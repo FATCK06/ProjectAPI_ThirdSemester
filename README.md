@@ -167,8 +167,10 @@ nome-do-projeto/
 
 | Foto | Funcao | Nome | Links |
 |------|--------|------|-------|
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Product Owner | Nome do Membro | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Scrum Master | Nome do Membro | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Desenvolvedor(a) | Nome do Membro | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Master | Vinicius Silva Lopes | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Product Owner | Vinicius Konishi Gregório | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Rodolfo Ferreira Venâncio | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Igor Martins | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Guilherme Fernando Portela de Oliveira | [GitHub](#) · [LinkedIn](#) |
+| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Yoseph Levi Rodrigues de Lima | [GitHub](#) · [LinkedIn](#) |
 
-<!-- Substitua as imagens de placeholder pelas fotos reais e os links "#" pelos perfis de cada integrante. -->
