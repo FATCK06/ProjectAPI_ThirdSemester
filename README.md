@@ -1,53 +1,38 @@
-# Nome do Projeto
+# Controle simplificado dos motoristas agregrados (NeweLog)
 
-> Uma frase curta descrevendo o que o projeto faz e para quem e.
+ Sistema simplificado para gestão de motoristas agregados, permitindo acompanhar a quantidade de viagens realizadas, a disponibilidade dos motoristas e a rentabilidade das operações. A solução tem como objetivo centralizar essas informações e facilitar o acompanhamento e a tomada de decisões operacionais.
 
-## Sumario
+## Sumário
 
-- [Sobre o Projeto](#sobre-o-projeto)
-- [Objetivo](#objetivo)
-- [Proposta de Solucao](#proposta-de-solucao)
-- [Sprints](#sprints)
-- [Backlog do Produto e User Stories](#backlog-do-produto-e-user-stories)
-- [Tecnologias](#tecnologias)
-- [Como Rodar o Projeto](#como-rodar-o-projeto)
-  - [Pre-requisitos](#pre-requisitos)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-- [Padroes de Commit](#padroes-de-commit)
-- [Estrutura do Projeto](#estrutura-do-projeto)
-- [Membros da Equipe](#membros-da-equipe)
+[Sobre o Projeto](#sobre-o-projeto) · [Objetivo](#objetivo) · [Proposta de Solução](#proposta-de-solucao) · [Sprints](#sprints) · [Backlog do Produto e User Stories](#backlog-do-produto-e-user-stories) · [Tecnologias](#tecnologias) · [Como Rodar o Projeto](#como-rodar-o-projeto) · [Padrões de Commit](#padroes-de-commit) · [Estrutura do Projeto](#estrutura-do-projeto) · [Membros da Equipe](#membros-da-equipe)
 
 ## Sobre o Projeto
 
-Descreva aqui o contexto do projeto: qual problema ele resolve, qual o publico-alvo, e um pouco do historico (ex: trabalho academico, projeto interno, produto).
+Este projeto foi desenvolvido com o objetivo de solucionar a dificuldade no acompanhamento e controle das operações realizadas por motoristas agregados. A proposta é centralizar informações como quantidade de viagens realizadas, disponibilidade dos motoristas e rentabilidade das operações, facilitando a análise dos resultados e o acompanhamento da operação.
 
-Exemplo:
-> O Aerocode e uma aplicacao frontend desenvolvida como parte da disciplina X, que simula um fluxo de producao industrial (Aeronave -> Peca -> Etapa -> Teste -> Relatorio) atraves de uma interface wizard.
+O sistema é direcionado principalmente a gestores e responsáveis pela operação logística que precisam de uma visão simplificada e organizada da performance dos motoristas e da rentabilidade das viagens.
+
+O projeto foi concebido como uma solução prática para representar e automatizar um cenário comum de gestão operacional, podendo ser utilizado tanto como projeto de estudo quanto como base para uma futura aplicação de uso interno.
 
 ## Objetivo
 
-Descreva aqui, de forma direta e objetiva (uma ou duas frases), qual problema o projeto resolve ou qual meta ele cumpre.
+Centralizar o controle dos motoristas agregados, permitindo acompanhar viagens realizadas, disponibilidade e rentabilidade das operações. O projeto busca facilitar a gestão operacional e apoiar decisões com base nesses indicadores.
 
-Exemplo:
-> Automatizar e padronizar o registro do processo de producao de aeronaves, desde a fabricacao de pecas ate a geracao do relatorio final.
 
 ## Proposta de Solucao
 
-Descreva aqui a abordagem escolhida para atingir o objetivo: o raciocinio geral por tras da solucao, sem entrar em detalhes de implementacao (isso fica para a secao de Tecnologias/Arquitetura).
+A solução adota uma abordagem centralizada de acompanhamento operacional, reunindo informações sobre motoristas, viagens e resultados financeiros em uma única visão. A partir desses dados, busca-se facilitar o monitoramento da disponibilidade, da produtividade e da rentabilidade das operações.
 
-Exemplo:
-> A solucao proposta consiste em uma interface do tipo wizard, que guia o usuario sequencialmente pelas etapas do processo produtivo (Aeronave -> Peca -> Etapa -> Teste -> Relatorio), utilizando gerenciamento de estado centralizado via Context API para manter a consistencia dos dados entre as telas.
 
 ## Sprints
 
-Descreva aqui a divisao do desenvolvimento em sprints, com a previsao de entrega e o status de cada uma.
+O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo dividido em três sprints com períodos e entregas previamente definidos. A tabela abaixo apresenta o cronograma previsto e o status de cada sprint, permitindo acompanhar a evolução do projeto ao longo do desenvolvimento.
 
-| Sprint | Previsao | Status |
-|--------|----------|--------|
-| 1 | dd/mm/aaaa | Concluida |
-| 2 | dd/mm/aaaa | Em andamento |
-| 3 | dd/mm/aaaa | Pendente |
+| Sprint | Início | Término | Status |
+|--------|--------|---------|--------|
+| 1 | 07/09/2026 | 27/09/2026 | Pendente |
+| 2 | 05/10/2026 | 25/10/2026 | Pendente |
+| 3 | 02/11/2026 | 22/11/2026 | Pendente |
 
 ## Backlog do Produto e User Stories
 
