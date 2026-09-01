@@ -1,3 +1,7 @@
+<div align="center">
+    <img src="docs/img/rubyfox.png" width="170x" height="170x">
+</div>
+
 # Controle simplificado dos motoristas agregrados (NeweLog)
 
  Sistema simplificado para gestão de motoristas agregados, permitindo acompanhar a quantidade de viagens realizadas, a disponibilidade dos motoristas e a rentabilidade das operações. A solução tem como objetivo centralizar essas informações e facilitar o acompanhamento e a tomada de decisões operacionais.
@@ -19,7 +23,7 @@ O projeto foi concebido como uma solução prática para representar e automatiz
 Centralizar o controle dos motoristas agregados, permitindo acompanhar viagens realizadas, disponibilidade e rentabilidade das operações. O projeto busca facilitar a gestão operacional e apoiar decisões com base nesses indicadores.
 
 
-## Proposta de Solucao
+## Proposta de Solução
 
 A solução adota uma abordagem centralizada de acompanhamento operacional, reunindo informações sobre motoristas, viagens e resultados financeiros em uma única visão. A partir desses dados, busca-se facilitar o monitoramento da disponibilidade, da produtividade e da rentabilidade das operações.
 
@@ -40,27 +44,20 @@ Descreva aqui as user stories que compoem o backlog do produto, com prioridade e
 
 | ID | User Story | Prioridade | Status |
 |----|------------|------------|--------|
-| US01 | Como usuario, quero cadastrar uma aeronave para iniciar o processo produtivo. | Alta | Concluida |
-| US02 | Como usuario, quero registrar uma peca vinculada a aeronave. | Alta | Em andamento |
+| US01 | Como usuario, quero cadastrar uma aeronave para iniciar o processo produtivo. | Alta | Pendente |
+| US02 | Como usuario, quero registrar uma peca vinculada a aeronave. | Alta | Pendente |
 | US03 | Como usuario, quero gerar um relatorio final do processo. | Media | Pendente |
 
 ## Tecnologias
 
 Principais tecnologias utilizadas no projeto:
 
-<img src="https://img.shields.io/badge/React-black?style=flat&logo=react&logoColor=61DAFB" height="25"/>
-<img src="https://img.shields.io/badge/Vite-black?style=flat&logo=vite&logoColor=646CFF" height="25"/>
-<img src="https://img.shields.io/badge/JavaScript-black?style=flat&logo=javascript&logoColor=F7DF1E" height="25"/>
-<img src="https://img.shields.io/badge/HTML5-black?style=flat&logo=html5&logoColor=E34F26" height="25"/>
-<img src="https://img.shields.io/badge/CSS3-black?style=flat&logo=css3&logoColor=1572B6" height="25"/>
-
-<!-- Adicione ou remova badges conforme as tecnologias do seu projeto. -->
-<!-- Lista completa de icones disponiveis em: https://simpleicons.org -->
+<p align="left"> <img src="https://img.shields.io/badge/JavaScript-black?style=flat&logo=javascript&logoColor=F7DF1E" height="25"/> <img src="https://img.shields.io/badge/TypeScript-black?style=flat&logo=typescript&logoColor=3178C6" height="25"/> <img src="https://img.shields.io/badge/HTML5-black?style=flat&logo=html5&logoColor=E34F26" height="25"/> <img src="https://img.shields.io/badge/CSS3-black?style=flat&logo=css3&logoColor=1572B6" height="25"/> <img src="https://img.shields.io/badge/React-black?style=flat&logo=react&logoColor=61DAFB" height="25"/> <img src="https://img.shields.io/badge/Vite-black?style=flat&logo=vite&logoColor=646CFF" height="25"/> <img src="https://img.shields.io/badge/Node.js-black?style=flat&logo=node.js&logoColor=339933" height="25"/> <img src="https://img.shields.io/badge/MongoDB-black?style=flat&logo=mongodb&logoColor=47A248" height="25"/> <img src="https://img.shields.io/badge/GitHub-black?style=flat&logo=github&logoColor=white" height="25"/> <img src="https://img.shields.io/badge/Figma-black?style=flat&logo=figma&logoColor=F24E1E" height="25"/> <img src="https://img.shields.io/badge/Jira-black?style=flat&logo=jira&logoColor=2684FF" height="25"/> <img src="https://img.shields.io/badge/JFreeChart-black?style=flat&logo=openjdk&logoColor=007396" height="25"/> </p>
 
 
 ## Como Rodar o Projeto
 
-### Pre-requisitos
+### Pré-requisitos
 
 Antes de iniciar, certifique-se de ter instalado:
 
@@ -112,9 +109,9 @@ Caso o projeto utilize variaveis de ambiente, copie o arquivo de exemplo:
 cp .env.example .env
 ```
 
-## Padroes de Commit
+## Padrões de Commit
 
-Este projeto segue o padrao de [Conventional Commits](https://www.conventionalcommits.org/) para manter o historico de alteracoes claro e organizado.
+**Formato:** `<tipo>(#00):mensagem`
 
 | Tipo | Descricao |
 |------|-----------|
@@ -129,8 +126,8 @@ Este projeto segue o padrao de [Conventional Commits](https://www.conventionalco
 Exemplo:
 
 ```bash
-git commit -m "feat: adiciona tela de cadastro de aeronave"
-git commit -m "fix: corrige validacao do formulario de peca"
+git commit -m "feat(#06):adiciona tela de ranking mensal dos motoristas"
+git commit -m "fix(#02):corrige leitura de linhas invalidas na importacao do XML"
 ```
 
 ## Estrutura do Projeto
@@ -152,10 +149,10 @@ nome-do-projeto/
 
 | Foto | Funcao | Nome | Links |
 |------|--------|------|-------|
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Master | Vinicius Silva Lopes | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | Product Owner | Vinicius Konishi Gregório | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Rodolfo Ferreira Venâncio | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Igor Martins | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Guilherme Fernando Portela de Oliveira | [GitHub](#) · [LinkedIn](#) |
-| <img src="https://via.placeholder.com/60" width="60" height="60" style="border-radius:50%"/> | DEV | Yoseph Levi Rodrigues de Lima | [GitHub](#) · [LinkedIn](#) |
-
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQHccwKf0_ByzQ/profile-displayphoto-crop_800_800/B4DZ6qNcd9H0AI-/0/1780972112692?e=1789603200&v=beta&t=jswXVNPQAB6QAc6LR8lDpvRCZlINIuo6fhi2SDlEdps" width="60" height="60" style="border-radius:50%"/> | Master | Vinicius Silva Lopes | [GitHub](https://github.com/viniciuslopes2) · [LinkedIn](https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFQwd80LGjHEw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727568322525?e=1789603200&v=beta&t=2btg-d3ZrIerf4ACRXRd9HedNLz60m06PrcH8uC8K_s" width="60" height="60" style="border-radius:50%"/> | Product Owner | Vinicius Konishi Gregório | [GitHub](https://github.com/vinicius-konishi) · [LinkedIn](https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEKrsk9CXyjxA/profile-displayphoto-crop_800_800/B4DZzIlYwdJ4AI-/0/1772891772140?e=1789603200&v=beta&t=1F02hawljbVxSe0ds2zFec2NJgxl-aFBsZVUDmDjQwQ" width="60" height="60" style="border-radius:50%"/> | DEV | Rodolfo Ferreira Venâncio | [GitHub](https://github.com/Clown0o0) · [LinkedIn](https://www.linkedin.com/in/rodolfo-ferreir4/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEw9VDUxHOlQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1678970447839?e=1789603200&v=beta&t=qd0SNljhZJNibhbq9CmJ9O40lsJrH9UEw9UrsO9s9AM" width="60" height="60" style="border-radius:50%"/> | DEV | Igor Martins | [GitHub](https://github.com/IgorMartins0729) · [LinkedIn](https://www.linkedin.com/in/igormrtns/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQHZ36h5L5A2XA/profile-displayphoto-crop_800_800/B4DZjKEYgfHYAI-/0/1755736806505?e=1789603200&v=beta&t=4xb-9sKPHoeRIhH3S9uZvNEjYCi62JLOi5kmXJ9Nr5E" width="60" height="60" style="border-radius:50%"/> | DEV | Guilherme Fernando Portela de Oliveira | [GitHub](#) · [LinkedIn](https://www.linkedin.com/in/guilhermefernandoportela/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4E03AQHiYzkTmAZtlg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1714513797011?e=1789603200&v=beta&t=xN5UL0er77KSJ1A3LHCtgNIrbojDJAt5pvOFfpvJWO0" width="60" height="60" style="border-radius:50%"/> | DEV | Yoseph Levi Rodrigues de Lima | [GitHub](#) · [LinkedIn](https://www.linkedin.com/in/yoseph-levi-rodrigues-de-lima-7020b324a/) |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFRtAeSxgrHNw/profile-displayphoto-crop_800_800/B4DZjYj0RDHwAI-/0/1755979928154?e=1789603200&v=beta&t=mn_ouv4eaMwffqvfKltkPuxTP7abaDaXE6xcuCIwsUE" width="60" height="60" style="border-radius:50%"/> | DEV | Caio Rodrigues de Almeida | [GitHub](#) · [LinkedIn](https://www.linkedin.com/in/caio-rodri1/) |
