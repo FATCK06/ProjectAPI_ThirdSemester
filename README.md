@@ -152,7 +152,7 @@ nome-do-projeto/
 
 ## Membros da Equipe
 
-| Foto | Funcao | Nome | Links |
+| Foto | Função | Nome | Links |
 |------|--------|------|-------|
 | <img src="https://media.licdn.com/dms/image/v2/D4D03AQHccwKf0_ByzQ/profile-displayphoto-crop_800_800/B4DZ6qNcd9H0AI-/0/1780972112692?e=1789603200&v=beta&t=jswXVNPQAB6QAc6LR8lDpvRCZlINIuo6fhi2SDlEdps" width="60" height="60" style="border-radius:50%"/> | Scrum Master | Vinicius Silva Lopes | [GitHub](https://github.com/viniciuslopes2) · [LinkedIn](https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/) |
 | <img src="https://media.licdn.com/dms/image/v2/D4D03AQFQwd80LGjHEw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727568322525?e=1789603200&v=beta&t=2btg-d3ZrIerf4ACRXRd9HedNLz60m06PrcH8uC8K_s" width="60" height="60" style="border-radius:50%"/> | Product Owner | Vinicius Konishi Gregório | [GitHub](https://github.com/vinicius-konishi) · [LinkedIn](https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/) |
