@@ -1,4 +1,4 @@
-package com.example.demo.models;
+package br.com.newe.ms_veiculos.models;
 
 import jakarta.persistence.*;
 
@@ -6,5 +6,5 @@ import jakarta.persistence.*;
 @Table(name = "veiculos")
 public class Veiculo {
     @Id
-    private
+    private long id;
 }
