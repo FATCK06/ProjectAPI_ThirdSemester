@@ -1,7 +1,6 @@
 package br.com.newe.ms_veiculos.models.enums;
 
-public enum StatusImportacao {
-    PENDENTE,
+public enum StatusImportacaoEnum {
     EM_PROCESSAMENTO,
     CONCLUIDO,
     ERRO
