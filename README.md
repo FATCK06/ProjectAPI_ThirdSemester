@@ -42,22 +42,35 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 Descreva aqui as user stories que compoem o backlog do produto, com prioridade e status de cada uma.
 
-| ID | User Story | Prioridade | Status |
-|----|------------|------------|--------|
-| US01 | Como operador quero uma interface para poder visualizar a quantidade de viagens realizada por cada motorista para acompanhar a produtividade. | ? | Pendente |
-| US02 | Como gestor quero um painel para poder visualizar a lista de motoristas agregados da frota. | ? | Pendente |
-| US03 | Como operador quero uma interface que através de uma planilha XML, trate os dados da mesma, e me devolva graficamente um resumo visual. | ? | Pendente |
-| US04 | Como gestor quero consultar a ficha de desempenho de um motorista, para visualizar seu desempenho. | ? | Pendente |
-| US05 | Como operador desejo importar a planilha de controle para carregar os dados dos motoristas do sistema. | ? | Pendente |
-| US06 | Como gestor desejo uma interface que apresente um ranking geral dos motoristas para visualizar os motoristas que se destacaram no mês.  | ? | Pendente |
-| US07 | Como gestor quero que o sistema possua níveis de acesso para que os dados financeiros restritos ao cargo de gestor.  | ? | Pendente |
-| US08 | Como operador quero poder filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos.  | ? | Pendente |
+| ID | Prioridade | User Story | Estimativa | Sprint | Status |
+|----|------------|------------|------------|--------|--------|
+| US01 | ? | Como operador quero uma interface para poder visualizar a quantidade de viagens realizada por cada motorista para acompanhar a produtividade. | ? | ? | Pendente |
+| US02 | ? | Como gestor quero um painel para poder visualizar a lista de motoristas agregados da frota. | ? | ? | Pendente |
+| US03 | ? | Como operador quero uma interface que através de uma planilha XML, trate os dados da mesma, e me devolva graficamente um resumo visual. | ? | ? | Pendente |
+| US04 | ? | Como gestor quero consultar a ficha de desempenho de um motorista, para visualizar seu desempenho. | ? | ? | Pendente |
+| US05 | ? | Como operador desejo importar a planilha de controle para carregar os dados dos motoristas do sistema. | ? | ? | Pendente |
+| US06 | ? | Como gestor desejo uma interface que apresente um ranking geral dos motoristas para visualizar os motoristas que se destacaram no mês. | ? | ? | Pendente |
+| US07 | ? | Como gestor quero que o sistema possua níveis de acesso para que os dados financeiros restritos ao cargo de gestor. | ? | ? | Pendente |
+| US08 | ? | Como operador quero poder filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos. | ? | ? | Pendente |
+
+- [Acessar o Backlog do Produto (PDF)](./docs/backlog-produto.pdf)
+- [Acessar o Backlog da Sprint (PDF)](./docs/backlog-sprint.pdf)
+
 
 ## Tecnologias
 
 Principais tecnologias utilizadas no projeto:
 
-<p align="left"> <img src="https://img.shields.io/badge/JavaScript-black?style=flat&logo=javascript&logoColor=F7DF1E" height="25"/> <img src="https://img.shields.io/badge/TypeScript-black?style=flat&logo=typescript&logoColor=3178C6" height="25"/> <img src="https://img.shields.io/badge/HTML5-black?style=flat&logo=html5&logoColor=E34F26" height="25"/> <img src="https://img.shields.io/badge/CSS3-black?style=flat&logo=css3&logoColor=1572B6" height="25"/> <img src="https://img.shields.io/badge/React-black?style=flat&logo=react&logoColor=61DAFB" height="25"/> <img src="https://img.shields.io/badge/Vite-black?style=flat&logo=vite&logoColor=646CFF" height="25"/> <img src="https://img.shields.io/badge/Node.js-black?style=flat&logo=node.js&logoColor=339933" height="25"/> <img src="https://img.shields.io/badge/MongoDB-black?style=flat&logo=mongodb&logoColor=47A248" height="25"/> <img src="https://img.shields.io/badge/GitHub-black?style=flat&logo=github&logoColor=white" height="25"/> <img src="https://img.shields.io/badge/Figma-black?style=flat&logo=figma&logoColor=F24E1E" height="25"/> <img src="https://img.shields.io/badge/Jira-black?style=flat&logo=jira&logoColor=2684FF" height="25"/> <img src="https://img.shields.io/badge/JFreeChart-black?style=flat&logo=openjdk&logoColor=007396" height="25"/> </p>
+**Front-end:** <span><img src="https://img.shields.io/badge/TypeScript-black?style=flat&logo=typescript&logoColor=3178C6" height="25"/> <img src="https://img.shields.io/badge/React-black?style=flat&logo=react&logoColor=61DAFB" height="25"/> <img src="https://img.shields.io/badge/CSS3-black?style=flat&logo=css3&logoColor=1572B6" height="25"/></span>
+
+**Back-end:** <span><img src="https://img.shields.io/badge/Java-black?style=flat&logo=openjdk&logoColor=ED8B00" height="25"/></span>
+
+**Banco de Dados:** <span><img src="https://img.shields.io/badge/PostgreSQL-black?style=flat&logo=postgresql&logoColor=4169E1" height="25"/></span>
+
+**Serviços:** <span><img src="https://img.shields.io/badge/Supabase-black?style=flat&logo=supabase&logoColor=3ECF8E" height="25"/></span>
+
+**Ferramentas:** <span><img src="https://img.shields.io/badge/Git-black?style=flat&logo=git&logoColor=F05032" height="25"/> <img src="https://img.shields.io/badge/GitHub-black?style=flat&logo=github&logoColor=white" height="25"/> <img src="https://img.shields.io/badge/Figma-black?style=flat&logo=figma&logoColor=F24E1E" height="25"/> <img src="https://img.shields.io/badge/Jira-black?style=flat&logo=jira&logoColor=2684FF" height="25"/></span>
+
 
 
 ## Como Rodar o Projeto
