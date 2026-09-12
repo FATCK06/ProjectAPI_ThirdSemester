@@ -4,6 +4,7 @@ import truckBg from '../../assets/images/truck-login.png';
 import './login.css';
 import { Eye, EyeOff } from 'lucide-react';
 
+
 //criando interface que reflete o contrato com o backend
 interface LoginResponse {
   token: string
