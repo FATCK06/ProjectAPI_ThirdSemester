@@ -15,11 +15,11 @@ export function Login() {
     const [senha,setSenha] = useState('');
     const navigate = useNavigate();
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-          const resposta = await fetch('http://localhost:8080/api/login', {
+          const resposta = await fetch('http://localhost:8081/api/auth/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

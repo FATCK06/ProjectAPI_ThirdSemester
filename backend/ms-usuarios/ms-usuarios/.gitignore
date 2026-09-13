@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Variaveis de ambiente local
+.env
+
+# Ignorar credenciais locais
+application-dev.properties
