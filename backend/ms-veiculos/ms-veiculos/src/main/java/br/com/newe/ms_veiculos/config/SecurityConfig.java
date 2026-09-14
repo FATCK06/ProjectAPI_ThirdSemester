@@ -1,4 +1,4 @@
-package backend.config;
+package br.com.newe.ms_veiculos.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,10 +13,9 @@ public class SecurityConfig {
     public SecurityFilterChain configurarFiltroDeSeguranca(HttpSecurity http) throws Exception {
 
         http
-            .authorizeHttpRequests(autorizacao -> autorizacao
-                .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults());
+                .authorizeHttpRequests(autorizacao -> autorizacao
+                        .anyRequest().authenticated())
+                .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
