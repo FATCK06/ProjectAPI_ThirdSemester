@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import truckBg from '../../assets/images/truck-login.png';
 import './login.css';
 import { Eye, EyeOff } from 'lucide-react';
-
+import api from '../../services/api';
 
 //criando interface que reflete o contrato com o backend
 interface LoginResponse {
