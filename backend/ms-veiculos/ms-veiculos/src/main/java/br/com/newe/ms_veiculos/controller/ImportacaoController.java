@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.newe.ms_veiculos.models.ArquivoImportacao;
+import br.com.newe.ms_veiculos.models.ResumoImportacao;
 import br.com.newe.ms_veiculos.service.ArquivoImportacaoService;
 
 @RestController
@@ -26,6 +27,11 @@ public class ImportacaoController {
 
     public ImportacaoController(ArquivoImportacaoService service) {
         this.service = service;
+    }
+
+    @GetMapping("/resumo") // "/importacao/arquivos/resumo"
+    public ResponseEntity<ResumoImportacao> resumo() {
+        return ResponseEntity.ok(service.gerarResumo());
     }
 
     @GetMapping("/{id}") // "/importacao/arquivos/{id}"

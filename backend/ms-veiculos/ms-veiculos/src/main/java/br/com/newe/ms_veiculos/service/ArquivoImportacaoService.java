@@ -5,11 +5,13 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import br.com.newe.ms_veiculos.models.ArquivoImportacao;
+import br.com.newe.ms_veiculos.models.ResumoImportacao;
 import br.com.newe.ms_veiculos.models.enums.StatusImportacaoEnum;
 
 @Service 
@@ -39,5 +41,15 @@ public class ArquivoImportacaoService {
 
     public ArquivoImportacao buscarPorId(Long id) {
         return arquivoImportado.get(id);
+    }
+
+    public ResumoImportacao gerarResumo() {
+        Map<StatusImportacaoEnum, Long> porStatus = arquivoImportado.values().stream()
+                .collect(Collectors.groupingBy(ArquivoImportacao::getStatus, Collectors.counting()));
+
+        Map<String, Long> porMesReferencia = arquivoImportado.values().stream()
+                .collect(Collectors.groupingBy(ArquivoImportacao::getMesReferencia, Collectors.counting()));
+
+        return new ResumoImportacao(arquivoImportado.size(), porStatus, porMesReferencia);
     }
 }
