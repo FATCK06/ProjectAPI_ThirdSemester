@@ -1,0 +1,146 @@
+.login-container {
+  display: flex;
+  height: 100vh;
+  background-color: #ffffff; /* Fundo branco (sem o preto do Figma) */
+}
+
+.login-card {
+  display: flex;
+  width: 100%;
+  /* Removemos box-shadow, padding e o max-width para a imagem colar na tela */
+  background-color: #ffffff; 
+}
+
+/* --- LADO ESQUERDO: IMAGEM --- */
+.login-image-wrapper {
+  flex: 1; /* Ocupa 50% da tela */
+  display: flex;
+}
+
+.login-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  border-top-right-radius: 10px; /* Curva solicitada na direita */
+  border-bottom-right-radius: 10px;
+}
+
+/* --- LADO DIREITO: FORMULÁRIO --- */
+.login-form-wrapper {
+  flex: 1; /* Ocupa os outros 50% da tela */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+}
+
+.login-form-content {
+  width: 100%;
+  max-width: 380px; /* Limita a largura para não ficar esticado */
+}
+
+.login-header h2 {
+  font-size: 28px;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+  text-align: center;
+  font-weight: 700; /* Ponto 4: "Faça seu Login" em negrito */
+}
+
+.login-header p {
+  font-size: 13px;
+  color: #888888;
+  margin-bottom: 32px;
+  text-align: center;
+  font-weight: 400;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  margin-bottom: 8px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid #C9C9C9; /* Ponto 3: Borda cinza do Figma */
+  border-radius: 18px; /* Ponto 3: Arredondamento */
+  background-color: #ffffff; /* Ponto 3: Fundo branco */
+  font-size: 14px;
+  font-family: 'Montserrat', sans-serif; /* Puxa a mesma fonte para o input */
+  color: #333;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input-group input::placeholder {
+  color: #b0b0b0;
+}
+
+.input-group input:focus {
+  border-color: #1d4ed8; /* Fica azul quando o usuário clica */
+}
+
+/* Container para posicionar o ícone de senha */
+.password-input-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 16px;
+  cursor: pointer;
+  color: #888888;
+}
+
+.forgot-password {
+  text-align: right;
+  margin-top: -8px;
+  margin-bottom: 24px;
+}
+
+.forgot-password a {
+  font-size: 12px;
+  color: #1d4ed8; 
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.forgot-password a:hover {
+  text-decoration: underline;
+}
+
+.btn-entrar {
+  width: 100%;
+  padding: 16px;
+  background-color: #1d4ed8; /* Azul do seu botão */
+  color: #ffffff;
+  border: none;
+  border-radius: 18px; /* Combinando com os inputs */
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Montserrat', sans-serif;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-entrar:hover {
+  background-color: #1e40af;
+}
+
+/* Responsividade para Celulares */
+@media (max-width: 768px) {
+  .login-image-wrapper {
+    display: none; 
+  }
+}
