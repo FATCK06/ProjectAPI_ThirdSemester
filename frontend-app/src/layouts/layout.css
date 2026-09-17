@@ -1,0 +1,16 @@
+.layout-wrapper {
+  display: flex;
+}
+
+.layout-content {
+  margin-left: 250px;
+  padding: 32px;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  transition: margin-left 0.3s ease;
+}
+
+.layout-content.minimized {
+  margin-left: 80px;
+}
