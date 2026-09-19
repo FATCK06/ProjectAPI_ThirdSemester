@@ -87,3 +87,53 @@
   border-radius: 8px; /* O arredondamento suave do card */
   border: none; /* Garante que nenhuma linha reta apareça */
 }
+
+/* Reseta o estilo nativo do botão para ficar igual aos NavLinks */
+.btn-accordion {
+  background: none;
+  border: none;
+  width: calc(100% - 32px); /* Compensa a margem lateral */
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Faz o texto empurrar a setinha (Chevron) para o canto direito */
+.accordion-title {
+  flex: 1;
+  text-align: left;
+}
+
+.accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* Estilo específico para os itens de dentro da gaveta (mais recuados) */
+.nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 0 16px 0 40px; /* Margem esquerda maior (40px) para criar o recuo visual */
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem; /* Fonte levemente menor para sub-itens */
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-sub-item:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.nav-sub-item.active {
+  background-color: rgba(29, 78, 216, 0.1); 
+  color: #1d4ed8; 
+  font-weight: 600;
+}
