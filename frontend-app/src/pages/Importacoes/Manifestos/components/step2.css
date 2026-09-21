@@ -1,0 +1,145 @@
+.mapeamento-wrap {
+  container-type: inline-size;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.mapeamento-cartao {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.mapeamento-grade {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.mapeamento-esquerda,
+.mapeamento-direita {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  height: 100%;
+}
+
+.mapeamento-cabecalho {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 13px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+}
+
+.mapeamento-cabecalho .mapeamento-direita {
+  justify-content: center;
+}
+
+.mapeamento-titulo-destino {
+  flex: 1;
+  text-align: center;
+}
+
+.mapeamento-status {
+  flex: 0 0 64px;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+}
+
+.mapeamento-destino {
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-weight: 500;
+  color: #0f172a;
+  text-align: center;
+}
+
+.mapeamento-obrigatorio {
+  color: #ef4444;
+  margin-left: 4px;
+}
+
+.mapeamento-caixa {
+  width: 100%;
+  padding: 10px 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #0f172a;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mapeamento-caixa.caixa-erro {
+  border-color: #fca5a5;
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.mapeamento-seta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #94a3b8;
+}
+
+.seta-v {
+  display: none;
+}
+
+.icone-ok {
+  color: #10b981; /* Verde sucesso */
+}
+
+.icone-erro {
+  color: #ef4444; /* Vermelho erro */
+}
+
+/* Responsividade inteligente usando Container Queries */
+@container (max-width: 560px) {
+  .mapeamento-cabecalho {
+    display: none;
+  }
+
+  .mapeamento-grade {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+  }
+
+  .mapeamento-esquerda {
+    margin-bottom: 8px;
+  }
+
+  .mapeamento-status {
+    flex: 0 0 32px;
+    justify-content: flex-start;
+  }
+
+  .seta-h {
+    display: none;
+  }
+
+  .seta-v {
+    display: block;
+    margin: 8px 0;
+  }
+}

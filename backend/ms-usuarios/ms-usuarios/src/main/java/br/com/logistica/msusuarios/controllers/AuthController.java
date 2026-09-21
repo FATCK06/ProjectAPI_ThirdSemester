@@ -31,31 +31,10 @@ public class AuthController {
         String email = credentials.get("email");
         String senha = credentials.get("senha");
 
-        // --- INÍCIO DAS ESCUTAS DE DEBUG ---
-        System.out.println("=== TESTE DE LOGIN ===");
-        System.out.println("1. Email recebido do React: [" + email + "]");
-        System.out.println("2. Senha recebida do React: [" + senha + "]");
-        
-        // Buscamos o usuário apenas UMA VEZ aqui
         Optional<Usuario> usuarioOp = usuarioRepository.findByEmail(email);
-        
-        if (usuarioOp.isPresent()) {
-            System.out.println("3. Usuário ENCONTRADO no Supabase!");
-            System.out.println("4. Hash que está no banco: " + usuarioOp.get().getSenha());
-            
-            boolean senhaBateu = passwordEncoder.matches(senha, usuarioOp.get().getSenha());
-            System.out.println("5. O BCrypt validou a senha? " + senhaBateu);
-        } else {
-            System.out.println("3. ERRO: Nenhum usuário encontrado com esse e-mail no banco.");
-        }
-        
-        System.out.println("6. O Hash correto para a senha '123' no seu Java é: " + passwordEncoder.encode("123"));
-        System.out.println("======================");
-        // --- FIM DAS ESCUTAS DE DEBUG ---
 
-        Map<String, Object> response = new HashMap<>(); 
+        Map<String, Object> response = new HashMap<>();
 
-        // 2. Continua a validação usando o usuarioOp que já buscamos lá em cima
         if (usuarioOp.isPresent() && passwordEncoder.matches(senha, usuarioOp.get().getSenha())) {
             Usuario usuarioLogado = usuarioOp.get();
 
