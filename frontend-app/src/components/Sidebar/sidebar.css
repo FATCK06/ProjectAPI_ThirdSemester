@@ -1,0 +1,139 @@
+.sidebar-container {
+  width: 250px;
+  height: 100vh;
+  background-color: #F6F6F6;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  border-right: 1px solid #e5e5e5;
+  transition: width 0.3s ease;
+  overflow: hidden;
+}
+
+/* Quando estiver minimizada, a largura cai para 80px */
+.sidebar-container.minimized {
+  width: 80px;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 20px;
+  min-height: 76px; /* Mantém a altura do header fixa, mesmo sem a logo */
+}
+
+.sidebar-container.minimized .sidebar-header {
+  justify-content: center; /* Centraliza o ícone de expandir */
+}
+
+.sidebar-logo {
+  height: 28px;
+  object-fit: contain;
+}
+
+.btn-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.btn-toggle:hover {
+  color: #0f172a;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+}
+
+/* O Segredo do Visual: Margens e Bordas Arredondadas */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 4px 16px; /* Descola o botão das laterais */
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  border-radius: 8px; /* Borda arredondada suave */
+  transition: all 0.2s;
+}
+
+.sidebar-container.minimized .nav-item {
+  margin: 4px 12px;
+  justify-content: center; /* Centraliza o ícone */
+}
+
+.nav-item:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.nav-item.active {
+  /* O rgba com 0.05 aplica preto com apenas 5% de visibilidade, criando o efeito de 'card' translúcido */
+  background-color: rgba(29, 78, 216, 0.1);
+  color: #1d4ed8; 
+  font-weight: 600;
+  border-radius: 8px; /* O arredondamento suave do card */
+  border: none; /* Garante que nenhuma linha reta apareça */
+}
+
+/* Reseta o estilo nativo do botão para ficar igual aos NavLinks */
+.btn-accordion {
+  background: none;
+  border: none;
+  width: calc(100% - 32px); /* Compensa a margem lateral */
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* Faz o texto empurrar a setinha (Chevron) para o canto direito */
+.accordion-title {
+  flex: 1;
+  text-align: left;
+}
+
+.accordion-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  margin-bottom: 8px;
+}
+
+/* Estilo específico para os itens de dentro da gaveta (mais recuados) */
+.nav-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 0 16px 0 40px; /* Margem esquerda maior (40px) para criar o recuo visual */
+  color: #64748b;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem; /* Fonte levemente menor para sub-itens */
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.nav-sub-item:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.nav-sub-item.active {
+  background-color: rgba(29, 78, 216, 0.1); 
+  color: #1d4ed8; 
+  font-weight: 600;
+}

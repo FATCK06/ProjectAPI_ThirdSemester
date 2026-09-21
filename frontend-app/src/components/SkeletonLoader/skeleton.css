@@ -1,0 +1,22 @@
+/* src/components/Skeletons/skeleton.css */
+.shimmer {
+  background: #e2e8f0;
+  background-image: linear-gradient(
+    90deg,
+    #e2e8f0 0px,
+    #f1f5f9 40px,
+    #e2e8f0 80px
+  );
+  background-size: 200% 100%;
+  animation: shimmer-effect 1.5s infinite linear;
+}
+
+@keyframes shimmer-effect {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton-base {
+  width: 100%;
+  border-radius: 12px;
+}
