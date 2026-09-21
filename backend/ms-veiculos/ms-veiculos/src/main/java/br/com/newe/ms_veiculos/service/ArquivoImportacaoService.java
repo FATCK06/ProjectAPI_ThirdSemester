@@ -1,55 +1,78 @@
 package br.com.newe.ms_veiculos.service;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.com.newe.ms_veiculos.models.ArquivoImportacao;
 import br.com.newe.ms_veiculos.models.ResumoImportacao;
 import br.com.newe.ms_veiculos.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_veiculos.repository.ArquivoImportacaoRepository;
+import br.com.newe.ms_veiculos.repository.ArquivoImportacaoRepository.ContagemPorStatus;
 
-@Service 
+@Service
 public class ArquivoImportacaoService {
-    private final Map<Long, ArquivoImportacao> arquivoImportado = new ConcurrentHashMap<>();
 
-    private final AtomicLong geradorId = new AtomicLong(1);
+    private final ArquivoImportacaoRepository repository;
+
+    public ArquivoImportacaoService(ArquivoImportacaoRepository repository) {
+        this.repository = repository;
+    }
 
     public ArquivoImportacao criar(
-        MultipartFile arquivo,
-        String mesReferencia
-    ) throws IOException {
-        Long id = geradorId.incrementAndGet();
-
+        String arquivoNome,
+        byte[] conteudo,
+        String mesReferencia,
+        String usuarioResponsavel
+    ) {
         ArquivoImportacao importacao = new ArquivoImportacao();
-        importacao.setId(id);
-        importacao.setArquivoNome(arquivo.getOriginalFilename());
-        importacao.setArquivoConteudo(arquivo.getBytes());
+        importacao.setArquivoNome(arquivoNome);
+        importacao.setArquivoConteudo(conteudo);
         importacao.setMesReferencia(mesReferencia);
+        importacao.setUsuarioResponsavel(usuarioResponsavel);
         importacao.setDataImportacao(LocalDateTime.now());
         importacao.setStatus(StatusImportacaoEnum.EM_PROCESSAMENTO);
 
-        arquivoImportado.put(id, importacao);
-
-        return importacao;
+        return repository.save(importacao);
     }
 
     public ArquivoImportacao buscarPorId(Long id) {
-        return arquivoImportado.get(id);
+        return repository.findById(id).orElse(null);
     }
 
-    public ResumoImportacao gerarResumo() {
-        Map<StatusImportacaoEnum, Long> porStatus = arquivoImportado.values().stream()
-                .collect(Collectors.groupingBy(ArquivoImportacao::getStatus, Collectors.counting()));
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void marcarConcluido(Long id, int quantidadeLinhasLidas) {
+        repository.findById(id).ifPresent(importacao -> {
+            importacao.setStatus(StatusImportacaoEnum.CONCLUIDO);
+            importacao.setQuantidadeLinhasLidas(quantidadeLinhasLidas);
+            repository.save(importacao);
+        });
+    }
 
-        Map<String, Long> porMesReferencia = arquivoImportado.values().stream()
-                .collect(Collectors.groupingBy(ArquivoImportacao::getMesReferencia, Collectors.counting()));
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void marcarErro(Long id) {
+        repository.findById(id).ifPresent(importacao -> {
+            importacao.setStatus(StatusImportacaoEnum.ERRO);
+            repository.save(importacao);
+        });
+    }
 
-        return new ResumoImportacao(arquivoImportado.size(), porStatus, porMesReferencia);
+    public ResumoImportacao gerarResumo(String mesReferencia, boolean operador) {
+        Map<StatusImportacaoEnum, Long> porStatus = new EnumMap<>(StatusImportacaoEnum.class);
+        long total = 0;
+
+        for (ContagemPorStatus contagem : repository.contarPorStatus(mesReferencia)) {
+            porStatus.put(contagem.getStatus(), contagem.getTotal());
+            total += contagem.getTotal();
+        }
+
+        Map<String, Object> indicadoresFinanceiros = operador ? null : new HashMap<>();
+
+        return new ResumoImportacao(mesReferencia, total, porStatus, indicadoresFinanceiros);
     }
 }

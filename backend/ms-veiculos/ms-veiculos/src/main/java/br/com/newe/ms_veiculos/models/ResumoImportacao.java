@@ -2,20 +2,37 @@ package br.com.newe.ms_veiculos.models;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import br.com.newe.ms_veiculos.models.enums.StatusImportacaoEnum;
 
 public class ResumoImportacao {
+    private String mesReferencia;
     private long totalImportacoes;
     private Map<StatusImportacaoEnum, Long> porStatus;
-    private Map<String, Long> porMesReferencia;
+
+    // Lista de indicadores financeiros ainda nao definida pelo time; fica null (e omitida do JSON)
+    // para o perfil operador, e como mapa extensivel para os demais perfis.
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Map<String, Object> indicadoresFinanceiros;
 
     public ResumoImportacao() {
     }
 
-    public ResumoImportacao(long totalImportacoes, Map<StatusImportacaoEnum, Long> porStatus, Map<String, Long> porMesReferencia) {
+    public ResumoImportacao(String mesReferencia, long totalImportacoes,
+            Map<StatusImportacaoEnum, Long> porStatus, Map<String, Object> indicadoresFinanceiros) {
+        this.mesReferencia = mesReferencia;
         this.totalImportacoes = totalImportacoes;
         this.porStatus = porStatus;
-        this.porMesReferencia = porMesReferencia;
+        this.indicadoresFinanceiros = indicadoresFinanceiros;
+    }
+
+    public String getMesReferencia() {
+        return mesReferencia;
+    }
+
+    public void setMesReferencia(String mesReferencia) {
+        this.mesReferencia = mesReferencia;
     }
 
     public long getTotalImportacoes() {
@@ -34,12 +51,12 @@ public class ResumoImportacao {
         this.porStatus = porStatus;
     }
 
-    public Map<String, Long> getPorMesReferencia() {
-        return porMesReferencia;
+    public Map<String, Object> getIndicadoresFinanceiros() {
+        return indicadoresFinanceiros;
     }
 
-    public void setPorMesReferencia(Map<String, Long> porMesReferencia) {
-        this.porMesReferencia = porMesReferencia;
+    public void setIndicadoresFinanceiros(Map<String, Object> indicadoresFinanceiros) {
+        this.indicadoresFinanceiros = indicadoresFinanceiros;
     }
 
 }
