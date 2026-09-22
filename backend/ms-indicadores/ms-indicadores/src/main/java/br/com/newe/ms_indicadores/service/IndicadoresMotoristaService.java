@@ -11,75 +11,56 @@ import br.com.newe.ms_indicadores.repository.IIndicadoresMotoristaRepository;
 @Service
 public class IndicadoresMotoristaService {
 
-    private final IIndicadoresMotoristaRepository repository;
+        private final IIndicadoresMotoristaRepository repository;
 
-    public IndicadoresMotoristaService(
-            IIndicadoresMotoristaRepository repository) {
-        this.repository = repository;
-    }
-
-    public IndicadoresMotoristaEntity calcularEGravar(
-            Long motoristaId,
-            Integer diasOperacao,
-            Integer diasDisponiveis,
-            Integer numeroViagens,
-            BigDecimal valorFrete,
-            BigDecimal custosOperacao) {
-
-        BigDecimal utilizacao = calcularUtilizacao(
-                diasOperacao,
-                diasDisponiveis);
-
-        BigDecimal rentabilidade = valorFrete
-                .subtract(custosOperacao);
-
-        BigDecimal rentabilidadeMediaViagem = calcularRentabilidadeMedia(
-                rentabilidade,
-                numeroViagens);
-
-        IndicadoresMotoristaEntity indicador = new IndicadoresMotoristaEntity();
-
-        indicador.setMotoristaId(motoristaId);
-        indicador.setDiasOperacao(diasOperacao);
-        indicador.setDiasDisponiveis(diasDisponiveis);
-        indicador.setNumeroViagens(numeroViagens);
-        indicador.setValorFrete(valorFrete);
-        indicador.setCustosOperacao(custosOperacao);
-        indicador.setUtilizacao(utilizacao);
-        indicador.setRentabilidade(rentabilidade);
-        indicador.setRentabilidadeMediaViagem(
-                rentabilidadeMediaViagem);
-
-        return repository.save(indicador);
-    }
-
-    private BigDecimal calcularUtilizacao(
-            Integer diasOperacao,
-            Integer diasDisponiveis) {
-
-        if (diasDisponiveis == null || diasDisponiveis == 0) {
-            return BigDecimal.ZERO;
+        public IndicadoresMotoristaService(IIndicadoresMotoristaRepository repository) {
+                this.repository = repository;
         }
 
-        return BigDecimal.valueOf(diasOperacao)
-                .divide(
-                        BigDecimal.valueOf(diasDisponiveis),
-                        4,
-                        RoundingMode.HALF_UP)
-                .multiply(BigDecimal.valueOf(100));
-    }
+        public IndicadoresMotoristaEntity calcularEGravar(
+                        Long motoristaId,
+                        Integer diasOperacao,
+                        Integer diasDisponiveis,
+                        Integer numeroViagens,
+                        BigDecimal valorFrete,
+                        BigDecimal custosOperacao) {
 
-    private BigDecimal calcularRentabilidadeMedia(
-            BigDecimal rentabilidade,
-            Integer numeroViagens) {
+                BigDecimal frete = (valorFrete == null) ? BigDecimal.ZERO : valorFrete;
+                BigDecimal custos = (custosOperacao == null) ? BigDecimal.ZERO : custosOperacao;
 
-        if (numeroViagens == null || numeroViagens == 0) {
-            return BigDecimal.ZERO;
+                BigDecimal utilizacao = calcularUtilizacao(diasOperacao, diasDisponiveis);
+                BigDecimal rentabilidade = frete.subtract(custos);
+                BigDecimal rentabilidadeMediaViagem = calcularRentabilidadeMedia(rentabilidade, numeroViagens);
+
+                IndicadoresMotoristaEntity indicador = new IndicadoresMotoristaEntity();
+                indicador.setMotoristaId(motoristaId);
+                indicador.setDiasOperacao(diasOperacao);
+                indicador.setDiasDisponiveis(diasDisponiveis);
+                indicador.setNumeroViagens(numeroViagens);
+                indicador.setValorFrete(frete);
+                indicador.setCustosOperacao(custos);
+                indicador.setUtilizacao(utilizacao);
+                indicador.setRentabilidade(rentabilidade);
+                indicador.setRentabilidadeMediaViagem(rentabilidadeMediaViagem);
+
+                return repository.save(indicador);
         }
 
-        return rentabilidade.divide(
-                BigDecimal.valueOf(numeroViagens),
-                2,
-                RoundingMode.HALF_UP);
-    }
+        private BigDecimal calcularUtilizacao(Integer diasOperacao, Integer diasDisponiveis) {
+                if (diasDisponiveis == null || diasDisponiveis == 0 || diasOperacao == null) {
+                        return BigDecimal.ZERO;
+                }
+
+                return BigDecimal.valueOf(diasOperacao)
+                                .multiply(BigDecimal.valueOf(100))
+                                .divide(BigDecimal.valueOf(diasDisponiveis), 2, RoundingMode.HALF_UP);
+        }
+
+        private BigDecimal calcularRentabilidadeMedia(BigDecimal rentabilidade, Integer numeroViagens) {
+                if (numeroViagens == null || numeroViagens == 0) {
+                        return BigDecimal.ZERO;
+                }
+
+                return rentabilidade.divide(BigDecimal.valueOf(numeroViagens), 2, RoundingMode.HALF_UP);
+        }
 }
