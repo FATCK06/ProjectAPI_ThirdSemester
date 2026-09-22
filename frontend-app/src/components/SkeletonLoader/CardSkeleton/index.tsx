@@ -1,11 +1,16 @@
-// src/components/Skeletons/CardSkeleton/index.tsx
-import '../skeleton.css';
+import type { ReactNode } from "react";
 
-export function CardSkeleton() {
+interface CardSkeletonProps {
+  children?: ReactNode;
+  isLoading: boolean; 
+}
+
+export function CardSkeleton({ children, isLoading }: CardSkeletonProps) {
   return (
-    <div 
-      className="skeleton-base shimmer" 
-      style={{ height: '300px' }} // Altura padrão do seu gráfico/card
-    />
+    <div className="card">
+      <div className={`card-chart skeleton-base ${isLoading ? "shimmer" : ""}`}>
+        {children}
+      </div>
+    </div>
   );
 }
