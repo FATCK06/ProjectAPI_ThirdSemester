@@ -1,0 +1,58 @@
+spring:
+  application:
+    name: api-gateway
+
+  # O perfil dev carrega application-dev.properties, que traz a chave do JWT e
+  # nao e versionado. Mesmo padrao do ms-usuarios.
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: usuarios
+              uri: ${MS_USUARIOS_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/auth/**,/api/usuarios/**
+
+            - id: frota
+              uri: ${MS_FROTA_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/motoristas/**,/api/veiculos/**,/api/agregados/**
+
+            - id: operacoes
+              uri: ${MS_OPERACOES_URL:http://localhost:8083}
+              predicates:
+                - Path=/api/importacao/**,/api/viagens/**
+
+  # O CSV de manifestos chega por aqui antes de ir para o ms-operacoes.
+  # Tem que acompanhar o limite de la (10MB), senao o gateway corta antes.
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 11MB
+
+server:
+  port: 8080
+
+# Mesma chave que o ms-usuarios usa para assinar. O gateway valida e injeta o
+# perfil nos headers; os servicos de tras confiam neles.
+#
+# O valor real vem de application-dev.properties (perfil dev, fora do git) ou da
+# variavel de ambiente. Sem chave, o JwtAutenticacaoFilter falha na subida - de
+# proposito: e melhor nao subir do que subir aceitando token nao verificado.
+api:
+  security:
+    token:
+      secret: ${API_SECURITY_TOKEN_SECRET:}
+
+# Origem do front (Vite). CORS fica so aqui: os servicos nunca sao chamados
+# direto pelo navegador.
+cors:
+  origem-permitida: ${CORS_ORIGEM:http://localhost:[*]}
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO

@@ -1,0 +1,118 @@
+/* src/pages/Importacoes/Manifestos/components/step3.css */
+
+.validacao-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.validacao-vazio {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+}
+
+/* --- NUMEROS --- */
+.validacao-numeros {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.validacao-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.validacao-card.ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.validacao-card.falha {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.validacao-valor {
+  font-size: 24px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.validacao-rotulo {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* --- ALERTA --- */
+.validacao-alerta {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.validacao-alerta.ok {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.validacao-alerta.falha {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+/* --- LISTA DE ERROS --- */
+.erro-titulo {
+  font-size: 14px;
+  color: #0f172a;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.erro-limite {
+  font-size: 12px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.erro-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.erro-tabela th {
+  text-align: left;
+  padding: 8px 12px;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 500;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.erro-tabela td {
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.erro-numero {
+  width: 70px;
+  font-weight: 600;
+  color: #b91c1c;
+}

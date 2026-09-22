@@ -1,0 +1,154 @@
+/* src/pages/Importacoes/Manifestos/manifestos.css */
+
+.importacao-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: white;
+  padding: 32px;
+  border-radius: 12px;
+}
+
+/* --- STEPPER --- */
+.stepper-wrapper {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  text-align: center;
+  z-index: 1;
+}
+
+.step-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f5f9;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.step-item.active .step-icon-wrapper {
+  background-color: #2563eb;
+  color: white;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+}
+
+.step-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.step-item.pending .step-title {
+  color: #64748b;
+}
+
+.step-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 12px;
+  margin-top: 4px;
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.step-item.active .step-badge {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.step-connector {
+  position: absolute;
+  top: 24px;
+  left: calc(50% + 24px);
+  right: calc(-50% + 24px);
+  height: 2px;
+  background-color: #e2e8f0;
+  z-index: -1;
+}
+
+/* --- FOOTER BOTÕES (Pai controla o Avançar/Voltar) --- */
+.step-footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.btn-voltar, .btn-continuar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-voltar {
+  background: #e2e8f0;
+  color: #64748b;
+  border: none;
+}
+
+.btn-voltar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-continuar {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.btn-continuar:hover {
+  background: #1d4ed8;
+}
+/* --- PASSO JA CONCLUIDO --- */
+.step-item.concluido .step-icon-wrapper {
+  color: #16a34a;
+}
+
+.step-item.concluido .step-badge {
+  color: #16a34a;
+}
+
+/* --- CONTINUAR BLOQUEADO --- */
+.btn-continuar:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- ERRO NO TOPO DO FLUXO --- */
+.importacao-erro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+/* Botao que grava: verde, para nao ser confundido com o Continuar azul */
+.btn-continuar.btn-gravar { background: #16a34a; }
+
+.btn-continuar.btn-gravar:hover:not(:disabled) { background: #15803d; }

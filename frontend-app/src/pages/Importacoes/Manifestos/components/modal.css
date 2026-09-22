@@ -1,0 +1,87 @@
+/* src/pages/Importacoes/Manifestos/components/modal.css */
+
+.modal-fundo {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  animation: modal-surgir 0.15s ease-out;
+}
+
+@keyframes modal-surgir {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-caixa {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px;
+  max-width: 440px;
+  width: calc(100% - 32px);
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+}
+
+.modal-icone {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.modal-titulo {
+  font-size: 17px;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.modal-mensagem {
+  font-size: 14px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.modal-acoes {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.modal-btn-cancelar,
+.modal-btn-confirmar {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.modal-btn-cancelar {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+.modal-btn-cancelar:hover {
+  background: #f8fafc;
+}
+
+.modal-btn-confirmar {
+  background: #2563eb;
+  border: none;
+  color: #ffffff;
+}
+
+.modal-btn-confirmar:hover {
+  background: #1d4ed8;
+}

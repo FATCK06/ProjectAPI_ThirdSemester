@@ -1,0 +1,4 @@
+# Copie para application-dev.properties e preencha com o Supabase do time.
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
