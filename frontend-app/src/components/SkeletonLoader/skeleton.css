@@ -1,4 +1,3 @@
-/* src/components/Skeletons/skeleton.css */
 .shimmer {
   background: #e2e8f0;
   background-image: linear-gradient(
@@ -11,12 +10,34 @@
   animation: shimmer-effect 1.5s infinite linear;
 }
 
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 300px;
+  padding: 7px;
+}
+
+.card-chart {
+  position: relative;
+  width: 100%;
+  height: 230px;
+}
+
 @keyframes shimmer-effect {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton-base {
   width: 100%;
   border-radius: 12px;
+  height: 100%;
+  border: 1px solid rgb(208, 208, 208);
 }

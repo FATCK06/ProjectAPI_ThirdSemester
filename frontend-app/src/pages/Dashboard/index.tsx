@@ -1,28 +1,33 @@
-import { CardSkeleton } from '../../components/SkeletonLoader/CardSkeleton';
-import { TableSkeleton } from '../../components/SkeletonLoader/TableSkeleton';
+import { useEffect, useState } from "react";
+import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
+import { TableSkeleton } from "../../components/SkeletonLoader/TableSkeleton";
+import Grafico from "../../graficos/Grafico";
+import Grafico2 from "../../graficos/Grafico2";
 
 export function Dashboard() {
-  const isLoading = true; // Simulação do estado de carregamento
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (isLoading) {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Topo: Dois gráficos lado a lado */}
-        <div style={{ display: 'flex', gap: '24px' }}>
-          <CardSkeleton />
-          <CardSkeleton />
-        </div>
-        
-        {/* Base: A tabela de dados */}
-        <TableSkeleton />
-      </div>
-    );
-  }
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <div>
-      {/* Aqui entrará o seu conteúdo real quando isLoading for false */}
-      <h1>Dashboard Carregado!</h1>
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div style={{ display: "flex", gap: "24px", width: "100%" }}>
+        <CardSkeleton isLoading={isLoading}>
+          {!isLoading && <Grafico />}
+        </CardSkeleton>
+        <CardSkeleton isLoading={isLoading}>
+          {!isLoading && <Grafico2 />}
+        </CardSkeleton>
+      </div>
+
+      {/* Base: A tabela de dados */}
+      <TableSkeleton />
     </div>
   );
 }
