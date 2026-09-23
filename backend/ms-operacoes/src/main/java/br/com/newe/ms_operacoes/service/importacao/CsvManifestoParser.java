@@ -6,11 +6,15 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
+
+import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 
 @Component
 public class CsvManifestoParser {
@@ -23,22 +27,64 @@ public class CsvManifestoParser {
      */
     public ResultadoParse parse(byte[] conteudo) throws IOException {
         List<LinhaManifesto> linhas = new ArrayList<>();
-        List<ErroLinha> erros = new ArrayList<>();
+        List<LinhaComProblema> problemas = new ArrayList<>();
 
         try (CSVParser parser = ManifestoCsvConfig.CSV_FORMAT.parse(
                 new InputStreamReader(new ByteArrayInputStream(conteudo), ManifestoCsvConfig.CHARSET))) {
 
             for (CSVRecord record : parser) {
                 int numeroLinha = (int) record.getRecordNumber() + 1;
-                try {
-                    linhas.add(converter(record, numeroLinha));
-                } catch (LinhaManifestoInvalidaException e) {
-                    erros.add(new ErroLinha(numeroLinha, e.getMessage()));
+                List<ProblemaCelula> daLinha = avaliarCelulas(record, numeroLinha);
+                boolean bloqueia = daLinha.stream().anyMatch(c -> c.severidade() == Severidade.ERRO);
+
+                if (!bloqueia) {
+                    try {
+                        linhas.add(converter(record, numeroLinha));
+                    } catch (LinhaManifestoInvalidaException e) {
+                        // Rede de seguranca: avaliarCelulas devia ter pego antes.
+                        daLinha = new ArrayList<>(daLinha);
+                        daLinha.add(ProblemaCelula.inesperado(e.getMessage()));
+                    }
+                }
+
+                if (!daLinha.isEmpty()) {
+                    problemas.add(new LinhaComProblema(numeroLinha, valoresCrus(record), daLinha));
                 }
             }
         }
 
-        return new ResultadoParse(linhas, erros);
+        return new ResultadoParse(linhas, problemas);
+    }
+
+    /** Classifica cada celula da linha pelo catalogo, sem interromper na primeira falha. */
+    private List<ProblemaCelula> avaliarCelulas(CSVRecord record, int numeroLinha) {
+        List<ProblemaCelula> problemas = new ArrayList<>();
+
+        for (CampoManifesto campo : CampoManifesto.values()) {
+            AvaliacaoCampo avaliacao = campo.avaliar(valorDe(record, campo.coluna()));
+            if (avaliacao.severidade() != Severidade.OK) {
+                problemas.add(ProblemaCelula.de(avaliacao, numeroLinha));
+            }
+        }
+
+        return problemas;
+    }
+
+    /** Celulas como vieram no arquivo: e o valor errado que a tela precisa mostrar. */
+    private Map<String, String> valoresCrus(CSVRecord record) {
+        Map<String, String> valores = new LinkedHashMap<>();
+        for (CampoManifesto campo : CampoManifesto.values()) {
+            valores.put(campo.coluna(), valorDe(record, campo.coluna()));
+        }
+        return valores;
+    }
+
+    /**
+     * null quando a coluna nao existe no cabecalho ou a linha tem menos valores
+     * que ele (linha truncada), em vez de estourar.
+     */
+    private String valorDe(CSVRecord record, String coluna) {
+        return record.isSet(coluna) ? record.get(coluna) : null;
     }
 
     /**

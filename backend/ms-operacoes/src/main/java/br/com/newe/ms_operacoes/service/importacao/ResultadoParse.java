@@ -5,17 +5,24 @@ import java.util.List;
 /**
  * Saida do parse: o que deu certo e o que nao deu, lado a lado.
  *
- * Antes uma unica linha invalida derrubava o arquivo inteiro. Numa planilha de
- * 1871 manifestos isso significa perder 1870 registros bons por causa de um CPF
- * digitado errado - entao os erros sao coletados e o resto segue.
+ * Uma linha invalida nao derruba o arquivo. Linha com pendencia entra em
+ * {@code linhas} e tambem em {@code problemas} - e valida, mas tem o que mostrar.
  */
-public record ResultadoParse(List<LinhaManifesto> linhas, List<ErroLinha> erros) {
+public record ResultadoParse(List<LinhaManifesto> linhas, List<LinhaComProblema> problemas) {
+
+    public int linhasInvalidas() {
+        return (int) problemas.stream().filter(LinhaComProblema::bloqueia).count();
+    }
+
+    public int linhasComPendencia() {
+        return problemas.size() - linhasInvalidas();
+    }
 
     public int totalLinhas() {
-        return linhas.size() + erros.size();
+        return linhas.size() + linhasInvalidas();
     }
 
     public boolean temErro() {
-        return !erros.isEmpty();
+        return problemas.stream().anyMatch(LinhaComProblema::bloqueia);
     }
 }

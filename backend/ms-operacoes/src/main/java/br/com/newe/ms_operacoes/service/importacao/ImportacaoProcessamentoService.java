@@ -33,7 +33,6 @@ public class ImportacaoProcessamentoService {
     private static final Logger log = LoggerFactory.getLogger(ImportacaoProcessamentoService.class);
 
     /** Uma planilha no formato errado geraria um erro por linha; nao adianta devolver todos. */
-    private static final int MAXIMO_ERROS_DEVOLVIDOS = 100;
 
     private static final int TAMANHO_AMOSTRA = 10;
 
@@ -55,7 +54,7 @@ public class ImportacaoProcessamentoService {
     }
 
     /** Le e confere o arquivo. Nao grava viagem nenhuma. */
-    public ResultadoValidacao validar(Importacao importacao) throws IOException {
+    public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho) throws IOException {
         byte[] conteudo = importacao.getArquivoConteudo();
 
         ResultadoParse resultado = parser.parse(conteudo);
@@ -65,24 +64,26 @@ public class ImportacaoProcessamentoService {
                 importacao.getId(),
                 resultado.totalLinhas(),
                 resultado.linhas().size(),
-                resultado.erros().size());
+                resultado.linhasInvalidas());
+
+        List<LinhaComProblema> todos = resultado.problemas();
+        int de = Math.min(Math.max(pagina, 0) * tamanho, todos.size());
+        int ate = Math.min(de + tamanho, todos.size());
 
         return new ResultadoValidacao(
                 importacao.getId(),
                 importacao.getArquivoNome(),
                 resultado.totalLinhas(),
                 resultado.linhas().size(),
-                resultado.erros().size(),
+                resultado.linhasInvalidas(),
+                resultado.linhasComPendencia(),
                 colunas,
                 mapear(colunas),
-                resultado.erros().stream().limit(MAXIMO_ERROS_DEVOLVIDOS).toList(),
+                new ResultadoValidacao.Pagina(pagina, tamanho, todos.size()),
+                todos.subList(de, ate),
                 resultado.linhas().stream().limit(TAMANHO_AMOSTRA).map(LinhaPreview::de).toList());
     }
 
-    /**
-     * Confronta o cabecalho do arquivo com as colunas que o parser procura.
-     * Comparacao sem diferenciar caixa nem espacos nas pontas, igual ao CSVFormat.
-     */
     private List<MapeamentoColuna> mapear(List<String> colunasDoArquivo) {
         Set<String> presentes = colunasDoArquivo.stream()
                 .filter(Objects::nonNull)
@@ -113,7 +114,7 @@ public class ImportacaoProcessamentoService {
             ResultadoParse resultado = parser.parse(importacao.getArquivoConteudo());
 
             if (resultado.temErro()) {
-                throw new ArquivoComErroException(resultado.erros().size(), resultado.totalLinhas());
+                throw new ArquivoComErroException(resultado.linhasInvalidas(), resultado.totalLinhas());
             }
             if (resultado.linhas().isEmpty()) {
                 throw new IllegalStateException("Nenhuma linha para importar");

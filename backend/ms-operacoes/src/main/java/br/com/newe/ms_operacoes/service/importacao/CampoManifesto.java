@@ -13,7 +13,7 @@ public enum CampoManifesto {
     FILIAL("Filial", Tipo.TEXTO, Nivel.IMPORTANTE, false),
     DATA("Data", Tipo.DATA, Nivel.OBRIGATORIO, false),
     NOME("Motorista", Tipo.TEXTO, Nivel.IMPORTANTE, false),
-    CPF("CPF", Tipo.DOCUMENTO, Nivel.OBRIGATORIO, false),
+    CPF("CPF", Tipo.DOCUMENTO, Nivel.OBRIGATORIO, false, 11),
     PIS("PIS", Tipo.DOCUMENTO, Nivel.OPCIONAL, false),
     DATA_NASCIMENTO("Data de nascimento", Tipo.DATA, Nivel.OPCIONAL, false),
     ENDERECO("Endereço motorista", Tipo.TEXTO, Nivel.OPCIONAL, false),
@@ -80,12 +80,18 @@ public enum CampoManifesto {
     private final Tipo tipo;
     private final Nivel nivel;
     private final boolean zeroAusente;
+    private final Integer tamanhoExato;
 
     CampoManifesto(String coluna, Tipo tipo, Nivel nivel, boolean zeroAusente) {
+        this(coluna, tipo, nivel, zeroAusente, null);
+    }
+
+    CampoManifesto(String coluna, Tipo tipo, Nivel nivel, boolean zeroAusente, Integer tamanhoExato) {
         this.coluna = coluna;
         this.tipo = tipo;
         this.nivel = nivel;
         this.zeroAusente = zeroAusente;
+        this.tamanhoExato = tamanhoExato;
     }
 
     public String coluna() {
@@ -105,6 +111,24 @@ public enum CampoManifesto {
         return zeroAusente;
     }
 
+    /** Quantidade exata de digitos, quando o campo tem uma. Hoje so o CPF. */
+    public Integer tamanhoExato() {
+        return tamanhoExato;
+    }
+
+    /** O que a celula deveria conter, para a tela explicar o erro. */
+    public String formatoEsperado() {
+        return switch (tipo) {
+            case TEXTO -> "Texto";
+            case DOCUMENTO -> tamanhoExato == null
+                    ? "Somente digitos"
+                    : tamanhoExato + " digitos";
+            case INTEIRO -> "Numero inteiro";
+            case DECIMAL -> "Numero decimal (1.234,56)";
+            case DATA -> "Data no formato DD/MM/AAAA";
+        };
+    }
+
     /** Classifica a celula sem lancar excecao. */
     public AvaliacaoCampo avaliar(String valorCru) {
         if (ManifestoCsvConfig.textoOuNulo(valorCru) == null) {
@@ -115,6 +139,10 @@ public enum CampoManifesto {
             if (valor == null) {
                 return new AvaliacaoCampo(this, valorCru, EstadoCampo.NAO_CONVERTE, null,
                         "Valor sem digitos: " + valorCru);
+            }
+            if (tamanhoExato != null && valor instanceof String digitos && digitos.length() != tamanhoExato) {
+                return new AvaliacaoCampo(this, valorCru, EstadoCampo.NAO_CONVERTE, null,
+                        "Esperado " + tamanhoExato + " digitos, veio com " + digitos.length());
             }
             if (zeroAusente && ehZero(valor)) {
                 return new AvaliacaoCampo(this, valorCru, EstadoCampo.AUSENTE_COMO_ZERO, null, null);
