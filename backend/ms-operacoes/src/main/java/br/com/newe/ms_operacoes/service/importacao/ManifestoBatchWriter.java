@@ -41,7 +41,7 @@ public class ManifestoBatchWriter {
      *         quando o arquivo repete manifesto ja importado antes).
      */
     @Transactional
-    public int gravarEmLote(Long arquivoImportacaoId, List<LinhaManifesto> linhas, ReferenciasFrota referencias) {
+    public int gravarEmLote(Long importacaoId, List<LinhaManifesto> linhas, ReferenciasFrota referencias) {
         Set<Integer> jaGravados = manifestosJaGravados(linhas);
 
         int contador = 0;
@@ -50,7 +50,7 @@ public class ManifestoBatchWriter {
                 continue;
             }
 
-            entityManager.persist(montarViagem(linha, arquivoImportacaoId, referencias));
+            entityManager.persist(montarViagem(linha, importacaoId, referencias));
 
             // id_viagem e IDENTITY, entao o Hibernate nao consegue agrupar os inserts
             // (precisa da chave de volta a cada um). O flush periodico serve para
@@ -65,7 +65,7 @@ public class ManifestoBatchWriter {
 
         int ignorados = linhas.size() - contador;
         if (ignorados > 0) {
-            log.info("Importacao {}: {} linhas ignoradas por manifesto ja existente", arquivoImportacaoId, ignorados);
+            log.info("Importacao {}: {} linhas ignoradas por manifesto ja existente", importacaoId, ignorados);
         }
 
         return contador;
@@ -85,7 +85,7 @@ public class ManifestoBatchWriter {
                 : new HashSet<>(viagemRepository.buscarManifestosExistentes(manifestos));
     }
 
-    private Viagem montarViagem(LinhaManifesto linha, Long arquivoImportacaoId, ReferenciasFrota referencias) {
+    private Viagem montarViagem(LinhaManifesto linha, Long importacaoId, ReferenciasFrota referencias) {
         UUID idMotorista = referencias.motorista(linha.cpf());
         UUID idVeiculo = referencias.veiculo(linha.veiculo());
 
@@ -105,7 +105,7 @@ public class ManifestoBatchWriter {
         viagem.setIdMotorista(idMotorista);
         viagem.setIdVeiculo(idVeiculo);
         viagem.setIdAgregado(referencias.agregado(linha.agregadoDocumento()));
-        viagem.setArquivoImportacaoId(arquivoImportacaoId);
+        viagem.setImportacaoId(importacaoId);
 
         viagem.setDataViagem(linha.data());
         viagem.setMesReferencia(linha.mesReferencia());

@@ -15,19 +15,42 @@ import org.springframework.stereotype.Component;
 @Component
 public class CsvManifestoParser {
 
-    public List<LinhaManifesto> parse(byte[] conteudo) throws IOException {
+    /**
+     * Converte o arquivo inteiro, separando o que deu certo do que nao deu.
+     *
+     * Uma linha invalida nao interrompe as demais: numa planilha de 1871
+     * manifestos, um CPF digitado errado nao pode custar os outros 1870.
+     */
+    public ResultadoParse parse(byte[] conteudo) throws IOException {
         List<LinhaManifesto> linhas = new ArrayList<>();
+        List<ErroLinha> erros = new ArrayList<>();
 
         try (CSVParser parser = ManifestoCsvConfig.CSV_FORMAT.parse(
                 new InputStreamReader(new ByteArrayInputStream(conteudo), ManifestoCsvConfig.CHARSET))) {
 
             for (CSVRecord record : parser) {
                 int numeroLinha = (int) record.getRecordNumber() + 1;
-                linhas.add(converter(record, numeroLinha));
+                try {
+                    linhas.add(converter(record, numeroLinha));
+                } catch (LinhaManifestoInvalidaException e) {
+                    erros.add(new ErroLinha(numeroLinha, e.getMessage()));
+                }
             }
         }
 
-        return linhas;
+        return new ResultadoParse(linhas, erros);
+    }
+
+    /**
+     * Nomes das colunas do cabecalho, na ordem do arquivo. Alimenta o passo de
+     * mapeamento da tela, que precisa mostrar o que veio na planilha antes de
+     * qualquer conversao.
+     */
+    public List<String> lerColunas(byte[] conteudo) throws IOException {
+        try (CSVParser parser = ManifestoCsvConfig.CSV_FORMAT.parse(
+                new InputStreamReader(new ByteArrayInputStream(conteudo), ManifestoCsvConfig.CHARSET))) {
+            return parser.getHeaderNames();
+        }
     }
 
     private LinhaManifesto converter(CSVRecord r, int numeroLinha) {

@@ -137,3 +137,47 @@
   color: #1d4ed8; 
   font-weight: 600;
 }
+/* --- RODAPE: usuario logado e sair --- */
+/* margin-top auto empurra o bloco para o fim da coluna flex do container */
+.sidebar-footer {
+  margin-top: auto;
+  padding-bottom: 12px;
+  border-top: 1px solid #e5e5e5;
+  padding-top: 12px;
+}
+
+.usuario-info {
+  display: flex;
+  flex-direction: column;
+  padding: 0 28px 8px;
+  overflow: hidden;
+}
+
+.usuario-nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usuario-perfil {
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.btn-sair {
+  background: none;
+  border: none;
+  width: calc(100% - 32px);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+}
+
+.btn-sair:hover {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}

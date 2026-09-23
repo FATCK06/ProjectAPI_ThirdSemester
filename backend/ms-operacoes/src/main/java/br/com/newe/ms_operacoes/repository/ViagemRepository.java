@@ -12,7 +12,7 @@ import br.com.newe.ms_operacoes.models.Viagem;
 
 public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
 
-    List<Viagem> findByArquivoImportacaoId(Long arquivoImportacaoId);
+    List<Viagem> findByImportacaoId(Long importacaoId);
 
     List<Viagem> findByMesReferencia(String mesReferencia);
 
@@ -20,8 +20,8 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
      * So os ids: nome e CPF do motorista pertencem ao ms-frota. Quem precisar do
      * dado completo consulta la com estes ids.
      */
-    @Query("select distinct v.idMotorista from Viagem v where v.arquivoImportacaoId = :arquivoImportacaoId")
-    List<UUID> buscarIdsMotoristasPorArquivo(@Param("arquivoImportacaoId") Long arquivoImportacaoId);
+    @Query("select distinct v.idMotorista from Viagem v where v.importacaoId = :importacaoId")
+    List<UUID> buscarIdsMotoristasPorArquivo(@Param("importacaoId") Long importacaoId);
 
     /**
      * Manifestos ja gravados, entre os informados. Usado para nao reimportar o que

@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import org.apache.commons.csv.CSVFormat;
@@ -118,6 +119,76 @@ public final class ManifestoCsvConfig {
     public static final String COL_OBSERVACOES = "Observações operacionais";
     public static final String COL_STATUS = "Status";
     public static final String COL_USUARIO = "Usuário";
+
+    /**
+     * Colunas que o parser procura no cabecalho, e quais delas nao podem faltar.
+     *
+     * Existe para a tela de mapeamento poder mostrar o que foi encontrado e o que
+     * falta, em vez de o usuario so descobrir na hora do erro. Fonte unica: se uma
+     * coluna nova entrar no parser, entra aqui tambem.
+     */
+    public record ColunaEsperada(String nome, boolean obrigatoria) {
+    }
+
+    public static final List<ColunaEsperada> COLUNAS_ESPERADAS = List.of(
+            new ColunaEsperada(COL_MANIFESTO, true),
+            new ColunaEsperada(COL_DATA, true),
+            new ColunaEsperada(COL_CPF, true),
+            new ColunaEsperada(COL_VEICULO, true),
+            new ColunaEsperada(COL_NOME, false),
+            new ColunaEsperada(COL_PIS, false),
+            new ColunaEsperada(COL_DATA_NASCIMENTO, false),
+            new ColunaEsperada(COL_ENDERECO, false),
+            new ColunaEsperada(COL_CEP, false),
+            new ColunaEsperada(COL_BAIRRO, false),
+            new ColunaEsperada(COL_CIDADE, false),
+            new ColunaEsperada(COL_ESTADO, false),
+            new ColunaEsperada(COL_AGREGADO, false),
+            new ColunaEsperada(COL_AGREGADO_DOCUMENTO, false),
+            new ColunaEsperada(COL_AGREGADO_PIS, false),
+            new ColunaEsperada(COL_REGIME_FISCAL, false),
+            new ColunaEsperada(COL_FILIAL, false),
+            new ColunaEsperada(COL_DESTINO, false),
+            new ColunaEsperada(COL_REBOQUE1, false),
+            new ColunaEsperada(COL_REBOQUE2, false),
+            new ColunaEsperada(COL_REBOQUE3, false),
+            new ColunaEsperada(COL_KM_SAIDA, false),
+            new ColunaEsperada(COL_KM_CHEGADA, false),
+            new ColunaEsperada(COL_SERVICOS, false),
+            new ColunaEsperada(COL_SERVICOS_FINALIZADOS, false),
+            new ColunaEsperada(COL_NFS, false),
+            new ColunaEsperada(COL_KG_REAL, false),
+            new ColunaEsperada(COL_KG_TAXADO, false),
+            new ColunaEsperada(COL_M3, false),
+            new ColunaEsperada(COL_CAPACIDADE_VEICULO, false),
+            new ColunaEsperada(COL_PERC_APROV_VEICULO, false),
+            new ColunaEsperada(COL_COLETAS, false),
+            new ColunaEsperada(COL_ENTREGAS, false),
+            new ColunaEsperada(COL_DESPACHOS, false),
+            new ColunaEsperada(COL_RETIRADAS, false),
+            new ColunaEsperada(COL_COLETAS_REVERSA, false),
+            new ColunaEsperada(COL_PERC_EFETIVIDADE, false),
+            new ColunaEsperada(COL_VALE_FRETE, false),
+            new ColunaEsperada(COL_VALOR_NF, false),
+            new ColunaEsperada(COL_VALOR_FRETES, false),
+            new ColunaEsperada(COL_VALOR_FRETE, false),
+            new ColunaEsperada(COL_COMBUSTIVEL, false),
+            new ColunaEsperada(COL_PEDAGIO, false),
+            new ColunaEsperada(COL_DIARIA, false),
+            new ColunaEsperada(COL_ADICIONAIS, false),
+            new ColunaEsperada(COL_DESCONTOS, false),
+            new ColunaEsperada(COL_ADIANTAMENTO, false),
+            new ColunaEsperada(COL_DESPESAS, false),
+            new ColunaEsperada(COL_TOTAL_DESPESAS, false),
+            new ColunaEsperada(COL_SALDO_DESPESAS, false),
+            new ColunaEsperada(COL_INSS, false),
+            new ColunaEsperada(COL_SEST_SENAT, false),
+            new ColunaEsperada(COL_IR, false),
+            new ColunaEsperada(COL_SALDO_A_PAGAR, false),
+            new ColunaEsperada(COL_CLASSIFICACAO, false),
+            new ColunaEsperada(COL_OBSERVACOES, false),
+            new ColunaEsperada(COL_STATUS, false),
+            new ColunaEsperada(COL_USUARIO, false));
 
     private ManifestoCsvConfig() {
     }

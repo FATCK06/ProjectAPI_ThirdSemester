@@ -42,8 +42,8 @@ public class Viagem {
     @Column(name = "id_agregado")
     private UUID idAgregado;
 
-    @Column(name = "arquivo_importacao_id")
-    private Long arquivoImportacaoId;
+    @Column(name = "importacao_id")
+    private Long importacaoId;
 
     @Column(name = "data_viagem", nullable = false)
     private LocalDate dataViagem;
@@ -192,12 +192,12 @@ public class Viagem {
         this.idAgregado = idAgregado;
     }
 
-    public Long getArquivoImportacaoId() {
-        return arquivoImportacaoId;
+    public Long getImportacaoId() {
+        return importacaoId;
     }
 
-    public void setArquivoImportacaoId(Long arquivoImportacaoId) {
-        this.arquivoImportacaoId = arquivoImportacaoId;
+    public void setImportacaoId(Long importacaoId) {
+        this.importacaoId = importacaoId;
     }
 
     public LocalDate getDataViagem() {

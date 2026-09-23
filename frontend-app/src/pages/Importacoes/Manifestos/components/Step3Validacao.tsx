@@ -1,169 +1,81 @@
-import { useState } from "react";
-import styles from "./step3.module.css";
-
-export interface LinhaMotorista {
-  id: string;
-  manifesto: string;
-  motorista: string;
-  cpf: string;
-  status: string;
-  veiculo: string;
-}
+import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { podeExecutar, type ResultadoValidacao } from '../../../../services/importacao';
+import './step3.css';
 
 interface PropsPasso3 {
-  linhas?: LinhaMotorista[];
-  total?: number;
-  painelAbertoInicial?: boolean;
+    validacao: ResultadoValidacao | null;
 }
 
-const LINHAS_PADRAO: LinhaMotorista[] = [
-  {
-    id: "1",
-    manifesto: "16882",
-    motorista: "",
-    cpf: "000.000.00",
-    status: "",
-    veiculo: "HNW3E20",
-  },
-  {
-    id: "2",
-    manifesto: "16908",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "3",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "4",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "5",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "6",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "7",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "8",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-  {
-    id: "9",
-    manifesto: "16912",
-    motorista: "",
-    cpf: "",
-    status: "",
-    veiculo: "",
-  },
-];
+export function Step3Validacao({ validacao }: PropsPasso3) {
+    if (!validacao) {
+        return <p className="validacao-vazio">Conferindo os dados...</p>;
+    }
 
-export function Step3Validacao({
-  linhas = LINHAS_PADRAO,
-  total = 9,
-  painelAbertoInicial = false,
-}: PropsPasso3) {
-  const [painelAberto, setPainelAberto] = useState(painelAbertoInicial);
-  const [linhaSelecionada, setLinhaSelecionada] = useState<string | null>(null);
+    const liberado = podeExecutar(validacao);
+    const temMaisErros = validacao.linhasInvalidas > validacao.erros.length;
 
-  const selecionarLinha = (id: string) => {
-    setLinhaSelecionada(id);
-    setPainelAberto(true);
-  };
+    return (
+        <div className="validacao-wrap">
+            <div className="validacao-numeros">
+                <div className="validacao-card">
+                    <span className="validacao-valor">{validacao.totalLinhas}</span>
+                    <span className="validacao-rotulo">linhas no arquivo</span>
+                </div>
+                <div className="validacao-card ok">
+                    <span className="validacao-valor">{validacao.linhasValidas}</span>
+                    <span className="validacao-rotulo">válidas</span>
+                </div>
+                <div className={`validacao-card ${validacao.linhasInvalidas > 0 ? 'falha' : ''}`}>
+                    <span className="validacao-valor">{validacao.linhasInvalidas}</span>
+                    <span className="validacao-rotulo">com erro</span>
+                </div>
+            </div>
 
-  return (
-    <div className={styles.wrap}>
-      <div className={styles.conteudo}>
-        <div className={styles.cartao}>
-          <div className={styles.rolagem}>
-            <table className={styles.tabela}>
-              <thead>
-                <tr>
-                  <th className={styles.indice} />
-                  <th>Manifesto</th>
-                  <th>Motorista</th>
-                  <th>CPF</th>
-                  <th>Status</th>
-                  <th>Veículo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {linhas.map((linha, i) => (
-                  <tr
-                    key={linha.id}
-                    className={`${styles.linha} ${
-                      linhaSelecionada === linha.id
-                        ? styles.linhaSelecionada
-                        : ""
-                    }`}
-                    onClick={() => selecionarLinha(linha.id)}
-                  >
-                    <td className={styles.indice}>{i + 1}</td>
-                    <td>{linha.manifesto}</td>
-                    <td>{linha.motorista}</td>
-                    <td>{linha.cpf}</td>
-                    <td>{linha.status}</td>
-                    <td>{linha.veiculo}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            {liberado ? (
+                <div className="validacao-alerta ok">
+                    <CheckCircle2 size={18} />
+                    <span>Nenhum erro encontrado. O arquivo está pronto para ser importado.</span>
+                </div>
+            ) : (
+                <div className="validacao-alerta falha">
+                    <AlertCircle size={18} />
+                    <span>
+                        O arquivo não pode ser importado enquanto houver erro. Corrija as linhas
+                        abaixo e envie novamente — <strong>nada será gravado</strong> até o arquivo
+                        estar limpo.
+                    </span>
+                </div>
+            )}
 
-          <div className={styles.rodape}>
-            Mostrando <strong>1-{linhas.length}</strong> de{" "}
-            <strong>{total}</strong> motoristas
-          </div>
+            {validacao.erros.length > 0 && (
+                <div className="erro-lista">
+                    <h4 className="erro-titulo">
+                        Linhas com problema
+                        {temMaisErros && (
+                            <span className="erro-limite">
+                                mostrando as {validacao.erros.length} primeiras de {validacao.linhasInvalidas}
+                            </span>
+                        )}
+                    </h4>
+
+                    <table className="erro-tabela">
+                        <thead>
+                            <tr>
+                                <th>Linha</th>
+                                <th>Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {validacao.erros.map((erro) => (
+                                <tr key={erro.numeroLinha}>
+                                    <td className="erro-numero">{erro.numeroLinha}</td>
+                                    <td>{erro.mensagem}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
-
-        {painelAberto && (
-          <aside className={styles.painel}>
-            <button
-              type="button"
-              className={styles.fechar}
-              aria-label="Fechar painel"
-              onClick={() => setPainelAberto(false)}
-            >
-              ✕
-            </button>
-            <div className={styles.blocoCinza} />
-            <div className={styles.blocoCinza} />
-          </aside>
-        )}
-      </div>
-    </div>
-  );
+    );
 }

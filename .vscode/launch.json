@@ -9,6 +9,36 @@
             "projectName": "ms-usuarios",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-ApiGatewayApplication<api-gateway>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "br.com.newe.api_gateway.ApiGatewayApplication",
+            "projectName": "api-gateway",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsFrotaApplication<ms-frota>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "br.com.newe.ms_frota.MsFrotaApplication",
+            "projectName": "ms-frota",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsOperacoesApplication<ms-operacoes>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "br.com.newe.ms_operacoes.MsOperacoesApplication",
+            "projectName": "ms-operacoes",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
         }
     ]
 }

@@ -12,6 +12,8 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -37,6 +39,7 @@ import jakarta.servlet.http.HttpServletResponse;
  * exatamente a falha existente.
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtAutenticacaoFilter extends OncePerRequestFilter {
 
     public static final String HEADER_PERFIL = "X-User-Role";
@@ -49,8 +52,15 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
             HEADER_PERFIL.toLowerCase(Locale.ROOT),
             HEADER_USUARIO.toLowerCase(Locale.ROOT));
 
-    /** O login precisa ser alcancavel sem token. */
-    private static final String PREFIXO_PUBLICO = "/api/auth/";
+    /**
+     * Rotas alcancaveis sem token.
+     *
+     * /api/auth/     - o login, obviamente.
+     * /api/usuarios  - cadastro, aberto para criar o primeiro Administrador.
+     *                  TODO fechar assim que existir um: hoje qualquer um cria
+     *                  usuario com perfil Administrador.
+     */
+    private static final List<String> PREFIXOS_PUBLICOS = List.of("/api/auth/", "/api/usuarios");
 
     private final JWTVerifier verificador;
 
@@ -74,7 +84,7 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
 
         String token = extrairToken(request);
         if (token == null) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Token ausente");
+            recusar(response, "Token ausente");
             return;
         }
 
@@ -82,7 +92,7 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
         try {
             jwt = verificador.verify(token);
         } catch (JWTVerificationException e) {
-            response.sendError(HttpStatus.UNAUTHORIZED.value(), "Token invalido ou expirado");
+            recusar(response, "Token invalido ou expirado");
             return;
         }
 
@@ -97,8 +107,24 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
         chain.doFilter(new RequestComIdentidade(request, identidade), response);
     }
 
+    /**
+     * Recusa escrevendo o corpo na mao, em vez de response.sendError().
+     *
+     * O sendError descarta a resposta e dispara o tratamento de erro do container,
+     * que monta uma resposta nova - jogando fora os cabecalhos que o CorsFilter ja
+     * tinha adicionado. Sem Access-Control-Allow-Origin, o navegador bloqueia a
+     * resposta e o front recebe "erro de rede" no lugar de 401, escondendo a causa.
+     */
+    private void recusar(HttpServletResponse response, String mensagem) throws IOException {
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"erro\":\"" + mensagem + "\"}");
+        response.getWriter().flush();
+    }
+
     private boolean ehPublica(HttpServletRequest request) {
-        return request.getRequestURI().startsWith(PREFIXO_PUBLICO);
+        String uri = request.getRequestURI();
+        return PREFIXOS_PUBLICOS.stream().anyMatch(uri::startsWith);
     }
 
     /** Rota publica tambem precisa ter os headers limpos: ninguem entra com perfil forjado. */

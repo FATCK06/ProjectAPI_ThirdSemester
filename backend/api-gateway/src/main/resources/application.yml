@@ -15,7 +15,7 @@ spring:
             - id: usuarios
               uri: ${MS_USUARIOS_URL:http://localhost:8081}
               predicates:
-                - Path=/api/auth/**
+                - Path=/api/auth/**,/api/usuarios/**
 
             - id: frota
               uri: ${MS_FROTA_URL:http://localhost:8082}
@@ -36,8 +36,6 @@ spring:
 
 server:
   port: 8080
-  # So loopback: evita o prompt de firewall do Windows.
-  address: ${SERVER_ADDRESS:127.0.0.1}
 
 # Mesma chave que o ms-usuarios usa para assinar. O gateway valida e injeta o
 # perfil nos headers; os servicos de tras confiam neles.
@@ -53,7 +51,7 @@ api:
 # Origem do front (Vite). CORS fica so aqui: os servicos nunca sao chamados
 # direto pelo navegador.
 cors:
-  origem-permitida: ${CORS_ORIGEM:http://localhost:5173}
+  origem-permitida: ${CORS_ORIGEM:http://localhost:[*]}
 
 logging:
   level:

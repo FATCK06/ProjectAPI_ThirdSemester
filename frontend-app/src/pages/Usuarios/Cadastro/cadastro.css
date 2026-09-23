@@ -1,0 +1,128 @@
+/* src/pages/Usuarios/Cadastro/cadastro.css */
+
+.cadastro-container {
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.cadastro-header {
+  margin-bottom: 24px;
+}
+
+.cadastro-header h2 {
+  font-size: 20px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.cadastro-header p {
+  font-size: 14px;
+  color: #64748b;
+}
+
+.cadastro-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.campo input,
+.campo select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0f172a;
+  background: #ffffff;
+  width: 100%;
+}
+
+.campo input:focus,
+.campo select:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+
+.campo-ajuda {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* --- SENHA --- */
+.campo-senha {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.campo-senha input {
+  padding-right: 44px;
+}
+
+.btn-olho {
+  position: absolute;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+
+.btn-olho:hover { color: #64748b; }
+
+/* --- AVISOS --- */
+.alerta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.alerta-erro {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.alerta-sucesso {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+/* --- ACAO --- */
+.btn-cadastrar {
+  padding: 12px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-cadastrar:hover:not(:disabled) { background: #1d4ed8; }
+
+.btn-cadastrar:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}

@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react';
 import { FileDown, FileText, Trash2, CheckCircle2, AlertCircle } from 'lucide-react';
 import {
-    enviarManifesto,
+    enviarArquivo,
     formatarTamanho,
-    mesCorrente,
+    mensagemDeErro,
     EXTENSOES_ACEITAS,
     TAMANHO_MAXIMO_BYTES,
     type ImportacaoCriada,
@@ -33,20 +33,8 @@ function validar(arquivo: File): string | null {
     return null;
 }
 
-function mensagemDeErro(erro: unknown): string {
-    const status = (erro as { response?: { status?: number } })?.response?.status;
-
-    if (status === 400) return 'O servidor recusou o arquivo. Confira a extensão e o mês de referência.';
-    if (status === 401 || status === 403) return 'Sua sessão expirou. Faça login novamente.';
-    if (status === 413) return 'Arquivo maior que o limite aceito pelo servidor.';
-    if (status) return `Falha no envio (erro ${status}).`;
-
-    return 'Não foi possível falar com o servidor. Verifique se os serviços estão no ar.';
-}
-
 export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
     const [arquivo, setArquivo] = useState<File | null>(null);
-    const [mesReferencia, setMesReferencia] = useState(mesCorrente);
     const [progresso, setProgresso] = useState(0);
     const [situacao, setSituacao] = useState<Situacao>(importacao ? 'concluido' : 'ocioso');
     const [erro, setErro] = useState<string | null>(null);
@@ -85,16 +73,7 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
         setProgresso(0);
 
         try {
-            const criada = await enviarManifesto(arquivo, mesReferencia, setProgresso);
-
-            // O processamento do CSV é síncrono: o status já chega final. ERRO aqui
-            // significa que o arquivo subiu mas o parsing falhou — não é erro de rede.
-            if (criada.status === 'ERRO') {
-                setSituacao('erro');
-                setErro('O arquivo foi recebido, mas o processamento falhou. Confira o conteúdo e as colunas.');
-                return;
-            }
-
+            const criada = await enviarArquivo(arquivo, setProgresso);
             setSituacao('concluido');
             aoImportar(criada);
         } catch (falha) {
@@ -108,20 +87,6 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
 
     return (
         <div className="upload-step-container">
-            <div className="campo-mes">
-                <label htmlFor="mes-referencia">Mês de referência</label>
-                <input
-                    id="mes-referencia"
-                    type="month"
-                    value={mesReferencia}
-                    onChange={(e) => setMesReferencia(e.target.value)}
-                    disabled={enviando || concluido}
-                />
-                <span className="campo-ajuda">
-                    Identifica o arquivo. O mês de cada viagem vem da coluna Data.
-                </span>
-            </div>
-
             <input
                 ref={inputRef}
                 type="file"
@@ -182,7 +147,7 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
                                 {enviando && <span className="status-uploading">Enviando...</span>}
                                 {concluido && (
                                     <span className="status-complete">
-                                        <CheckCircle2 size={14} /> Importado
+                                        <CheckCircle2 size={14} /> Recebido
                                     </span>
                                 )}
                                 {situacao === 'erro' && <span className="status-erro">Falhou</span>}
@@ -210,7 +175,8 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
 
                     {concluido && importacao && (
                         <p className="aviso-sucesso">
-                            Importação #{importacao.id} concluída. Avance para o mapeamento.
+                            Arquivo #{importacao.id} recebido e aguardando. Nada foi gravado ainda —
+                            avance para conferir os dados.
                         </p>
                     )}
                 </div>

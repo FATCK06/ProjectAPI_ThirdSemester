@@ -1,0 +1,52 @@
+/* src/pages/Importacoes/Manifestos/components/step5.css
+   Passo de execução: tela de progresso, sem ação do usuário. */
+
+.execucao-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 0;
+}
+
+.execucao-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: execucao-girar 0.9s linear infinite;
+}
+
+@keyframes execucao-girar {
+  to { transform: rotate(360deg); }
+}
+
+.execucao-check {
+  color: #16a34a;
+  animation: execucao-surgir 0.3s ease-out;
+}
+
+.execucao-falha {
+  color: #ef4444;
+}
+
+@keyframes execucao-surgir {
+  from { transform: scale(0.6); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.execucao-texto {
+  font-size: 16px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.execucao-aviso {
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.5;
+}
