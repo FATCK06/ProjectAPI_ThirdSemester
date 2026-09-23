@@ -29,6 +29,7 @@ A regra 3 não é burocracia: foi ignorá-la que gerou as tabelas duplicadas
 | `V1__baseline.sql` | ⚠️ **ainda não escrito** |
 | `V2__criar_agregados.sql` | criado — tabela `agregados` + `viagens.id_agregado` |
 | `V3__viagens_campos_do_manifesto.sql` | criado — campos do CSV, `mes_referencia`, seed de `tipos_custo` |
+| `V4__agregados_tipo_pessoa_varchar.sql` | criado — `agregados.tipo_pessoa` para varchar |
 
 **O Flyway ainda está desligado em todos os serviços** (`spring.flyway.enabled=false`).
 Ligar exige dois cuidados, explicados abaixo.
