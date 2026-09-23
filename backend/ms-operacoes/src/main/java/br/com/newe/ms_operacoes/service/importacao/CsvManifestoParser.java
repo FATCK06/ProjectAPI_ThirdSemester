@@ -15,6 +15,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class CsvManifestoParser {
 
+    private final CamposObrigatoriosValidator camposObrigatoriosValidator;
+
+    public CsvManifestoParser(CamposObrigatoriosValidator camposObrigatoriosValidator) {
+        this.camposObrigatoriosValidator = camposObrigatoriosValidator;
+    }
+
     /**
      * Converte o arquivo inteiro, separando o que deu certo do que nao deu.
      *
@@ -31,6 +37,12 @@ public class CsvManifestoParser {
             for (CSVRecord record : parser) {
                 int numeroLinha = (int) record.getRecordNumber() + 1;
                 try {
+                    List<String> camposVazios = camposObrigatoriosValidator.camposVazios(record);
+                    if (!camposVazios.isEmpty()) {
+                        throw new LinhaManifestoInvalidaException(
+                                numeroLinha,
+                                "Campos obrigatorios vazios: " + String.join(", ", camposVazios));
+                    }
                     linhas.add(converter(record, numeroLinha));
                 } catch (LinhaManifestoInvalidaException e) {
                     erros.add(new ErroLinha(numeroLinha, e.getMessage()));
