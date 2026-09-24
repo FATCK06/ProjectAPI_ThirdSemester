@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
-import { TableSkeleton } from "../../components/SkeletonLoader/TableSkeleton";
+import { RankingMotoristas } from "../../components/RankingMotoristas";
 import Grafico from "../../graficos/Grafico";
 import Grafico2 from "../../graficos/Grafico2";
 
@@ -26,8 +26,8 @@ export function Dashboard() {
         </CardSkeleton>
       </div>
 
-      {/* Base: A tabela de dados */}
-      <TableSkeleton />
+      {/* Base: Ranking dos 5 motoristas com mais viagens */}
+      <RankingMotoristas />
     </div>
   );
 }

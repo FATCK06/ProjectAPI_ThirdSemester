@@ -33,6 +33,12 @@ public class VeiculoController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /** Placa por id, em lote. Usado pelo dashboard do ms-operacoes. */
+    @PostMapping("/placas")
+    public ResponseEntity<Map<UUID, String>> buscarPlacas(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(service.buscarPlacas(ids));
+    }
+
     @PostMapping("/lote")
     public ResponseEntity<Map<String, UUID>> upsertLote(@RequestBody List<VeiculoLoteItem> itens) {
         return ResponseEntity.ok(service.upsertLote(itens));

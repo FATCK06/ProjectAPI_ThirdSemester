@@ -1,6 +1,7 @@
 package br.com.newe.ms_operacoes.client;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import br.com.newe.ms_operacoes.dto.AgregadoLoteItem;
 import br.com.newe.ms_operacoes.dto.MotoristaLoteItem;
+import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.VeiculoLoteItem;
 
 /**
@@ -31,6 +33,12 @@ import br.com.newe.ms_operacoes.dto.VeiculoLoteItem;
 public class FrotaClient {
 
     private static final ParameterizedTypeReference<Map<String, UUID>> MAPA_CHAVE_ID = new ParameterizedTypeReference<>() {
+    };
+
+    private static final ParameterizedTypeReference<List<MotoristaResumo>> LISTA_MOTORISTAS = new ParameterizedTypeReference<>() {
+    };
+
+    private static final ParameterizedTypeReference<Map<UUID, String>> MAPA_ID_PLACA = new ParameterizedTypeReference<>() {
     };
 
     private final RestClient restClient;
@@ -74,6 +82,36 @@ public class FrotaClient {
     /** @return placa (normalizada pelo ms-frota) -> id. */
     public Map<String, UUID> upsertVeiculos(List<VeiculoLoteItem> itens) {
         return postLote("/api/veiculos/lote", itens);
+    }
+
+    /** Nome e CPF dos motoristas informados (os nao encontrados ficam de fora). */
+    public List<MotoristaResumo> buscarMotoristas(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        List<MotoristaResumo> resposta = restClient.post()
+                .uri("/api/motoristas/resumos")
+                .body(ids)
+                .retrieve()
+                .body(LISTA_MOTORISTAS);
+
+        return resposta != null ? resposta : List.of();
+    }
+
+    /** @return id -> placa, para os veiculos encontrados. */
+    public Map<UUID, String> buscarPlacas(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, String> resposta = restClient.post()
+                .uri("/api/veiculos/placas")
+                .body(ids)
+                .retrieve()
+                .body(MAPA_ID_PLACA);
+
+        return resposta != null ? resposta : Map.of();
     }
 
     private Map<String, UUID> postLote(String uri, List<?> itens) {

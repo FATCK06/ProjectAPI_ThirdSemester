@@ -25,7 +25,7 @@ spring:
             - id: operacoes
               uri: ${MS_OPERACOES_URL:http://localhost:8083}
               predicates:
-                - Path=/api/importacao/**,/api/viagens/**
+                - Path=/api/importacao/**,/api/viagens/**,/api/dashboard/**
 
   # O CSV de manifestos chega por aqui antes de ir para o ms-operacoes.
   # Tem que acompanhar o limite de la (10MB), senao o gateway corta antes.

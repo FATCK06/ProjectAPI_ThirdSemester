@@ -30,6 +30,18 @@ public class VeiculoService {
         return repository.findByPlaca(normalizar(placa));
     }
 
+    /** @return id -> placa, para os ids encontrados. */
+    public Map<UUID, String> buscarPlacas(List<UUID> ids) {
+        Map<UUID, String> placas = new HashMap<>();
+        if (ids.isEmpty()) {
+            return placas;
+        }
+        for (Veiculo veiculo : repository.findAllById(ids)) {
+            placas.put(veiculo.getIdVeiculo(), veiculo.getPlaca());
+        }
+        return placas;
+    }
+
     /**
      * Cria o veiculo minimo quando a placa aparece pela primeira vez: viagens.id_veiculo
      * e NOT NULL e o CSV de manifestos so traz a placa. Os demais dados entram
