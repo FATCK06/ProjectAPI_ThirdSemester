@@ -7,6 +7,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
   type ChartOptions,
   type ChartData,
 } from "chart.js";
@@ -18,6 +19,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
+  Filler,
 );
 
 const dadosDoGrafico: ChartData<"bar"> = {
