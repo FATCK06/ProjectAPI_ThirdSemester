@@ -8,6 +8,8 @@ package br.com.newe.ms_operacoes.service.importacao;
 public record MapeamentoColuna(
         String campoSistema,
         boolean obrigatoria,
-        boolean encontrada
+        boolean encontrada,
+        /** Cabecalho como esta no arquivo (grafia original); null quando nao encontrada. */
+        String colunaArquivo
 ) {
 }
