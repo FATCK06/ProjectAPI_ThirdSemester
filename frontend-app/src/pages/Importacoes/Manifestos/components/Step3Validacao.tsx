@@ -139,9 +139,13 @@ export function Step3Validacao({ validacao }: PropsPasso3) {
                     </h4>
                 )}
 
-                {linhas.map((linha) => (
-                    <CardLinha key={linha.numeroLinha} linha={linha} />
-                ))}
+                {linhas.length > 0 && (
+                    <div className="erro-linhas-rolagem">
+                        {linhas.map((linha) => (
+                            <CardLinha key={linha.numeroLinha} linha={linha} />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
