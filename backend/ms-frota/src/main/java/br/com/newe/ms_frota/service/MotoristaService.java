@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.newe.ms_frota.dto.MotoristaLoteItem;
+import br.com.newe.ms_frota.dto.MotoristaResumo;
 import br.com.newe.ms_frota.models.Cidade;
 import br.com.newe.ms_frota.models.Motorista;
 import br.com.newe.ms_frota.repository.CidadeRepository;
@@ -35,6 +36,16 @@ public class MotoristaService {
 
     public Optional<Motorista> buscarPorCpf(String cpf) {
         return motoristaRepository.findByCpf(cpf);
+    }
+
+    /** Nome e CPF de varios motoristas de uma vez, para quem so guarda o id (ms-operacoes). */
+    public List<MotoristaResumo> buscarResumos(List<UUID> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return motoristaRepository.findAllById(ids).stream()
+                .map(m -> new MotoristaResumo(m.getIdMotorista(), m.getNome(), m.getCpf()))
+                .toList();
     }
 
     /**

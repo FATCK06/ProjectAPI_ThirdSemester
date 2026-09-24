@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.newe.ms_frota.dto.MotoristaLoteItem;
+import br.com.newe.ms_frota.dto.MotoristaResumo;
 import br.com.newe.ms_frota.models.Motorista;
 import br.com.newe.ms_frota.service.MotoristaService;
 
@@ -31,6 +32,12 @@ public class MotoristaController {
         return service.buscarPorCpf(cpf)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    /** Nome e CPF por id, em lote. Usado pelo dashboard do ms-operacoes. */
+    @PostMapping("/resumos")
+    public ResponseEntity<List<MotoristaResumo>> buscarResumos(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(service.buscarResumos(ids));
     }
 
     /**
