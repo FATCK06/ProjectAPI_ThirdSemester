@@ -97,14 +97,22 @@ public class ImportacaoController {
      * Le o arquivo e devolve colunas detectadas, erros por linha e uma amostra.
      * Pode ser chamado quantas vezes quiser: nao altera viagens.
      */
+    /** Devolve so as linhas com problema; sem nenhuma, a lista vem vazia e o resumo preenchido. */
     @PostMapping("/{id}/validar")
-    public ResponseEntity<?> validar(@PathVariable Long id) throws IOException {
+    public ResponseEntity<?> validar(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "50") int tamanho
+    ) throws IOException {
         Importacao importacao = service.buscarPorId(id);
         if (importacao == null) {
             return ResponseEntity.notFound().build();
         }
+        if (pagina < 0 || tamanho < 1 || tamanho > 200) {
+            return ResponseEntity.badRequest().build();
+        }
 
-        ResultadoValidacao resultado = processamentoService.validar(importacao);
+        ResultadoValidacao resultado = processamentoService.validar(importacao, pagina, tamanho);
         return ResponseEntity.ok(resultado);
     }
 

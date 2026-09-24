@@ -1,8 +1,11 @@
 package br.com.newe.ms_operacoes.service.importacao;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -11,14 +14,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.newe.ms_operacoes.models.TipoCusto;
 import br.com.newe.ms_operacoes.models.Viagem;
+import br.com.newe.ms_operacoes.models.ViagemCusto;
+import br.com.newe.ms_operacoes.repository.TipoCustoRepository;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
 /**
- * Grava as viagens. So persistencia: as referencias de motorista, veiculo e
+ * Grava as viagens e seus custos. So persistencia: as referencias de motorista, veiculo e
  * agregado ja chegam resolvidas pelo {@link ResolvedorFrota}, para que nenhuma
  * chamada HTTP aconteca com a transacao aberta.
  */
@@ -28,12 +34,14 @@ public class ManifestoBatchWriter {
     private static final Logger log = LoggerFactory.getLogger(ManifestoBatchWriter.class);
 
     private final ViagemRepository viagemRepository;
+    private final TipoCustoRepository tipoCustoRepository;
 
     @PersistenceContext
     private EntityManager entityManager;
 
-    public ManifestoBatchWriter(ViagemRepository viagemRepository) {
+    public ManifestoBatchWriter(ViagemRepository viagemRepository, TipoCustoRepository tipoCustoRepository) {
         this.viagemRepository = viagemRepository;
+        this.tipoCustoRepository = tipoCustoRepository;
     }
 
     /**
@@ -43,6 +51,7 @@ public class ManifestoBatchWriter {
     @Transactional
     public int gravarEmLote(Long importacaoId, List<LinhaManifesto> linhas, ReferenciasFrota referencias) {
         Set<Integer> jaGravados = manifestosJaGravados(linhas);
+        Map<String, Integer> tiposCusto = carregarTiposCusto();
 
         int contador = 0;
         for (LinhaManifesto linha : linhas) {
@@ -50,7 +59,11 @@ public class ManifestoBatchWriter {
                 continue;
             }
 
-            entityManager.persist(montarViagem(linha, importacaoId, referencias));
+            Viagem viagem = montarViagem(linha, importacaoId, referencias);
+            entityManager.persist(viagem);
+
+            // id_viagem e IDENTITY: o persist acima ja trouxe a chave.
+            gravarCustos(viagem, linha, tiposCusto);
 
             // id_viagem e IDENTITY, entao o Hibernate nao consegue agrupar os inserts
             // (precisa da chave de volta a cada um). O flush periodico serve para
@@ -145,5 +158,42 @@ public class ManifestoBatchWriter {
         viagem.setUsuarioManifesto(linha.usuarioManifesto());
 
         return viagem;
+    }
+
+    /** descricao -> id_tipo_custo, lido uma vez por importacao. */
+    private Map<String, Integer> carregarTiposCusto() {
+        Map<String, Integer> porDescricao = new HashMap<>();
+        for (TipoCusto tipo : tipoCustoRepository.findAll()) {
+            porDescricao.put(tipo.getDescricao(), tipo.getIdTipoCusto());
+        }
+
+        List<String> ausentes = new ArrayList<>();
+        for (CustoDoManifesto custo : CustoDoManifesto.values()) {
+            if (!porDescricao.containsKey(custo.descricao())) {
+                ausentes.add(custo.descricao());
+            }
+        }
+        if (!ausentes.isEmpty()) {
+            throw new IllegalStateException(
+                    "tipos_custo sem as descricoes " + ausentes + ". Rode a migration V3 antes de importar.");
+        }
+
+        return porDescricao;
+    }
+
+    /** Uma linha por desembolso com valor. Ausente e zero nao viram linha. */
+    private void gravarCustos(Viagem viagem, LinhaManifesto linha, Map<String, Integer> tiposCusto) {
+        for (CustoDoManifesto custo : CustoDoManifesto.values()) {
+            BigDecimal valor = custo.valorEm(linha);
+
+            if (valor == null || valor.compareTo(BigDecimal.ZERO) == 0) {
+                continue;
+            }
+
+            entityManager.persist(new ViagemCusto(
+                    viagem.getIdViagem(),
+                    tiposCusto.get(custo.descricao()),
+                    valor));
+        }
     }
 }

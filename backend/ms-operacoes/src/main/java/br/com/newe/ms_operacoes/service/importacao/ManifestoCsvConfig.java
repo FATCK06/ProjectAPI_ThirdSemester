@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -27,7 +28,8 @@ public final class ManifestoCsvConfig {
     public static final Charset CHARSET = StandardCharsets.ISO_8859_1;
     public static final int TAMANHO_CHUNK = 50;
 
-    private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter FORMATO_DATA =
+            DateTimeFormatter.ofPattern("dd/MM/uuuu").withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter FORMATO_MES_REFERENCIA = DateTimeFormatter.ofPattern("yyyy-MM");
 
     /** Envolucro que o Excel usa para exportar texto sem perder zero a esquerda: ="00012345678" */
