@@ -90,29 +90,92 @@
   color: #94a3b8;
 }
 
-.erro-tabela {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
+.erro-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.erro-tabela th {
-  text-align: left;
-  padding: 8px 12px;
-  background: #f8fafc;
-  color: #64748b;
-  font-weight: 500;
-  border-bottom: 1px solid #e2e8f0;
+.erro-lista .erro-titulo {
+  margin: 8px 0 0;
 }
 
-.erro-tabela td {
-  padding: 8px 12px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
+/* --- CARDS DE ERRO --- */
+.erro-card {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  padding: 12px 16px;
 }
 
-.erro-numero {
-  width: 70px;
+.erro-card-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
   font-weight: 600;
   color: #b91c1c;
+  margin-bottom: 6px;
+}
+
+.erro-card-selo {
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.erro-card-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.erro-card-mensagem {
+  font-size: 13px;
+  color: #7f1d1d;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.erro-card-detalhe {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px 12px;
+  margin: 6px 0 0;
+  font-size: 12px;
+}
+
+.erro-card-detalhe dt {
+  color: #991b1b;
+  font-weight: 500;
+}
+
+.erro-card-detalhe dd {
+  margin: 0;
+  color: #450a0a;
+  word-break: break-word;
+}
+
+.erro-card-valor {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* Pendência: avisa, mas não bloqueia */
+.erro-card.pendencia {
+  background: #fffbeb;
+  border-color: #fde68a;
+  border-left-color: #d97706;
+}
+
+.erro-card.pendencia .erro-card-titulo,
+.erro-card.pendencia .erro-card-detalhe dt {
+  color: #b45309;
+}
+
+.erro-card.pendencia .erro-card-mensagem,
+.erro-card.pendencia .erro-card-detalhe dd {
+  color: #78350f;
 }

@@ -1,9 +1,60 @@
-import { CheckCircle2, AlertCircle } from 'lucide-react';
-import { podeExecutar, type ResultadoValidacao } from '../../../../services/importacao';
+import { CheckCircle2, AlertCircle, AlertTriangle } from 'lucide-react';
+import {
+    linhaBloqueia,
+    obrigatoriasFaltando,
+    podeExecutar,
+    type LinhaComProblema,
+    type ProblemaCelula,
+    type ResultadoValidacao,
+} from '../../../../services/importacao';
 import './step3.css';
 
 interface PropsPasso3 {
     validacao: ResultadoValidacao | null;
+}
+
+function DetalheProblema({ problema }: { problema: ProblemaCelula }) {
+    return (
+        <li>
+            <p className="erro-card-mensagem">{problema.mensagem}</p>
+            {problema.coluna && (
+                <dl className="erro-card-detalhe">
+                    <dt>Valor encontrado</dt>
+                    <dd className="erro-card-valor">
+                        {problema.valorEncontrado?.trim() ? problema.valorEncontrado : '(vazio)'}
+                    </dd>
+                    {problema.valorEsperado && (
+                        <>
+                            <dt>Esperado</dt>
+                            <dd>{problema.valorEsperado}</dd>
+                        </>
+                    )}
+                </dl>
+            )}
+        </li>
+    );
+}
+
+/** Vermelho quando a linha bloqueia a importação; amarelo quando é só pendência. */
+function CardLinha({ linha }: { linha: LinhaComProblema }) {
+    const bloqueia = linhaBloqueia(linha);
+    // Numa linha que bloqueia, as pendências dela iriam só poluir o card.
+    const exibidos = bloqueia ? linha.problemas.filter((p) => p.severidade === 'ERRO') : linha.problemas;
+
+    return (
+        <div className={`erro-card ${bloqueia ? '' : 'pendencia'}`}>
+            <div className="erro-card-titulo">
+                {bloqueia ? <AlertCircle size={18} /> : <AlertTriangle size={18} />}
+                <span>Linha {linha.numeroLinha}</span>
+                {!bloqueia && <span className="erro-card-selo">aviso — não impede a importação</span>}
+            </div>
+            <ul className="erro-card-lista">
+                {exibidos.map((problema, i) => (
+                    <DetalheProblema key={i} problema={problema} />
+                ))}
+            </ul>
+        </div>
+    );
 }
 
 export function Step3Validacao({ validacao }: PropsPasso3) {
@@ -12,7 +63,14 @@ export function Step3Validacao({ validacao }: PropsPasso3) {
     }
 
     const liberado = podeExecutar(validacao);
-    const temMaisErros = validacao.linhasInvalidas > validacao.erros.length;
+    const colunasFaltando = obrigatoriasFaltando(validacao);
+    const arquivoSemDados = validacao.totalLinhas === 0;
+    const temMaisProblemas = validacao.pagina.totalElementos > validacao.problemas.length;
+
+    // Erros primeiro: é o que o usuário precisa corrigir para seguir.
+    const linhas = [...validacao.problemas].sort(
+        (a, b) => Number(linhaBloqueia(b)) - Number(linhaBloqueia(a)) || a.numeroLinha - b.numeroLinha,
+    );
 
     return (
         <div className="validacao-wrap">
@@ -40,42 +98,51 @@ export function Step3Validacao({ validacao }: PropsPasso3) {
                 <div className="validacao-alerta falha">
                     <AlertCircle size={18} />
                     <span>
-                        O arquivo não pode ser importado enquanto houver erro. Corrija as linhas
+                        O arquivo não pode ser importado enquanto houver erro. Corrija os pontos
                         abaixo e envie novamente — <strong>nada será gravado</strong> até o arquivo
                         estar limpo.
                     </span>
                 </div>
             )}
 
-            {validacao.erros.length > 0 && (
-                <div className="erro-lista">
+            <div className="erro-lista">
+                {arquivoSemDados && (
+                    <div className="erro-card">
+                        <div className="erro-card-titulo">
+                            <AlertCircle size={18} />
+                            <span>Arquivo sem dados</span>
+                        </div>
+                        <p className="erro-card-mensagem">O CSV não tem nenhuma linha além do cabeçalho.</p>
+                    </div>
+                )}
+
+                {colunasFaltando.length > 0 && (
+                    <div className="erro-card">
+                        <div className="erro-card-titulo">
+                            <AlertCircle size={18} />
+                            <span>Colunas obrigatórias ausentes</span>
+                        </div>
+                        <p className="erro-card-mensagem">
+                            O cabeçalho do arquivo não tem: <strong>{colunasFaltando.join(', ')}</strong>.
+                        </p>
+                    </div>
+                )}
+
+                {linhas.length > 0 && (
                     <h4 className="erro-titulo">
                         Linhas com problema
-                        {temMaisErros && (
+                        {temMaisProblemas && (
                             <span className="erro-limite">
-                                mostrando as {validacao.erros.length} primeiras de {validacao.linhasInvalidas}
+                                mostrando {validacao.problemas.length} de {validacao.pagina.totalElementos}
                             </span>
                         )}
                     </h4>
+                )}
 
-                    <table className="erro-tabela">
-                        <thead>
-                            <tr>
-                                <th>Linha</th>
-                                <th>Motivo</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {validacao.erros.map((erro) => (
-                                <tr key={erro.numeroLinha}>
-                                    <td className="erro-numero">{erro.numeroLinha}</td>
-                                    <td>{erro.mensagem}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+                {linhas.map((linha) => (
+                    <CardLinha key={linha.numeroLinha} linha={linha} />
+                ))}
+            </div>
         </div>
     );
 }

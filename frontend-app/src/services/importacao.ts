@@ -32,9 +32,34 @@ export interface Importacao {
     linhasGravadas: number | null;
 }
 
-export interface ErroLinha {
-    numeroLinha: number;
+/** ERRO bloqueia a importação; PENDENCIA só avisa. */
+export type Severidade = 'OK' | 'PENDENCIA' | 'ERRO';
+
+export type EstadoCampo = 'OK' | 'VAZIO' | 'AUSENTE_COMO_ZERO' | 'NAO_CONVERTE';
+
+/** Problema em uma célula: onde está, o que veio e o que era esperado. */
+export interface ProblemaCelula {
+    /** Nulo quando a falha não é de uma coluna específica. */
+    campo: string | null;
+    coluna: string | null;
+    severidade: Severidade;
+    estado: EstadoCampo;
+    valorEncontrado: string | null;
+    valorEsperado: string | null;
     mensagem: string;
+}
+
+export interface LinhaComProblema {
+    numeroLinha: number;
+    /** Células cruas, como vieram no CSV. */
+    valores: Record<string, string | null>;
+    problemas: ProblemaCelula[];
+}
+
+export interface PaginaProblemas {
+    numero: number;
+    tamanho: number;
+    totalElementos: number;
 }
 
 export interface LinhaPreview {
@@ -63,10 +88,14 @@ export interface ResultadoValidacao {
     totalLinhas: number;
     linhasValidas: number;
     linhasInvalidas: number;
+    /** Linhas com aviso que não impede a importação. */
+    linhasComPendencia: number;
     /** Cabeçalho do arquivo, na ordem em que veio. */
     colunasDetectadas: string[];
     mapeamento: MapeamentoColuna[];
-    erros: ErroLinha[];
+    pagina: PaginaProblemas;
+    /** Só as linhas com problema (erro ou pendência), da página pedida. */
+    problemas: LinhaComProblema[];
     amostra: LinhaPreview[];
 }
 
@@ -85,6 +114,10 @@ export function podeExecutar(validacao: ResultadoValidacao): boolean {
         validacao.linhasValidas > 0 &&
         obrigatoriasFaltando(validacao).length === 0
     );
+}
+
+export function linhaBloqueia(linha: LinhaComProblema): boolean {
+    return linha.problemas.some((p) => p.severidade === 'ERRO');
 }
 
 export interface ResumoImportacao {

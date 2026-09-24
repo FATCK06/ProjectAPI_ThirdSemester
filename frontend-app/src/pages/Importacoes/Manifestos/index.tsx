@@ -26,6 +26,7 @@ const STEPS = [
 ];
 
 const PASSO_UPLOAD = 1;
+const PASSO_VALIDACAO = 3;
 const PASSO_REVISAO = 4;
 const PASSO_EXECUCAO = 5;
 const PASSO_RESULTADO = 6;
@@ -103,13 +104,14 @@ export function ManifestosImport() {
     function podeAvancar() {
         if (carregando) return false;
         if (passoAtual === PASSO_UPLOAD) return importacao !== null;
-        if (passoAtual === PASSO_REVISAO) return liberadoParaGravar;
+        // Tudo ou nada: com erro, a prévia não serve para nada — o usuário fica onde vê os erros.
+        if (passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) return liberadoParaGravar;
         return passoAtual < STEPS.length;
     }
 
     function motivoBloqueio() {
         if (passoAtual === PASSO_UPLOAD && !importacao) return 'Envie um arquivo para continuar';
-        if (passoAtual === PASSO_REVISAO && !liberadoParaGravar) {
+        if ((passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) && !liberadoParaGravar) {
             return 'Corrija os erros do arquivo antes de enviar';
         }
         return undefined;
