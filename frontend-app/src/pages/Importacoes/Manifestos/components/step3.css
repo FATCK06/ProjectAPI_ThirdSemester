@@ -100,6 +100,16 @@
   margin: 8px 0 0;
 }
 
+/* Com muitas linhas, a lista rola por dentro e o rodapé (Continuar) continua à vista */
+.erro-linhas-rolagem {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 45vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
 /* --- CARDS DE ERRO --- */
 .erro-card {
   background: #fef2f2;

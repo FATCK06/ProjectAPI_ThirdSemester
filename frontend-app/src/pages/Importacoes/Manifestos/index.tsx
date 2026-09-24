@@ -10,6 +10,7 @@ import { ModalConfirmacao } from './components/ModalConfirmacao';
 import {
     validarImportacao,
     mensagemDeErro,
+    obrigatoriasFaltando,
     podeExecutar,
     type ImportacaoCriada,
     type ResultadoValidacao,
@@ -26,6 +27,7 @@ const STEPS = [
 ];
 
 const PASSO_UPLOAD = 1;
+const PASSO_MAPEAMENTO = 2;
 const PASSO_VALIDACAO = 3;
 const PASSO_REVISAO = 4;
 const PASSO_EXECUCAO = 5;
@@ -95,6 +97,7 @@ export function ManifestosImport() {
     }, []);
 
     const liberadoParaGravar = validacao !== null && podeExecutar(validacao);
+    const colunasOk = validacao !== null && obrigatoriasFaltando(validacao).length === 0;
 
     function rotuloBotao() {
         if (passoAtual === PASSO_REVISAO) return 'Enviar os Dados';
@@ -104,6 +107,8 @@ export function ManifestosImport() {
     function podeAvancar() {
         if (carregando) return false;
         if (passoAtual === PASSO_UPLOAD) return importacao !== null;
+        // Sem coluna obrigatória nenhuma linha passa: não adianta seguir para a validação.
+        if (passoAtual === PASSO_MAPEAMENTO) return colunasOk;
         // Tudo ou nada: com erro, a prévia não serve para nada — o usuário fica onde vê os erros.
         if (passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) return liberadoParaGravar;
         return passoAtual < STEPS.length;
@@ -111,6 +116,9 @@ export function ManifestosImport() {
 
     function motivoBloqueio() {
         if (passoAtual === PASSO_UPLOAD && !importacao) return 'Envie um arquivo para continuar';
+        if (passoAtual === PASSO_MAPEAMENTO && !colunasOk) {
+            return 'Faltam colunas obrigatórias no arquivo — corrija e envie novamente';
+        }
         if ((passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) && !liberadoParaGravar) {
             return 'Corrija os erros do arquivo antes de enviar';
         }

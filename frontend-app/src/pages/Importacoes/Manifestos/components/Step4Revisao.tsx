@@ -39,6 +39,18 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
 
             <div className="revisao-tabela-area">
                 <table className="revisao-tabela">
+                    {/* Larguras fixas nas colunas curtas; as de texto dividem o resto e cortam com reticências */}
+                    <colgroup>
+                        <col className="col-manifesto" />
+                        <col className="col-data" />
+                        <col className="col-mes" />
+                        <col />
+                        <col className="col-cpf" />
+                        <col />
+                        <col className="col-veiculo" />
+                        <col />
+                        <col className="col-valor" />
+                    </colgroup>
                     <thead>
                         <tr>
                             <th>Manifesto</th>
@@ -58,11 +70,11 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
                                 <td className="celula-forte">{linha.manifesto ?? '—'}</td>
                                 <td>{formatarData(linha.data)}</td>
                                 <td>{linha.mesReferencia ?? '—'}</td>
-                                <td>{linha.motorista ?? '—'}</td>
+                                <td title={linha.motorista ?? undefined}>{linha.motorista ?? '—'}</td>
                                 <td className="celula-mono">{mascararCpf(linha.cpf)}</td>
-                                <td>{linha.agregado ?? '—'}</td>
+                                <td title={linha.agregado ?? undefined}>{linha.agregado ?? '—'}</td>
                                 <td className="celula-mono">{linha.veiculo ?? '—'}</td>
-                                <td>{linha.destino ?? '—'}</td>
+                                <td title={linha.destino ?? undefined}>{linha.destino ?? '—'}</td>
                                 <td className="alinhar-direita">{formatarMoeda(linha.valorFrete)}</td>
                             </tr>
                         ))}

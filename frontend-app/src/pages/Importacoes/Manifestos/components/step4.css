@@ -21,7 +21,7 @@
   color: #64748b;
 }
 
-/* A tabela tem 9 colunas: rolagem horizontal em vez de quebrar o layout */
+/* 9 colunas: cabem na largura da tela cortando os textos longos; a rolagem só aparece em telas estreitas */
 .revisao-tabela-area {
   overflow-x: auto;
   border: 1px solid #e2e8f0;
@@ -30,14 +30,22 @@
 
 .revisao-tabela {
   width: 100%;
+  min-width: 760px;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 13px;
+}
+
+.revisao-tabela th,
+.revisao-tabela td {
+  padding: 10px;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .revisao-tabela th {
   text-align: left;
-  padding: 10px 14px;
   background: #f8fafc;
   color: #64748b;
   font-weight: 500;
@@ -45,10 +53,16 @@
 }
 
 .revisao-tabela td {
-  padding: 10px 14px;
   border-bottom: 1px solid #f1f5f9;
   color: #334155;
 }
+
+.revisao-tabela .col-manifesto { width: 96px; }
+.revisao-tabela .col-data { width: 96px; }
+.revisao-tabela .col-mes { width: 80px; }
+.revisao-tabela .col-cpf { width: 128px; }
+.revisao-tabela .col-veiculo { width: 96px; }
+.revisao-tabela .col-valor { width: 116px; }
 
 .revisao-tabela tr:last-child td {
   border-bottom: none;

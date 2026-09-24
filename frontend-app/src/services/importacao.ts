@@ -80,6 +80,8 @@ export interface MapeamentoColuna {
     campoSistema: string;
     obrigatoria: boolean;
     encontrada: boolean;
+    /** Cabeçalho como está no arquivo; null quando a coluna não foi encontrada. */
+    colunaArquivo: string | null;
 }
 
 export interface ResultadoValidacao {

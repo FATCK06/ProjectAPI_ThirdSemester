@@ -1,11 +1,11 @@
 package br.com.newe.ms_operacoes.service.importacao;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,17 +85,26 @@ public class ImportacaoProcessamentoService {
     }
 
     private List<MapeamentoColuna> mapear(List<String> colunasDoArquivo) {
-        Set<String> presentes = colunasDoArquivo.stream()
+        // Chave normalizada -> grafia original, para a tela mostrar o cabecalho como o usuario escreveu.
+        Map<String, String> presentes = new HashMap<>();
+        colunasDoArquivo.stream()
                 .filter(Objects::nonNull)
-                .map(c -> c.trim().toLowerCase(Locale.ROOT))
-                .collect(Collectors.toSet());
+                .forEach(c -> presentes.putIfAbsent(normalizarColuna(c), c.trim()));
 
         return ManifestoCsvConfig.COLUNAS_ESPERADAS.stream()
-                .map(esperada -> new MapeamentoColuna(
-                        esperada.nome(),
-                        esperada.obrigatoria(),
-                        presentes.contains(esperada.nome().trim().toLowerCase(Locale.ROOT))))
+                .map(esperada -> {
+                    String noArquivo = presentes.get(normalizarColuna(esperada.nome()));
+                    return new MapeamentoColuna(
+                            esperada.nome(),
+                            esperada.obrigatoria(),
+                            noArquivo != null,
+                            noArquivo);
+                })
                 .toList();
+    }
+
+    private static String normalizarColuna(String coluna) {
+        return coluna.trim().toLowerCase(Locale.ROOT);
     }
 
     /**
