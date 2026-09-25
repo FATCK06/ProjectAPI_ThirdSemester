@@ -32,8 +32,8 @@ function montarDados(porModelo: IndicadoresPorModelo[]): ChartData<"bar"> {
       {
         label: "Rentabilidade (R$)",
         data: porModelo.map((m) => m.rentabilidade),
-        backgroundColor: "rgba(21, 128, 61, 0.85)",
-        borderColor: "#15803d",
+        backgroundColor: "rgba(29, 78, 216, 0.85)",
+        borderColor: "#1d4ed8",
         borderWidth: 2,
         borderRadius: 8,
         barPercentage: 0.8,

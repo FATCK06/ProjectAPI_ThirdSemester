@@ -28,7 +28,13 @@ interface PropsGrafico {
 function montarDados(motoristas: IndicadoresMotorista[]): ChartData<"bar"> {
   const top = motoristas.slice(0, 10);
   return {
-    labels: top.map((m) => m.nome ?? "Sem nome"),
+    labels: top.map((motorista) => {
+      const nomes = motorista.nome?.trim().split(/\s+/).filter(Boolean) ?? [];
+      if (nomes.length === 0) return "Sem nome";
+      return nomes.length > 1
+        ? `${nomes[0]} ${nomes[nomes.length - 1]}`
+        : nomes[0];
+    }),
     datasets: [
       {
         label: "Rentabilidade (R$)",
@@ -44,14 +50,16 @@ function montarDados(motoristas: IndicadoresMotorista[]): ChartData<"bar"> {
   };
 }
 
-const opcoesDoGrafico: ChartOptions<"bar"> = {
+function montarOpcoes(motoristas: IndicadoresMotorista[]): ChartOptions<"bar"> {
+  return {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: { position: "top" },
-    title: { display: true, text: "Rentabilidade por motorista" },
     tooltip: {
       callbacks: {
+        title: (items) =>
+          motoristas[items[0]?.dataIndex]?.nome ?? "Sem nome",
         label: (context) => {
           const valor = context.parsed.y ?? 0;
           return `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
@@ -60,9 +68,21 @@ const opcoesDoGrafico: ChartOptions<"bar"> = {
     },
   },
   scales: {
-    y: { beginAtZero: true },
+    y: {
+      beginAtZero: true,
+      ticks: { stepSize: 5000, precision: 0 },
+    },
+    x: {
+      ticks: {
+        font: { size: 9 },
+        maxRotation: 60,
+        minRotation: 45,
+        autoSkip: false,
+      },
+    },
   },
-};
+  };
+}
 
 export function Grafico({ motoristas }: PropsGrafico) {
   return (
@@ -71,7 +91,7 @@ export function Grafico({ motoristas }: PropsGrafico) {
         <h2>Rentabilidade por motorista</h2>
       </div>
       <div className="card-chart">
-        <Bar data={montarDados(motoristas)} options={opcoesDoGrafico} />
+        <Bar data={montarDados(motoristas)} options={montarOpcoes(motoristas)} />
       </div>
     </div>
   );

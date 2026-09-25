@@ -10,6 +10,7 @@ import {
 import Grafico from "./components/Grafico";
 import Grafico2 from "./components/Grafico2";
 import Card from "./components/Card";
+import "./dashboard.css";
 
 function mesAtual(): string {
   const hoje = new Date();
@@ -65,24 +66,18 @@ export function Dashboard() {
         width: "100%",
       }}
     >
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "24px",
-          width: "100%",
-        }}
-      >
-        <div style={{ width: "100%", minHeight: "300px" }}>
-          <CardSkeleton isLoading={isLoading}>
-            {!isLoading && erro && <p>{erro}</p>}
-            {!isLoading && !erro && indicadores && (
-              <Card indicadores={indicadores} />
-            )}
-          </CardSkeleton>
+      <div className="dashboard-charts">
+        <div className="dashboard-indicators">
+          {isLoading ? (
+            <CardSkeleton isLoading={true} />
+          ) : erro ? (
+            <p>{erro}</p>
+          ) : indicadores ? (
+            <Card indicadores={indicadores} />
+          ) : null}
         </div>
 
-        <div style={{ flex: "1 1 calc(50% - 12px)" }}>
+        <div className="dashboard-chart dashboard-driver-chart">
           <CardSkeleton isLoading={isLoading}>
             {!isLoading && !erro && indicadores && (
               <Grafico motoristas={indicadores.motoristas} />
@@ -90,7 +85,7 @@ export function Dashboard() {
           </CardSkeleton>
         </div>
 
-        <div style={{ flex: "1 1 calc(50% - 12px)" }}>
+        <div className="dashboard-chart">
           <CardSkeleton isLoading={isLoading}>
             {!isLoading && !erro && porModelo && (
               <Grafico2 porModelo={porModelo} />
