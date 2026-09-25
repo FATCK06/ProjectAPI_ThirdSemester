@@ -32,12 +32,12 @@ const dadosDoGrafico: ChartData<"line"> = {
       label: "Trajetos realizados",
       data: [24, 21, 16, 60, 36],
 
-      borderColor: "#4BC0C0",
-      backgroundColor: "rgba(75, 192, 192, 0.15)",
+      borderColor: "#1d4ed8",
+      backgroundColor: "rgba(29, 78, 216, 0.15)",
 
       borderWidth: 3,
 
-      pointBackgroundColor: "#4BC0C0",
+      pointBackgroundColor: "#1d4ed8",
       pointBorderColor: "#ffffff",
       pointBorderWidth: 2,
       pointRadius: 5,

@@ -30,8 +30,8 @@ const dadosDoGrafico: ChartData<"bar"> = {
       label: "Motoristas ativos",
       data: [128, 145, 162, 178, 193, 215],
 
-      backgroundColor: "rgba(75, 192, 192, 0.7)",
-      borderColor: "rgba(75, 192, 192, 1)",
+      backgroundColor: "rgba(29, 78, 216, 0.85)",
+      borderColor: "#1d4ed8",
 
       borderWidth: 5,
       borderRadius: 8,

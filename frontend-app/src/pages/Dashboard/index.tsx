@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
 import { RankingMotoristas } from "../../components/RankingMotoristas";
-import Grafico from "../../graficos/Grafico";
-import Grafico2 from "../../graficos/Grafico2";
+import Grafico from "./components/Grafico";
+import Grafico2 from "./components/Grafico2";
 
 export function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);

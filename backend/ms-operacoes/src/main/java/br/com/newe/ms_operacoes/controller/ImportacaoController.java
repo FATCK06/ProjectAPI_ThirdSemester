@@ -24,6 +24,7 @@ import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
@@ -94,25 +95,30 @@ public class ImportacaoController {
     // ── Etapa 2: validar (sem gravar) ────────────────────────────────────────
 
     /**
-     * Le o arquivo e devolve colunas detectadas, erros por linha e uma amostra.
-     * Pode ser chamado quantas vezes quiser: nao altera viagens.
+     * Le o arquivo e devolve colunas detectadas, as linhas com problema (paginadas,
+     * erros antes de pendencias) e uma amostra. Sem problema, a lista vem vazia e o
+     * resumo preenchido. Pode ser chamado quantas vezes quiser: nao altera viagens.
+     *
+     * {@code severidade} (ERRO ou PENDENCIA) filtra a lista; o resumo continua
+     * contando o arquivo inteiro.
      */
-    /** Devolve so as linhas com problema; sem nenhuma, a lista vem vazia e o resumo preenchido. */
     @PostMapping("/{id}/validar")
     public ResponseEntity<?> validar(
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int pagina,
-            @RequestParam(defaultValue = "50") int tamanho
+            @RequestParam(defaultValue = "50") int tamanho,
+            @RequestParam(required = false) Severidade severidade
     ) throws IOException {
         Importacao importacao = service.buscarPorId(id);
         if (importacao == null) {
             return ResponseEntity.notFound().build();
         }
-        if (pagina < 0 || tamanho < 1 || tamanho > 200) {
+        // OK nao filtra nada: linha sem problema nem entra na lista.
+        if (pagina < 0 || tamanho < 1 || tamanho > 200 || severidade == Severidade.OK) {
             return ResponseEntity.badRequest().build();
         }
 
-        ResultadoValidacao resultado = processamentoService.validar(importacao, pagina, tamanho);
+        ResultadoValidacao resultado = processamentoService.validar(importacao, pagina, tamanho, severidade);
         return ResponseEntity.ok(resultado);
     }
 

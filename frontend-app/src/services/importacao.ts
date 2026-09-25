@@ -148,9 +148,25 @@ export async function enviarArquivo(
     return data;
 }
 
-/** Lê e confere o arquivo. Não grava nada — pode ser chamado quantas vezes precisar. */
-export async function validarImportacao(id: number): Promise<ResultadoValidacao> {
-    const { data } = await api.post<ResultadoValidacao>(`/importacao/arquivos/${id}/validar`);
+/** Linhas com problema por página do relatório de validação (o backend aceita até 200). */
+export const TAMANHO_PAGINA_VALIDACAO = 50;
+
+/** Restringe a lista de linhas com problema; null mostra erros e avisos. */
+export type FiltroProblemas = Exclude<Severidade, 'OK'> | null;
+
+/**
+ * Lê e confere o arquivo. Não grava nada — pode ser chamado quantas vezes precisar.
+ * As linhas com problema vêm paginadas, com as que bloqueiam a importação primeiro.
+ * O filtro só afeta a lista: os totais do resumo são sempre do arquivo inteiro.
+ */
+export async function validarImportacao(
+    id: number,
+    pagina = 0,
+    filtro: FiltroProblemas = null,
+): Promise<ResultadoValidacao> {
+    const { data } = await api.post<ResultadoValidacao>(`/importacao/arquivos/${id}/validar`, null, {
+        params: { pagina, tamanho: TAMANHO_PAGINA_VALIDACAO, severidade: filtro ?? undefined },
+    });
     return data;
 }
 

@@ -3,7 +3,8 @@ package br.com.newe.ms_operacoes.service.importacao;
 /**
  * Resultado da classificacao de uma celula.
  *
- * @param valor   convertido; null quando o estado nao e OK
+ * @param valor   convertido; null em VAZIO e NAO_CONVERTE. Em AUSENTE_COMO_ZERO
+ *                guarda o zero, que e o que o arquivo trouxe
  * @param detalhe mensagem do conversor; so preenchido em NAO_CONVERTE
  */
 public record AvaliacaoCampo(
