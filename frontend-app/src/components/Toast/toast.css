@@ -1,0 +1,177 @@
+/* --- REGIÃO: pilha no canto superior direito --- */
+.toast-regiao {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: min(380px, calc(100vw - 32px));
+  pointer-events: none; /* a área vazia entre os toasts não bloqueia a tela */
+}
+
+/* --- CARD --- */
+.toast {
+  --toast-cor: #2563eb;
+  --toast-fundo-icone: #eff6ff;
+
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow:
+    0 10px 25px -5px rgba(15, 23, 42, 0.12),
+    0 4px 10px -6px rgba(15, 23, 42, 0.1);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: toast-entrada 0.25s cubic-bezier(0.21, 1.02, 0.73, 1) both;
+}
+
+.toast.saindo {
+  animation: toast-saida 0.2s ease-in forwards;
+}
+
+.toast-sucesso {
+  --toast-cor: #16a34a;
+  --toast-fundo-icone: #f0fdf4;
+}
+
+.toast-erro {
+  --toast-cor: #dc2626;
+  --toast-fundo-icone: #fef2f2;
+}
+
+.toast-aviso {
+  --toast-cor: #d97706;
+  --toast-fundo-icone: #fffbeb;
+}
+
+.toast-info {
+  --toast-cor: #2563eb;
+  --toast-fundo-icone: #eff6ff;
+}
+
+/* --- CONTEÚDO --- */
+.toast-icone {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--toast-fundo-icone);
+  color: var(--toast-cor);
+}
+
+.toast-texto {
+  flex: 1;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.toast-titulo {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.toast-mensagem {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.toast-fechar {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 4px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: #94a3b8;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.toast-fechar:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.toast-fechar:focus-visible {
+  outline: 2px solid var(--toast-cor);
+  outline-offset: 1px;
+}
+
+/* --- BARRA DE TEMPO: é ela que fecha o toast ao terminar --- */
+.toast-progresso {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--toast-cor);
+  opacity: 0.8;
+  transform-origin: left;
+  animation-name: toast-tempo;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+/* Parar o mouse em cima (ou focar o botão) segura o toast para leitura */
+.toast:hover .toast-progresso,
+.toast:focus-within .toast-progresso {
+  animation-play-state: paused;
+}
+
+@keyframes toast-entrada {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-saida {
+  to {
+    opacity: 0;
+    transform: translateX(24px) scale(0.98);
+  }
+}
+
+@keyframes toast-tempo {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* Sem animação de entrada/saída, mas a barra continua: ela é o timer */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .toast.saindo {
+    animation-duration: 1ms;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-regiao {
+    top: 12px;
+    right: 16px;
+  }
+}

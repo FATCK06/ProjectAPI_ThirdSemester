@@ -4,6 +4,7 @@ import {
   executarImportacao,
   mensagemDeErro,
 } from "../../../../services/importacao";
+import { Loading } from "../../../../components/Loading";
 import "./step5.css";
 
 /** Tempo que o check fica visível antes de avançar, só para o usuário ver que deu certo. */
@@ -49,16 +50,12 @@ export function Step5Execucao({
     })();
   }, [importacaoId, aoConcluir, aoFalhar]);
 
+  if (situacao === "enviando") {
+    return <Loading texto="Enviando para o banco" detalhe="Não feche esta janela." />;
+  }
+
   return (
     <div className="execucao-wrap">
-      {situacao === "enviando" && (
-        <>
-          <div className="execucao-spinner" />
-          <p className="execucao-texto">Enviando para o banco</p>
-          <p className="execucao-aviso">Não feche esta janela.</p>
-        </>
-      )}
-
       {situacao === "sucesso" && (
         <>
           <div className="execucao-check">

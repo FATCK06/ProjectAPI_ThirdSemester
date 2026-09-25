@@ -134,20 +134,6 @@
   cursor: not-allowed;
 }
 
-/* --- ERRO NO TOPO DO FLUXO --- */
-.importacao-erro {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding: 12px 16px;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 8px;
-  font-size: 13px;
-  color: #b91c1c;
-}
-
 /* Botao que grava: verde, para nao ser confundido com o Continuar azul */
 .btn-continuar.btn-gravar { background: #16a34a; }
 

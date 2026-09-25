@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, ChevronDown, FileText, LogOut, UserPlus, Activity } from 'lucide-react';
+import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity } from 'lucide-react';
 import neweLogo from '../../assets/image 3.png';
 import './sidebar.css';
 import { useState } from 'react';
@@ -60,20 +60,23 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
             {!isMinimized && (
               <>
                 <span className="accordion-title">Importação de Dados</span>
-                {isImportOpen ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                <ChevronRight size={16} className={`accordion-seta ${isImportOpen ? 'aberta' : ''}`} />
               </>
             )}
           </button>
 
-          {isImportOpen && !isMinimized && (
-            <div className="accordion-content">
-              <NavLink
-                to="/importacoes/manifestos"
-                className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
-              >
-                <FileText size={18} />
-                <span>Manifestos</span>
-              </NavLink>
+          {/* Fica sempre montado para a abertura e o fechamento poderem animar;
+              inert tira os links do Tab enquanto a gaveta está fechada. */}
+          {!isMinimized && (
+            <div className={`accordion-content ${isImportOpen ? 'aberto' : ''}`} inert={!isImportOpen}>
+              <div className="accordion-itens">
+                <NavLink
+                  to="/importacoes/manifestos"
+                  className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
+                >
+                  <span>Manifestos</span>
+                </NavLink>
+              </div>
             </div>
           )}
         </div>

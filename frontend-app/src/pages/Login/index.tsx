@@ -4,6 +4,7 @@ import truckBg from '../../assets/images/truck-login.png';
 import './login.css';
 import { Eye, EyeOff } from 'lucide-react';
 import api from '../../services/api';
+import { useToast } from '../../components/Toast';
 
 //criando interface que reflete o contrato com o backend
 interface LoginResponse {
@@ -14,6 +15,7 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +37,9 @@ export function Login() {
           }
         } catch (erro) {
           console.error('Erro ao conectar com o servidor:', erro);
-          alert('Email ou enha incorretos ou servidor indisponível!');
+          toast.erro('E-mail ou senha incorretos, ou servidor indisponível.', {
+            titulo: 'Não foi possível entrar',
+          });
         }
   };   
 

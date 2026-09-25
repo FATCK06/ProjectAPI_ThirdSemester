@@ -8,6 +8,7 @@ import {
     TAMANHO_MAXIMO_BYTES,
     type ImportacaoCriada,
 } from '../../../../services/importacao';
+import { useToast } from '../../../../components/Toast';
 import './step1.css';
 
 type Situacao = 'ocioso' | 'enviando' | 'concluido' | 'erro';
@@ -15,6 +16,8 @@ type Situacao = 'ocioso' | 'enviando' | 'concluido' | 'erro';
 interface PropsPasso1 {
     importacao: ImportacaoCriada | null;
     aoImportar: (importacao: ImportacaoCriada) => void;
+    /** O arquivo foi descartado: o fluxo não pode seguir com a importação anterior. */
+    aoRemover: () => void;
 }
 
 function validar(arquivo: File): string | null {
@@ -33,13 +36,14 @@ function validar(arquivo: File): string | null {
     return null;
 }
 
-export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
+export function Step1Upload({ importacao, aoImportar, aoRemover }: PropsPasso1) {
     const [arquivo, setArquivo] = useState<File | null>(null);
     const [progresso, setProgresso] = useState(0);
     const [situacao, setSituacao] = useState<Situacao>(importacao ? 'concluido' : 'ocioso');
     const [erro, setErro] = useState<string | null>(null);
     const [arrastando, setArrastando] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+    const toast = useToast();
 
     function selecionar(escolhido: File | undefined) {
         if (!escolhido) return;
@@ -51,10 +55,10 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
             return;
         }
 
-        setErro(null);
         setArquivo(escolhido);
-        setSituacao('ocioso');
-        setProgresso(0);
+        // Envia já na seleção: o botão "Enviar arquivo" era um clique a mais sem
+        // decisão nenhuma. Nada é gravado em viagens aqui, só o arquivo fica guardado.
+        void enviar(escolhido);
     }
 
     function remover() {
@@ -63,27 +67,35 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
         setProgresso(0);
         setSituacao('ocioso');
         if (inputRef.current) inputRef.current.value = '';
+        aoRemover();
     }
 
-    async function enviar() {
-        if (!arquivo) return;
-
+    // Recebe o arquivo por parâmetro: chamado logo após setArquivo, o estado ainda não mudou.
+    async function enviar(alvo: File) {
         setSituacao('enviando');
         setErro(null);
         setProgresso(0);
 
         try {
-            const criada = await enviarArquivo(arquivo, setProgresso);
+            const criada = await enviarArquivo(alvo, setProgresso);
             setSituacao('concluido');
             aoImportar(criada);
+            toast.sucesso(`${alvo.name} recebido. Nada foi gravado ainda — avance para conferir os dados.`, {
+                titulo: 'Arquivo enviado',
+            });
         } catch (falha) {
+            // Falha de envio é passageira (rede, servidor): toast. Arquivo inválido
+            // continua no alerta fixo, porque o usuário precisa trocar o arquivo.
             setSituacao('erro');
-            setErro(mensagemDeErro(falha));
+            toast.erro(mensagemDeErro(falha), { titulo: 'Falha no envio do arquivo' });
         }
     }
 
     const enviando = situacao === 'enviando';
     const concluido = situacao === 'concluido';
+    // Ao voltar do passo 2 o componente remonta sem o File, mas a importação existe:
+    // o card continua aparecendo, com o nome que o servidor guardou.
+    const nomeArquivo = arquivo?.name ?? importacao?.arquivoNome;
 
     return (
         <div className="upload-step-container">
@@ -129,7 +141,7 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
                 </div>
             )}
 
-            {arquivo && (
+            {nomeArquivo && (
                 <div className="file-list-section">
                     <h4 className="file-list-title">Arquivo selecionado</h4>
 
@@ -139,10 +151,10 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
                         </div>
 
                         <div className="file-info">
-                            <span className="file-name">{arquivo.name}</span>
+                            <span className="file-name">{nomeArquivo}</span>
 
                             <div className="file-meta">
-                                <span>{formatarTamanho(arquivo.size)}</span>
+                                {arquivo && <span>{formatarTamanho(arquivo.size)}</span>}
 
                                 {enviando && <span className="status-uploading">Enviando...</span>}
                                 {concluido && (
@@ -167,9 +179,10 @@ export function Step1Upload({ importacao, aoImportar }: PropsPasso1) {
                         </button>
                     </div>
 
-                    {!concluido && (
-                        <button className="btn-enviar" onClick={enviar} disabled={enviando}>
-                            {enviando ? 'Enviando...' : 'Enviar arquivo'}
+                    {/* Só sobra botão para repetir um envio que falhou */}
+                    {situacao === 'erro' && arquivo && (
+                        <button className="btn-enviar" onClick={() => enviar(arquivo)}>
+                            Tentar novamente
                         </button>
                     )}
 

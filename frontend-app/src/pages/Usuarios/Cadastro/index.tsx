@@ -1,12 +1,7 @@
 import { useState } from 'react';
-import { Eye, EyeOff, CheckCircle2, AlertCircle } from 'lucide-react';
-import {
-    criarUsuario,
-    mensagemDeErro,
-    PERFIS,
-    type Perfil,
-    type UsuarioResponse,
-} from '../../../services/usuarios';
+import { Eye, EyeOff } from 'lucide-react';
+import { criarUsuario, mensagemDeErro, PERFIS, type Perfil } from '../../../services/usuarios';
+import { useToast } from '../../../components/Toast';
 import './cadastro.css';
 
 export function CadastroUsuario() {
@@ -16,24 +11,24 @@ export function CadastroUsuario() {
     const [perfil, setPerfil] = useState<Perfil>('Operador');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [enviando, setEnviando] = useState(false);
-    const [erro, setErro] = useState<string | null>(null);
-    const [criado, setCriado] = useState<UsuarioResponse | null>(null);
+    const toast = useToast();
 
     async function enviar(evento: React.FormEvent) {
         evento.preventDefault();
         setEnviando(true);
-        setErro(null);
-        setCriado(null);
 
         try {
             const usuario = await criarUsuario({ nome, email, senha, perfilAcesso: perfil });
-            setCriado(usuario);
+            toast.sucesso(`${usuario.nome} cadastrado como ${usuario.perfilAcesso}. Já pode fazer login.`, {
+                titulo: 'Usuário cadastrado',
+            });
             setNome('');
             setEmail('');
             setSenha('');
             setPerfil('Operador');
         } catch (falha) {
-            setErro(mensagemDeErro(falha));
+            // Mantém o formulário preenchido para o usuário só corrigir o que falhou.
+            toast.erro(mensagemDeErro(falha), { titulo: 'Não foi possível cadastrar' });
         } finally {
             setEnviando(false);
         }
@@ -106,22 +101,6 @@ export function CadastroUsuario() {
                         Administrador enxerga a página de status dos serviços.
                     </span>
                 </div>
-
-                {erro && (
-                    <div className="alerta alerta-erro">
-                        <AlertCircle size={18} />
-                        <span>{erro}</span>
-                    </div>
-                )}
-
-                {criado && (
-                    <div className="alerta alerta-sucesso">
-                        <CheckCircle2 size={18} />
-                        <span>
-                            <strong>{criado.nome}</strong> cadastrado como {criado.perfilAcesso}. Já pode fazer login.
-                        </span>
-                    </div>
-                )}
 
                 <button type="submit" className="btn-cadastrar" disabled={enviando}>
                     {enviando ? 'Cadastrando...' : 'Cadastrar'}

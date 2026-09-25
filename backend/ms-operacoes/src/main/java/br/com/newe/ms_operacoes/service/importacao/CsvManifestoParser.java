@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,14 +35,15 @@ public class CsvManifestoParser {
 
             for (CSVRecord record : parser) {
                 int numeroLinha = (int) record.getRecordNumber() + 1;
-                List<ProblemaCelula> daLinha = avaliarCelulas(record, numeroLinha);
+                Map<CampoManifesto, AvaliacaoCampo> avaliacoes = avaliarCelulas(record);
+                List<ProblemaCelula> daLinha = problemasDe(avaliacoes, numeroLinha);
                 boolean bloqueia = daLinha.stream().anyMatch(c -> c.severidade() == Severidade.ERRO);
 
                 if (!bloqueia) {
                     try {
-                        linhas.add(converter(record, numeroLinha));
-                    } catch (LinhaManifestoInvalidaException e) {
-                        // Rede de seguranca: avaliarCelulas devia ter pego antes.
+                        linhas.add(montar(avaliacoes, numeroLinha));
+                    } catch (RuntimeException e) {
+                        // Rede de seguranca: o catalogo ja converteu tudo, montar nao devia falhar.
                         daLinha = new ArrayList<>(daLinha);
                         daLinha.add(ProblemaCelula.inesperado(e.getMessage()));
                     }
@@ -56,17 +58,25 @@ public class CsvManifestoParser {
         return new ResultadoParse(linhas, problemas);
     }
 
-    /** Classifica cada celula da linha pelo catalogo, sem interromper na primeira falha. */
-    private List<ProblemaCelula> avaliarCelulas(CSVRecord record, int numeroLinha) {
-        List<ProblemaCelula> problemas = new ArrayList<>();
-
+    /**
+     * Classifica cada celula da linha pelo catalogo, sem interromper na primeira falha.
+     * E a unica conversao da linha: {@link #montar} so le o que sai daqui.
+     */
+    private Map<CampoManifesto, AvaliacaoCampo> avaliarCelulas(CSVRecord record) {
+        Map<CampoManifesto, AvaliacaoCampo> avaliacoes = new EnumMap<>(CampoManifesto.class);
         for (CampoManifesto campo : CampoManifesto.values()) {
-            AvaliacaoCampo avaliacao = campo.avaliar(valorDe(record, campo.coluna()));
+            avaliacoes.put(campo, campo.avaliar(valorDe(record, campo.coluna())));
+        }
+        return avaliacoes;
+    }
+
+    private List<ProblemaCelula> problemasDe(Map<CampoManifesto, AvaliacaoCampo> avaliacoes, int numeroLinha) {
+        List<ProblemaCelula> problemas = new ArrayList<>();
+        for (AvaliacaoCampo avaliacao : avaliacoes.values()) {
             if (avaliacao.severidade() != Severidade.OK) {
                 problemas.add(ProblemaCelula.de(avaliacao, numeroLinha));
             }
         }
-
         return problemas;
     }
 
@@ -99,115 +109,94 @@ public class CsvManifestoParser {
         }
     }
 
-    private LinhaManifesto converter(CSVRecord r, int numeroLinha) {
-        try {
-            String cpf = digitos(r, ManifestoCsvConfig.COL_CPF);
-            String manifesto = texto(r, ManifestoCsvConfig.COL_MANIFESTO);
-            LocalDate data = data(r, ManifestoCsvConfig.COL_DATA);
+    /**
+     * So e chamado sem ERRO na linha, entao os obrigatorios estao OK. Campo com
+     * pendencia de formato chega aqui como null: o valor foi descartado e a
+     * pendencia ja avisou o usuario.
+     */
+    private LinhaManifesto montar(Map<CampoManifesto, AvaliacaoCampo> a, int numeroLinha) {
+        LocalDate data = data(a, CampoManifesto.DATA);
 
-            if (cpf == null || cpf.length() != 11) {
-                throw new IllegalArgumentException("CPF ausente ou invalido: " + r.get(ManifestoCsvConfig.COL_CPF));
-            }
-            if (manifesto == null) {
-                throw new IllegalArgumentException("Manifesto ausente");
-            }
-            // viagens.id_manifesto e integer: melhor falhar aqui, apontando a linha,
-            // do que so na hora de gravar.
-            if (!manifesto.matches("\\d+")) {
-                throw new IllegalArgumentException("Manifesto nao numerico: " + manifesto);
-            }
-            // Obrigatoria porque o mes de referencia da viagem e derivado dela.
-            if (data == null) {
-                throw new IllegalArgumentException("Data do manifesto ausente");
-            }
-
-            return new LinhaManifesto(
-                    texto(r, ManifestoCsvConfig.COL_NOME),
-                    cpf,
-                    digitos(r, ManifestoCsvConfig.COL_PIS),
-                    data(r, ManifestoCsvConfig.COL_DATA_NASCIMENTO),
-                    texto(r, ManifestoCsvConfig.COL_ENDERECO),
-                    digitos(r, ManifestoCsvConfig.COL_CEP),
-                    texto(r, ManifestoCsvConfig.COL_BAIRRO),
-                    texto(r, ManifestoCsvConfig.COL_CIDADE),
-                    texto(r, ManifestoCsvConfig.COL_ESTADO),
-                    texto(r, ManifestoCsvConfig.COL_CHEFE_GUARNICAO),
-                    texto(r, ManifestoCsvConfig.COL_VIGILANTE1),
-                    texto(r, ManifestoCsvConfig.COL_VIGILANTE2),
-                    texto(r, ManifestoCsvConfig.COL_AGREGADO),
-                    digitos(r, ManifestoCsvConfig.COL_AGREGADO_DOCUMENTO),
-                    digitos(r, ManifestoCsvConfig.COL_AGREGADO_PIS),
-                    texto(r, ManifestoCsvConfig.COL_REGIME_FISCAL),
-                    manifesto,
-                    texto(r, ManifestoCsvConfig.COL_FILIAL),
-                    data,
-                    ManifestoCsvConfig.mesReferenciaDe(data),
-                    texto(r, ManifestoCsvConfig.COL_VEICULO),
-                    texto(r, ManifestoCsvConfig.COL_REBOQUE1),
-                    texto(r, ManifestoCsvConfig.COL_REBOQUE2),
-                    texto(r, ManifestoCsvConfig.COL_REBOQUE3),
-                    texto(r, ManifestoCsvConfig.COL_DESTINO),
-                    inteiro(r, ManifestoCsvConfig.COL_KM_SAIDA),
-                    inteiro(r, ManifestoCsvConfig.COL_KM_CHEGADA),
-                    inteiro(r, ManifestoCsvConfig.COL_SERVICOS),
-                    inteiro(r, ManifestoCsvConfig.COL_NFS),
-                    decimal(r, ManifestoCsvConfig.COL_KG_REAL),
-                    decimal(r, ManifestoCsvConfig.COL_KG_TAXADO),
-                    decimal(r, ManifestoCsvConfig.COL_M3),
-                    decimal(r, ManifestoCsvConfig.COL_CAPACIDADE_VEICULO),
-                    decimal(r, ManifestoCsvConfig.COL_PERC_APROV_VEICULO),
-                    decimal(r, ManifestoCsvConfig.COL_VALE_FRETE),
-                    decimal(r, ManifestoCsvConfig.COL_VALOR_NF),
-                    decimal(r, ManifestoCsvConfig.COL_VALOR_FRETES),
-                    decimal(r, ManifestoCsvConfig.COL_VALOR_FRETE),
-                    decimal(r, ManifestoCsvConfig.COL_COMBUSTIVEL),
-                    decimal(r, ManifestoCsvConfig.COL_PEDAGIO),
-                    decimal(r, ManifestoCsvConfig.COL_DIARIA),
-                    inteiro(r, ManifestoCsvConfig.COL_COLETAS),
-                    inteiro(r, ManifestoCsvConfig.COL_ENTREGAS),
-                    inteiro(r, ManifestoCsvConfig.COL_DESPACHOS),
-                    inteiro(r, ManifestoCsvConfig.COL_RETIRADAS),
-                    inteiro(r, ManifestoCsvConfig.COL_COLETAS_REVERSA),
-                    decimal(r, ManifestoCsvConfig.COL_ADICIONAIS),
-                    decimal(r, ManifestoCsvConfig.COL_DESCONTOS),
-                    decimal(r, ManifestoCsvConfig.COL_ADIANTAMENTO),
-                    decimal(r, ManifestoCsvConfig.COL_DESPESAS),
-                    decimal(r, ManifestoCsvConfig.COL_TOTAL_DESPESAS),
-                    decimal(r, ManifestoCsvConfig.COL_SALDO_DESPESAS),
-                    decimal(r, ManifestoCsvConfig.COL_INSS),
-                    decimal(r, ManifestoCsvConfig.COL_SEST_SENAT),
-                    decimal(r, ManifestoCsvConfig.COL_IR),
-                    decimal(r, ManifestoCsvConfig.COL_SALDO_A_PAGAR),
-                    inteiro(r, ManifestoCsvConfig.COL_SERVICOS_FINALIZADOS),
-                    decimal(r, ManifestoCsvConfig.COL_PERC_EFETIVIDADE),
-                    texto(r, ManifestoCsvConfig.COL_CLASSIFICACAO),
-                    texto(r, ManifestoCsvConfig.COL_OBSERVACOES),
-                    texto(r, ManifestoCsvConfig.COL_STATUS),
-                    texto(r, ManifestoCsvConfig.COL_USUARIO),
-                    numeroLinha
-            );
-        } catch (RuntimeException e) {
-            throw new LinhaManifestoInvalidaException(numeroLinha, e.getMessage());
-        }
+        return new LinhaManifesto(
+                texto(a, CampoManifesto.NOME),
+                texto(a, CampoManifesto.CPF),
+                texto(a, CampoManifesto.PIS),
+                data(a, CampoManifesto.DATA_NASCIMENTO),
+                texto(a, CampoManifesto.ENDERECO),
+                texto(a, CampoManifesto.CEP),
+                texto(a, CampoManifesto.BAIRRO),
+                texto(a, CampoManifesto.CIDADE),
+                texto(a, CampoManifesto.ESTADO),
+                texto(a, CampoManifesto.CHEFE_GUARNICAO),
+                texto(a, CampoManifesto.VIGILANTE1),
+                texto(a, CampoManifesto.VIGILANTE2),
+                texto(a, CampoManifesto.AGREGADO),
+                texto(a, CampoManifesto.AGREGADO_DOCUMENTO),
+                texto(a, CampoManifesto.AGREGADO_PIS),
+                texto(a, CampoManifesto.REGIME_FISCAL),
+                String.valueOf(inteiro(a, CampoManifesto.MANIFESTO)),
+                texto(a, CampoManifesto.FILIAL),
+                data,
+                ManifestoCsvConfig.mesReferenciaDe(data),
+                texto(a, CampoManifesto.VEICULO),
+                texto(a, CampoManifesto.REBOQUE1),
+                texto(a, CampoManifesto.REBOQUE2),
+                texto(a, CampoManifesto.REBOQUE3),
+                texto(a, CampoManifesto.DESTINO),
+                inteiro(a, CampoManifesto.KM_SAIDA),
+                inteiro(a, CampoManifesto.KM_CHEGADA),
+                inteiro(a, CampoManifesto.SERVICOS),
+                inteiro(a, CampoManifesto.NFS),
+                decimal(a, CampoManifesto.KG_REAL),
+                decimal(a, CampoManifesto.KG_TAXADO),
+                decimal(a, CampoManifesto.M3),
+                decimal(a, CampoManifesto.CAPACIDADE_VEICULO),
+                decimal(a, CampoManifesto.PERC_APROV_VEICULO),
+                decimal(a, CampoManifesto.VALE_FRETE),
+                decimal(a, CampoManifesto.VALOR_NF),
+                decimal(a, CampoManifesto.VALOR_FRETES),
+                decimal(a, CampoManifesto.VALOR_FRETE),
+                decimal(a, CampoManifesto.COMBUSTIVEL),
+                decimal(a, CampoManifesto.PEDAGIO),
+                decimal(a, CampoManifesto.DIARIA),
+                inteiro(a, CampoManifesto.COLETAS),
+                inteiro(a, CampoManifesto.ENTREGAS),
+                inteiro(a, CampoManifesto.DESPACHOS),
+                inteiro(a, CampoManifesto.RETIRADAS),
+                inteiro(a, CampoManifesto.COLETAS_REVERSA),
+                decimal(a, CampoManifesto.ADICIONAIS),
+                decimal(a, CampoManifesto.DESCONTOS),
+                decimal(a, CampoManifesto.ADIANTAMENTO),
+                decimal(a, CampoManifesto.DESPESAS),
+                decimal(a, CampoManifesto.TOTAL_DESPESAS),
+                decimal(a, CampoManifesto.SALDO_DESPESAS),
+                decimal(a, CampoManifesto.INSS),
+                decimal(a, CampoManifesto.SEST_SENAT),
+                decimal(a, CampoManifesto.IR),
+                decimal(a, CampoManifesto.SALDO_A_PAGAR),
+                inteiro(a, CampoManifesto.SERVICOS_FINALIZADOS),
+                decimal(a, CampoManifesto.PERC_EFETIVIDADE),
+                texto(a, CampoManifesto.CLASSIFICACAO),
+                texto(a, CampoManifesto.OBSERVACOES),
+                texto(a, CampoManifesto.STATUS),
+                texto(a, CampoManifesto.USUARIO),
+                numeroLinha
+        );
     }
 
-    private String texto(CSVRecord r, String coluna) {
-        return ManifestoCsvConfig.textoOuNulo(r.get(coluna));
+    private static String texto(Map<CampoManifesto, AvaliacaoCampo> a, CampoManifesto campo) {
+        return (String) a.get(campo).valor();
     }
 
-    private String digitos(CSVRecord r, String coluna) {
-        return ManifestoCsvConfig.digitosOuNulo(r.get(coluna));
+    private static Integer inteiro(Map<CampoManifesto, AvaliacaoCampo> a, CampoManifesto campo) {
+        return (Integer) a.get(campo).valor();
     }
 
-    private Integer inteiro(CSVRecord r, String coluna) {
-        return ManifestoCsvConfig.inteiroOuNulo(r.get(coluna));
+    private static BigDecimal decimal(Map<CampoManifesto, AvaliacaoCampo> a, CampoManifesto campo) {
+        return (BigDecimal) a.get(campo).valor();
     }
 
-    private BigDecimal decimal(CSVRecord r, String coluna) {
-        return ManifestoCsvConfig.decimalBrOuNulo(r.get(coluna));
-    }
-
-    private LocalDate data(CSVRecord r, String coluna) {
-        return ManifestoCsvConfig.dataOuNula(r.get(coluna));
+    private static LocalDate data(Map<CampoManifesto, AvaliacaoCampo> a, CampoManifesto campo) {
+        return (LocalDate) a.get(campo).valor();
     }
 }

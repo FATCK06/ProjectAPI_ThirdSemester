@@ -1,5 +1,6 @@
 /* src/pages/Importacoes/Manifestos/components/step5.css
-   Passo de execução: tela de progresso, sem ação do usuário. */
+   Passo de execução: tela de progresso, sem ação do usuário.
+   O spinner da espera vem do componente Loading. */
 
 .execucao-wrap {
   display: flex;
@@ -8,19 +9,6 @@
   justify-content: center;
   gap: 16px;
   padding: 64px 0;
-}
-
-.execucao-spinner {
-  width: 56px;
-  height: 56px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #2563eb;
-  border-radius: 50%;
-  animation: execucao-girar 0.9s linear infinite;
-}
-
-@keyframes execucao-girar {
-  to { transform: rotate(360deg); }
 }
 
 .execucao-check {

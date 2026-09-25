@@ -1,5 +1,6 @@
 package br.com.newe.ms_operacoes.repository;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +47,31 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
     List<ViagemKmView> kmViagensPorMotoristas(
             @Param("mesReferencia") String mesReferencia,
             @Param("motoristaIds") Collection<UUID> motoristaIds);
+
+    /**
+     * Somas por motorista no mes; as formulas ficam em CalculoIndicadores.
+     *
+     * PENDENTE (cliente): frete = valor_frete e custo = total_despesas sao
+     * provisorios. O CSV tambem traz valor_fretes, e viagem_custos mistura custo
+     * com desconto, adiantamento e retencao - somar tudo daria numero errado.
+     */
+    @Query("select v.idMotorista as motoristaId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(v.valorFrete) as valorFrete, "
+            + "sum(v.totalDespesas) as custoTotal "
+            + "from Viagem v "
+            + "where v.mesReferencia = :mesReferencia "
+            + "group by v.idMotorista")
+    List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
+
+    interface SomaMotoristaView {
+        UUID getMotoristaId();
+        Long getNumeroViagens();
+        Long getDiasOperacao();
+        BigDecimal getValorFrete();
+        BigDecimal getCustoTotal();
+    }
 
     interface RankingMotoristaView {
         UUID getMotoristaId();

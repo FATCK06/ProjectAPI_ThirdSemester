@@ -5,49 +5,193 @@
   margin: 0 auto;
 }
 
-.validacao-vazio {
-  text-align: center;
-  color: #94a3b8;
-  padding: 40px 0;
+/* --- RESUMO: 4 cards --- */
+.resumo-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
 }
 
-/* --- NUMEROS --- */
-.validacao-numeros {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
+@media (max-width: 600px) {
+  .resumo-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.resumo-card {
+  --resumo-cor: #475569;
+  --resumo-fundo: #ffffff;
+  --resumo-borda: #e2e8f0;
+  --resumo-fundo-icone: #f1f5f9;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--resumo-borda);
+  border-top: 3px solid var(--resumo-cor);
+  border-radius: 10px;
+  background: var(--resumo-fundo);
+  font-family: inherit;
+  text-align: left;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+
+.resumo-neutro {
+  --resumo-cor: #334155;
+}
+
+.resumo-ok {
+  --resumo-cor: #16a34a;
+  --resumo-fundo: #f0fdf4;
+  --resumo-borda: #bbf7d0;
+  --resumo-fundo-icone: #dcfce7;
+}
+
+.resumo-aviso {
+  --resumo-cor: #d97706;
+  --resumo-fundo: #fffbeb;
+  --resumo-borda: #fde68a;
+  --resumo-fundo-icone: #fef3c7;
+}
+
+.resumo-erro {
+  --resumo-cor: #dc2626;
+  --resumo-fundo: #fef2f2;
+  --resumo-borda: #fecaca;
+  --resumo-fundo-icone: #fee2e2;
+}
+
+/* Zerado: some a cor, fica claro que não há nada ali */
+.resumo-zerado {
+  --resumo-cor: #cbd5e1;
+  --resumo-fundo-icone: #f8fafc;
+}
+
+.resumo-zerado .resumo-valor {
+  color: #94a3b8;
+}
+
+.resumo-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 6px;
+  border-radius: 50%;
+  background: var(--resumo-fundo-icone);
+  color: var(--resumo-cor);
+}
+
+.resumo-valor {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.1;
+  color: #0f172a;
+}
+
+.resumo-rotulo {
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Cards que filtram a lista */
+.resumo-card.clicavel {
+  cursor: pointer;
+}
+
+.resumo-card.clicavel:hover:not(:disabled) {
+  box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.15);
+  transform: translateY(-1px);
+}
+
+.resumo-card.clicavel:focus-visible {
+  outline: 2px solid var(--resumo-cor);
+  outline-offset: 2px;
+}
+
+.resumo-card.clicavel:disabled {
+  cursor: progress;
+}
+
+.resumo-card.ativo {
+  border-color: var(--resumo-cor);
+  box-shadow: 0 0 0 1px var(--resumo-cor);
+}
+
+/* --- BARRA DE SAÚDE --- */
+.saude {
   margin-bottom: 20px;
 }
 
-.validacao-card {
+.saude-legenda {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 16px;
-  border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  background: #ffffff;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #64748b;
 }
 
-.validacao-card.ok {
-  border-color: #bbf7d0;
-  background: #f0fdf4;
-}
-
-.validacao-card.falha {
-  border-color: #fecaca;
-  background: #fef2f2;
-}
-
-.validacao-valor {
-  font-size: 24px;
+.saude-legenda strong {
   font-weight: 600;
   color: #0f172a;
 }
 
-.validacao-rotulo {
+.saude-barra {
+  display: flex;
+  gap: 2px;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.saude-segmento {
+  flex-basis: 0;
+  min-width: 6px; /* poucos erros num arquivo grande continuam visíveis */
+  transition: flex-grow 0.3s ease;
+}
+
+.saude-ok {
+  background: #22c55e;
+}
+
+.saude-aviso {
+  background: #f59e0b;
+}
+
+.saude-erro {
+  background: #ef4444;
+}
+
+/* "Mostrar todas" ao lado do título quando há filtro */
+.erro-limpar-filtro {
+  margin-left: auto;
+  padding: 2px 8px;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
   font-size: 12px;
-  color: #64748b;
+  font-weight: 500;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.erro-limpar-filtro:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .resumo-card,
+  .saude-segmento {
+    transition: none;
+  }
 }
 
 /* --- ALERTA --- */
@@ -108,6 +252,39 @@
   max-height: 45vh;
   overflow-y: auto;
   padding-right: 6px;
+}
+
+/* --- PAGINAÇÃO DAS LINHAS COM PROBLEMA --- */
+.erro-paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.erro-paginacao button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  color: #0f172a;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.erro-paginacao button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.erro-paginacao button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* --- CARDS DE ERRO --- */

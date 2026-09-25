@@ -151,12 +151,6 @@
   }
 }
 /* --- RESUMO E ALERTAS DO MAPEAMENTO --- */
-.mapeamento-vazio {
-  text-align: center;
-  color: #94a3b8;
-  padding: 40px 0;
-}
-
 .mapeamento-resumo {
   display: flex;
   align-items: center;

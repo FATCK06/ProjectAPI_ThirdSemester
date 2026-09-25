@@ -19,6 +19,8 @@ import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
+import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -26,10 +28,20 @@ public class DashboardController {
 
     private final ViagemRepository repository;
     private final FrotaClient frotaClient;
+    private final IndicadoresService indicadoresService;
 
-    public DashboardController(ViagemRepository repository, FrotaClient frotaClient) {
+    public DashboardController(ViagemRepository repository, FrotaClient frotaClient, IndicadoresService indicadoresService) {
         this.repository = repository;
         this.frotaClient = frotaClient;
+        this.indicadoresService = indicadoresService;
+    }
+
+    @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
+    public ResponseEntity<IndicadoresMes> indicadores(@RequestParam("mesReferencia") String mesReferencia) {
+        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(indicadoresService.calcular(mesReferencia));
     }
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"

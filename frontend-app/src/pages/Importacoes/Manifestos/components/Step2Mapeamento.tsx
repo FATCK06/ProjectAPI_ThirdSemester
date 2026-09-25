@@ -1,5 +1,6 @@
 import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import type { MapeamentoColuna, ResultadoValidacao } from '../../../../services/importacao';
+import { Loading } from '../../../../components/Loading';
 import './step2.css';
 
 interface PropsPasso2 {
@@ -14,7 +15,7 @@ function prioridade(linha: MapeamentoColuna): number {
 
 export function Step2Mapeamento({ validacao }: PropsPasso2) {
     if (!validacao) {
-        return <p className="mapeamento-vazio">Lendo o arquivo...</p>;
+        return <Loading texto="Lendo o arquivo" detalhe="Conferindo as colunas da planilha." />;
     }
 
     const encontradas = validacao.mapeamento.filter((m) => m.encontrada).length;

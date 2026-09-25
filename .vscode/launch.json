@@ -8,7 +8,8 @@
             "mainClass": "br.com.logistica.msusuarios.MsUsuariosApplication",
             "projectName": "ms-usuarios",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -18,7 +19,8 @@
             "mainClass": "br.com.newe.api_gateway.ApiGatewayApplication",
             "projectName": "api-gateway",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -28,7 +30,8 @@
             "mainClass": "br.com.newe.ms_frota.MsFrotaApplication",
             "projectName": "ms-frota",
             "args": "",
-            "envFile": "${workspaceFolder}/.env"
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
         },
         {
             "type": "java",
@@ -37,6 +40,17 @@
             "cwd": "${workspaceFolder}",
             "mainClass": "br.com.newe.ms_operacoes.MsOperacoesApplication",
             "projectName": "ms-operacoes",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": " -Dcom.sun.management.jmxremote"
+        },
+        {
+            "type": "java",
+            "name": "Spring Boot-MsVeiculosApplication<ms-veiculos>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "br.com.newe.ms_indicadores.MsVeiculosApplication",
+            "projectName": "ms-veiculos",
             "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
