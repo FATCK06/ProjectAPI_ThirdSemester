@@ -104,12 +104,80 @@
   text-align: left;
 }
 
+/* A seta gira em vez de trocar de ícone, acompanhando a gaveta */
+.accordion-seta {
+  transition: transform 0.25s ease;
+}
+
+.accordion-seta.aberta {
+  transform: rotate(90deg);
+}
+
+/* Gaveta: grid de 0fr para 1fr anima até a altura real do conteúdo,
+   sem precisar de um max-height chutado. */
 .accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+}
+
+.accordion-content.aberto {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  /* Negativo para a linha da árvore nascer logo abaixo do ícone do item pai */
+  margin-top: -6px;
+  margin-bottom: 8px;
+}
+
+.accordion-itens {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: 4px;
-  margin-bottom: 8px;
+  min-height: 0;
+  overflow: hidden;
+  padding-top: 4px;
+}
+
+/* --- LINHAS DA ÁRVORE ---
+   A vertical fica em x = 38px, o centro do ícone do item pai
+   (16 de margem + 12 de padding + 10 de meio ícone). Com o sub-item em
+   margin-left 58px, ela fica 20px à esquerda da caixa dele. */
+.accordion-itens .nav-sub-item {
+  position: relative;
+  margin-left: 58px;
+}
+
+/* Tronco até o meio do item + galho curvo até o texto */
+.accordion-itens .nav-sub-item::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: -4px; /* cobre o gap entre itens (ou o padding-top, no primeiro) */
+  width: 14px;
+  height: calc(50% + 4px);
+  border-left: 1.5px solid #cbd5e1;
+  border-bottom: 1.5px solid #cbd5e1;
+  border-bottom-left-radius: 8px;
+  pointer-events: none;
+}
+
+/* Tronco seguindo para o próximo item; o último termina na curva */
+.accordion-itens .nav-sub-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: -4px;
+  border-left: 1.5px solid #cbd5e1;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-seta,
+  .accordion-content {
+    transition: none;
+  }
 }
 
 /* Estilo específico para os itens de dentro da gaveta (mais recuados) */

@@ -1,11 +1,12 @@
 package br.com.newe.ms_operacoes.service.importacao;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 
 /**
  * As duas operacoes do fluxo em etapas.
@@ -31,8 +33,6 @@ import br.com.newe.ms_operacoes.service.ImportacaoService;
 public class ImportacaoProcessamentoService {
 
     private static final Logger log = LoggerFactory.getLogger(ImportacaoProcessamentoService.class);
-
-    /** Uma planilha no formato errado geraria um erro por linha; nao adianta devolver todos. */
 
     private static final int TAMANHO_AMOSTRA = 10;
 
@@ -53,8 +53,14 @@ public class ImportacaoProcessamentoService {
         this.importacaoService = importacaoService;
     }
 
-    /** Le e confere o arquivo. Nao grava viagem nenhuma. */
-    public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho) throws IOException {
+    /**
+     * Le e confere o arquivo. Nao grava viagem nenhuma.
+     *
+     * @param severidade null traz todas as linhas com problema; ERRO ou PENDENCIA
+     *                   restringe a lista (e o total da paginacao) a esse grupo
+     */
+    public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho, Severidade severidade)
+            throws IOException {
         byte[] conteudo = importacao.getArquivoConteudo();
 
         ResultadoParse resultado = parser.parse(conteudo);
@@ -66,7 +72,13 @@ public class ImportacaoProcessamentoService {
                 resultado.linhas().size(),
                 resultado.linhasInvalidas());
 
-        List<LinhaComProblema> todos = resultado.problemas();
+        // Erros antes de pendencias, e so depois pagina: senao, num arquivo cheio de
+        // avisos, a linha que bloqueia a importacao cai numa pagina que ninguem abre.
+        // Sort estavel: dentro de cada grupo segue a ordem das linhas.
+        List<LinhaComProblema> todos = resultado.problemas().stream()
+                .filter(l -> severidade == null || l.severidade() == severidade)
+                .sorted(Comparator.comparing((LinhaComProblema l) -> !l.bloqueia()))
+                .toList();
         int de = Math.min(Math.max(pagina, 0) * tamanho, todos.size());
         int ate = Math.min(de + tamanho, todos.size());
 
@@ -84,18 +96,31 @@ public class ImportacaoProcessamentoService {
                 resultado.linhas().stream().limit(TAMANHO_AMOSTRA).map(LinhaPreview::de).toList());
     }
 
+    /**
+     * Confronta o cabecalho do arquivo com as colunas que o parser procura.
+     * Comparacao sem diferenciar caixa nem espacos nas pontas, igual ao CSVFormat.
+     */
     private List<MapeamentoColuna> mapear(List<String> colunasDoArquivo) {
-        Set<String> presentes = colunasDoArquivo.stream()
+        // Chave normalizada -> grafia original, para a tela mostrar o cabecalho como o usuario escreveu.
+        Map<String, String> presentes = new HashMap<>();
+        colunasDoArquivo.stream()
                 .filter(Objects::nonNull)
-                .map(c -> c.trim().toLowerCase(Locale.ROOT))
-                .collect(Collectors.toSet());
+                .forEach(c -> presentes.putIfAbsent(normalizarColuna(c), c.trim()));
 
         return ManifestoCsvConfig.COLUNAS_ESPERADAS.stream()
-                .map(esperada -> new MapeamentoColuna(
-                        esperada.nome(),
-                        esperada.obrigatoria(),
-                        presentes.contains(esperada.nome().trim().toLowerCase(Locale.ROOT))))
+                .map(esperada -> {
+                    String noArquivo = presentes.get(normalizarColuna(esperada.nome()));
+                    return new MapeamentoColuna(
+                            esperada.nome(),
+                            esperada.obrigatoria(),
+                            noArquivo != null,
+                            noArquivo);
+                })
                 .toList();
+    }
+
+    private static String normalizarColuna(String coluna) {
+        return coluna.trim().toLowerCase(Locale.ROOT);
     }
 
     /**

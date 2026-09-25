@@ -1,18 +1,28 @@
 import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
-import type { ResultadoValidacao } from '../../../../services/importacao';
+import type { MapeamentoColuna, ResultadoValidacao } from '../../../../services/importacao';
+import { Loading } from '../../../../components/Loading';
 import './step2.css';
 
 interface PropsPasso2 {
     validacao: ResultadoValidacao | null;
 }
 
+/** 0 = obrigatória ausente, 1 = opcional ausente, 2 = reconhecida. */
+function prioridade(linha: MapeamentoColuna): number {
+    if (linha.encontrada) return 2;
+    return linha.obrigatoria ? 0 : 1;
+}
+
 export function Step2Mapeamento({ validacao }: PropsPasso2) {
     if (!validacao) {
-        return <p className="mapeamento-vazio">Lendo o arquivo...</p>;
+        return <Loading texto="Lendo o arquivo" detalhe="Conferindo as colunas da planilha." />;
     }
 
     const encontradas = validacao.mapeamento.filter((m) => m.encontrada).length;
     const faltandoObrigatoria = validacao.mapeamento.filter((m) => m.obrigatoria && !m.encontrada);
+    // Problemas primeiro: o que impede a importação não pode ficar escondido no fim da lista.
+    // O sort é estável, então dentro de cada grupo vale a ordem do sistema.
+    const linhas = [...validacao.mapeamento].sort((a, b) => prioridade(a) - prioridade(b));
 
     return (
         <div className="mapeamento-wrap">
@@ -45,40 +55,43 @@ export function Step2Mapeamento({ validacao }: PropsPasso2) {
                     <div className="mapeamento-direita">Coluna na sua planilha</div>
                 </div>
 
-                {validacao.mapeamento.map((linha) => (
-                    <div key={linha.campoSistema} className="mapeamento-grade mapeamento-linha">
-                        <div className="mapeamento-esquerda">
-                            <div className="mapeamento-status">
-                                {linha.encontrada ? (
-                                    <CheckCircle2 size={18} className="icone-ok" />
-                                ) : (
-                                    <AlertCircle
-                                        size={18}
-                                        className={linha.obrigatoria ? 'icone-erro' : 'icone-aviso'}
-                                    />
-                                )}
+                <div className="mapeamento-rolagem">
+                    {linhas.map((linha) => (
+                        <div key={linha.campoSistema} className="mapeamento-grade mapeamento-linha">
+                            <div className="mapeamento-esquerda">
+                                <div className="mapeamento-status">
+                                    {linha.encontrada ? (
+                                        <CheckCircle2 size={18} className="icone-ok" />
+                                    ) : (
+                                        <AlertCircle
+                                            size={18}
+                                            className={linha.obrigatoria ? 'icone-erro' : 'icone-aviso'}
+                                        />
+                                    )}
+                                </div>
+                                <div className="mapeamento-destino">
+                                    {linha.campoSistema}
+                                    {linha.obrigatoria && <span className="mapeamento-obrigatorio">*</span>}
+                                </div>
                             </div>
-                            <div className="mapeamento-destino">
-                                {linha.campoSistema}
-                                {linha.obrigatoria && <span className="mapeamento-obrigatorio">*</span>}
+    
+                            <div className="mapeamento-seta">
+                                <ArrowRight size={16} className="seta-h" />
+                            </div>
+    
+                            <div className="mapeamento-direita">
+                                <div
+                                    className={`mapeamento-caixa ${
+                                        linha.encontrada ? '' : linha.obrigatoria ? 'caixa-erro' : 'caixa-ausente'
+                                    }`}
+                                    title={linha.colunaArquivo ?? undefined}
+                                >
+                                    {linha.encontrada ? linha.colunaArquivo ?? linha.campoSistema : 'não encontrada'}
+                                </div>
                             </div>
                         </div>
-
-                        <div className="mapeamento-seta">
-                            <ArrowRight size={16} className="seta-h" />
-                        </div>
-
-                        <div className="mapeamento-direita">
-                            <div
-                                className={`mapeamento-caixa ${
-                                    linha.encontrada ? '' : linha.obrigatoria ? 'caixa-erro' : 'caixa-ausente'
-                                }`}
-                            >
-                                {linha.encontrada ? linha.campoSistema : 'não encontrada'}
-                            </div>
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             <p className="mapeamento-nota">

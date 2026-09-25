@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight, AlertCircle } from 'lucide-react';
+import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Step1Upload } from './components/Step1Upload';
 import { Step2Mapeamento } from './components/Step2Mapeamento';
 import { Step3Validacao } from './components/Step3Validacao';
@@ -10,15 +10,18 @@ import { ModalConfirmacao } from './components/ModalConfirmacao';
 import {
     validarImportacao,
     mensagemDeErro,
+    obrigatoriasFaltando,
     podeExecutar,
+    type FiltroProblemas,
     type ImportacaoCriada,
     type ResultadoValidacao,
 } from '../../../services/importacao';
+import { useToast } from '../../../components/Toast';
 import './manifestos.css';
 
 const STEPS = [
     'Upload de Arquivo',
-    'Mapeamento de Títulos de Colunas',
+    'Mapeamento de Colunas',
     'Validação de Dados',
     'Revisão/Preview',
     'Confirmação e execução',
@@ -26,6 +29,7 @@ const STEPS = [
 ];
 
 const PASSO_UPLOAD = 1;
+const PASSO_MAPEAMENTO = 2;
 const PASSO_VALIDACAO = 3;
 const PASSO_REVISAO = 4;
 const PASSO_EXECUCAO = 5;
@@ -39,16 +43,20 @@ export function ManifestosImport() {
     const [erro, setErro] = useState<string | null>(null);
     const [linhasGravadas, setLinhasGravadas] = useState(0);
     const [confirmando, setConfirmando] = useState(false);
+    // Fica aqui, e não no passo 3, porque ele remonta ao ir e voltar: o filtro
+    // precisa continuar batendo com a lista que está em `validacao`.
+    const [filtroProblemas, setFiltroProblemas] = useState<FiltroProblemas>(null);
+    const toast = useToast();
 
     /** O parse roda no servidor a cada chamada e não é persistido — pode repetir à vontade. */
-    async function carregarValidacao(id: number) {
+    async function carregarValidacao(id: number, pagina = 0, filtro: FiltroProblemas = null) {
         setCarregando(true);
-        setErro(null);
         try {
-            setValidacao(await validarImportacao(id));
+            setValidacao(await validarImportacao(id, pagina, filtro));
+            setFiltroProblemas(filtro);
             return true;
         } catch (falha) {
-            setErro(mensagemDeErro(falha));
+            toast.erro(mensagemDeErro(falha), { titulo: 'Não foi possível conferir o arquivo' });
             return false;
         } finally {
             setCarregando(false);
@@ -58,8 +66,13 @@ export function ManifestosImport() {
     async function avancar() {
         if (passoAtual === PASSO_UPLOAD) {
             if (!importacao) return;
+            // Vai para o passo 2 na hora e lê lá, com o Loading na tela. Limpar a
+            // validação antiga garante que ele não mostre o arquivo anterior.
+            setValidacao(null);
+            setPassoAtual(PASSO_MAPEAMENTO);
             const ok = await carregarValidacao(importacao.id);
-            if (ok) setPassoAtual(2);
+            // Sem leitura o passo 2 não tem o que mostrar: volta para o upload.
+            if (!ok) setPassoAtual((p) => (p === PASSO_MAPEAMENTO ? PASSO_UPLOAD : p));
             return;
         }
 
@@ -95,6 +108,7 @@ export function ManifestosImport() {
     }, []);
 
     const liberadoParaGravar = validacao !== null && podeExecutar(validacao);
+    const colunasOk = validacao !== null && obrigatoriasFaltando(validacao).length === 0;
 
     function rotuloBotao() {
         if (passoAtual === PASSO_REVISAO) return 'Enviar os Dados';
@@ -104,6 +118,8 @@ export function ManifestosImport() {
     function podeAvancar() {
         if (carregando) return false;
         if (passoAtual === PASSO_UPLOAD) return importacao !== null;
+        // Sem coluna obrigatória nenhuma linha passa: não adianta seguir para a validação.
+        if (passoAtual === PASSO_MAPEAMENTO) return colunasOk;
         // Tudo ou nada: com erro, a prévia não serve para nada — o usuário fica onde vê os erros.
         if (passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) return liberadoParaGravar;
         return passoAtual < STEPS.length;
@@ -111,6 +127,9 @@ export function ManifestosImport() {
 
     function motivoBloqueio() {
         if (passoAtual === PASSO_UPLOAD && !importacao) return 'Envie um arquivo para continuar';
+        if (passoAtual === PASSO_MAPEAMENTO && !colunasOk) {
+            return 'Faltam colunas obrigatórias no arquivo — corrija e envie novamente';
+        }
         if ((passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) && !liberadoParaGravar) {
             return 'Corrija os erros do arquivo antes de enviar';
         }
@@ -148,17 +167,26 @@ export function ManifestosImport() {
                 })}
             </div>
 
-            {erro && passoAtual !== PASSO_EXECUCAO && (
-                <div className="importacao-erro">
-                    <AlertCircle size={18} />
-                    <span>{erro}</span>
-                </div>
-            )}
-
             <div className="step-content">
-                {passoAtual === 1 && <Step1Upload importacao={importacao} aoImportar={setImportacao} />}
+                {passoAtual === 1 && (
+                    <Step1Upload
+                        importacao={importacao}
+                        aoImportar={setImportacao}
+                        aoRemover={() => {
+                            setImportacao(null);
+                            setValidacao(null);
+                        }}
+                    />
+                )}
                 {passoAtual === 2 && <Step2Mapeamento validacao={validacao} />}
-                {passoAtual === 3 && <Step3Validacao validacao={validacao} />}
+                {passoAtual === 3 && (
+                    <Step3Validacao
+                        validacao={validacao}
+                        carregando={carregando}
+                        filtro={filtroProblemas}
+                        aoConsultar={(pagina, filtro) => importacao && carregarValidacao(importacao.id, pagina, filtro)}
+                    />
+                )}
                 {passoAtual === 4 && <Step4Revisao validacao={validacao} />}
                 {passoAtual === 5 && importacao && (
                     <Step5Execucao

@@ -145,7 +145,8 @@ public enum CampoManifesto {
                         "Esperado " + tamanhoExato + " digitos, veio com " + digitos.length());
             }
             if (zeroAusente && ehZero(valor)) {
-                return new AvaliacaoCampo(this, valorCru, EstadoCampo.AUSENTE_COMO_ZERO, null, null);
+                // O zero segue para a gravacao como veio no arquivo; o estado so sinaliza.
+                return new AvaliacaoCampo(this, valorCru, EstadoCampo.AUSENTE_COMO_ZERO, valor, null);
             }
             return new AvaliacaoCampo(this, valorCru, EstadoCampo.OK, valor, null);
         } catch (IllegalArgumentException e) {
@@ -157,10 +158,26 @@ public enum CampoManifesto {
         return switch (tipo) {
             case TEXTO -> ManifestoCsvConfig.textoOuNulo(valorCru);
             case DOCUMENTO -> ManifestoCsvConfig.digitosOuNulo(valorCru);
-            case INTEIRO -> ManifestoCsvConfig.inteiroOuNulo(valorCru);
+            case INTEIRO -> inteiroExato(valorCru);
             case DECIMAL -> ManifestoCsvConfig.decimalBrOuNulo(valorCru);
             case DATA -> ManifestoCsvConfig.dataOuNula(valorCru);
         };
+    }
+
+    /**
+     * Aceita "1,00" (as contagens vem assim no CSV), mas recusa "12,5" em vez de
+     * truncar para 12 sem avisar.
+     */
+    private static Integer inteiroExato(String valorCru) {
+        BigDecimal decimal = ManifestoCsvConfig.decimalBrOuNulo(valorCru);
+        if (decimal == null) {
+            return null;
+        }
+        try {
+            return decimal.intValueExact();
+        } catch (ArithmeticException e) {
+            throw new IllegalArgumentException("Numero inteiro invalido: " + valorCru.trim(), e);
+        }
     }
 
     private static boolean ehZero(Object valor) {
