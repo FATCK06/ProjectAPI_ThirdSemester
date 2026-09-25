@@ -26,6 +26,52 @@
   height: 230px;
 }
 
+.card-indicadores {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.card-indicadores .card-header {
+  margin-bottom: 16px;
+}
+
+.card-indicadores .card-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card-indicadores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.card-indicadores-grid > div {
+  padding: 14px;
+  border: 1px solid;
+  border-radius: 8px;
+}
+
+.card-indicadores-grid strong {
+  display: block;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+
+.card-indicadores-grid p {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  color: #3b82f6;
+}
+
 @keyframes shimmer-effect {
   0% {
     background-position: -200% 0;

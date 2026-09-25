@@ -65,23 +65,53 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.idMotorista")
     List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
 
+    @Query("select v.idVeiculo as veiculoId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(v.valorFrete) as valorFrete, "
+            + "sum(v.totalDespesas) as custoTotal "
+            + "from Viagem v "
+            + "where v.mesReferencia = :mesReferencia "
+            + "group by v.idVeiculo")
+    List<SomaVeiculoView> somasPorVeiculo(@Param("mesReferencia") String mesReferencia);
+
+    interface SomaVeiculoView {
+        UUID getVeiculoId();
+
+        Long getNumeroViagens();
+
+        Long getDiasOperacao();
+
+        BigDecimal getValorFrete();
+
+        BigDecimal getCustoTotal();
+    }
+
     interface SomaMotoristaView {
         UUID getMotoristaId();
+
         Long getNumeroViagens();
+
         Long getDiasOperacao();
+
         BigDecimal getValorFrete();
+
         BigDecimal getCustoTotal();
     }
 
     interface RankingMotoristaView {
         UUID getMotoristaId();
+
         Long getTotalViagens();
     }
 
     interface ViagemKmView {
         UUID getMotoristaId();
+
         UUID getVeiculoId();
+
         Integer getKmSaida();
+
         Integer getKmChegada();
     }
 }

@@ -20,6 +20,7 @@ import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
+import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 
 @RestController
@@ -30,7 +31,8 @@ public class DashboardController {
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
 
-    public DashboardController(ViagemRepository repository, FrotaClient frotaClient, IndicadoresService indicadoresService) {
+    public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
+            IndicadoresService indicadoresService) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
@@ -47,14 +49,13 @@ public class DashboardController {
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
     public ResponseEntity<List<RankingMotoristaDTO>> rankingMotoristas(
             @RequestParam("mesReferencia") String mesReferencia,
-            @RequestParam(value = "limite", defaultValue = "5") int limite
-    ) {
+            @RequestParam(value = "limite", defaultValue = "5") int limite) {
         if (!mesReferencia.matches("\\d{4}-\\d{2}") || limite < 1 || limite > 50) {
             return ResponseEntity.badRequest().build();
         }
 
-        List<ViagemRepository.RankingMotoristaView> linhas =
-                repository.rankingMotoristas(mesReferencia, PageRequest.of(0, limite));
+        List<ViagemRepository.RankingMotoristaView> linhas = repository.rankingMotoristas(mesReferencia,
+                PageRequest.of(0, limite));
 
         if (linhas.isEmpty()) {
             return ResponseEntity.ok(List.of());
@@ -62,7 +63,8 @@ public class DashboardController {
 
         List<UUID> motoristaIds = linhas.stream().map(ViagemRepository.RankingMotoristaView::getMotoristaId).toList();
 
-        // Viagem mais longa por motorista (kmChegada - kmSaida); em empate, fica a mais recente
+        // Viagem mais longa por motorista (kmChegada - kmSaida); em empate, fica a mais
+        // recente
         Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
         Map<UUID, Integer> maiorDistancia = new HashMap<>();
         for (ViagemRepository.ViagemKmView v : repository.kmViagensPorMotoristas(mesReferencia, motoristaIds)) {
@@ -104,10 +106,18 @@ public class DashboardController {
                     motorista != null ? motorista.cpf() : null,
                     linha.getTotalViagens(),
                     viagem != null ? placas.get(viagem.getVeiculoId()) : null,
-                    maiorDistancia.get(linha.getMotoristaId())
-            ));
+                    maiorDistancia.get(linha.getMotoristaId())));
         }
 
         return ResponseEntity.ok(ranking);
+    }
+
+    @GetMapping("/indicadores-por-modelo")
+    public ResponseEntity<List<IndicadoresPorModelo>> indicadoresPorModelo(
+            @RequestParam("mesReferencia") String mesReferencia) {
+        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(indicadoresService.calcularPorModelo(mesReferencia));
     }
 }

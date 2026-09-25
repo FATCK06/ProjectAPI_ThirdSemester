@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +44,8 @@ public class VeiculoService {
     }
 
     /**
-     * Cria o veiculo minimo quando a placa aparece pela primeira vez: viagens.id_veiculo
+     * Cria o veiculo minimo quando a placa aparece pela primeira vez:
+     * viagens.id_veiculo
      * e NOT NULL e o CSV de manifestos so traz a placa. Os demais dados entram
      * depois, pelo CRUD de frota.
      */
@@ -79,7 +81,10 @@ public class VeiculoService {
         return placaParaId;
     }
 
-    /** Placa e chave unica: sem normalizar, "abc1d23" viraria um veiculo diferente de "ABC1D23". */
+    /**
+     * Placa e chave unica: sem normalizar, "abc1d23" viraria um veiculo diferente
+     * de "ABC1D23".
+     */
     private String normalizar(String placa) {
         if (placa == null) {
             return null;
@@ -95,5 +100,13 @@ public class VeiculoService {
         veiculo.setNomeAgregado(item.nomeAgregado());
         veiculo.setStatusVeiculo(Veiculo.STATUS_ATIVO);
         return veiculo;
+    }
+
+    public Map<UUID, String> buscarModelosPorIds(List<UUID> ids) {
+        Map<UUID, String> modelos = new HashMap<>();
+        for (Veiculo veiculo : repository.findAllById(ids)) {
+            modelos.put(veiculo.getIdVeiculo(), veiculo.getModelo() != null ? veiculo.getModelo() : "Não informado");
+        }
+        return modelos;
     }
 }

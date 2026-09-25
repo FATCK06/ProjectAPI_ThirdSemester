@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 
 interface CardSkeletonProps {
   children?: ReactNode;
-  isLoading: boolean; 
+  isLoading: boolean;
 }
 
 export function CardSkeleton({ children, isLoading }: CardSkeletonProps) {
