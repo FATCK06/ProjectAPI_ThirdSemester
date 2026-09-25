@@ -3,6 +3,9 @@
   border: 1px solid #e2e8f0;
   border-radius: 16px;
   padding: 20px 24px 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  /* Nao deixa a tabela larga esticar o card: a rolagem fica dentro dele */
+  min-width: 0;
 }
 
 .ranking-header {
@@ -45,8 +48,9 @@
 }
 
 .ranking-table-wrap {
-  max-height: 176px;
-  overflow-y: scroll;
+  /* Rolagem nos dois sentidos: para os lados ve os indicadores, para baixo os motoristas */
+  max-height: 232px;
+  overflow: auto;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   scrollbar-width: thin;
@@ -55,6 +59,11 @@
 
 .ranking-table-wrap::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
+}
+
+.ranking-table-wrap::-webkit-scrollbar-corner {
+  background: #e2e8f0;
 }
 
 .ranking-table-wrap::-webkit-scrollbar-track {
@@ -68,6 +77,7 @@
 
 .ranking-table {
   width: 100%;
+  min-width: max-content;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -96,38 +106,27 @@
   white-space: nowrap;
 }
 
+/* Coluna do motorista fixa, para o nome continuar visivel ao rolar para a direita */
+.ranking-table th:first-child,
+.ranking-table td:first-child {
+  position: sticky;
+  left: 0;
+  box-shadow: 1px 0 0 #e2e8f0;
+}
+
+.ranking-table th:first-child {
+  z-index: 2;
+}
+
+.ranking-table td:first-child {
+  z-index: 1;
+  background: #ffffff;
+}
+
 .ranking-name {
   font-weight: 700 !important;
   color: #1e293b !important;
   text-transform: capitalize;
-}
-
-.ranking-position {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #f1f5f9;
-  color: #475569;
-  font-weight: 700;
-  font-size: 12px;
-}
-
-.ranking-position.pos-1 {
-  background: #4bc0c0;
-  color: #ffffff;
-}
-
-.ranking-position.pos-2 {
-  background: #7fd4d4;
-  color: #ffffff;
-}
-
-.ranking-position.pos-3 {
-  background: #b2e6e6;
-  color: #0f5f5f;
 }
 
 .ranking-feedback {

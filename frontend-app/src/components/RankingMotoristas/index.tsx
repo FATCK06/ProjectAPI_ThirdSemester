@@ -13,6 +13,23 @@ interface RankingItem {
   distanciaMaximaKm: number | null;
 }
 
+// Linha de /dashboard/indicadores; valores em R$ e percentuais de 0 a 100
+interface IndicadoresMotorista {
+  motoristaId: string;
+  utilizacao: number;
+  disponibilidade: number;
+  valorFrete: number;
+  custoTotal: number;
+  rentabilidade: number;
+  rentabilidadeMediaViagem: number;
+}
+
+interface IndicadoresMes {
+  motoristas: IndicadoresMotorista[];
+}
+
+type LinhaRanking = RankingItem & { indicadores?: IndicadoresMotorista };
+
 type Status = 'loading' | 'success' | 'error';
 
 function mesAtual() {
@@ -20,21 +37,17 @@ function mesAtual() {
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function formatarDocumento(valor: string | null) {
-  if (!valor) return '—';
-  const d = valor.replace(/\D/g, '');
-  if (d.length === 11) return d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
-  if (d.length === 14) return d.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
-  return valor;
+function formatarMoeda(valor: number | undefined) {
+  return valor === undefined ? '—' : valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
-function formatarKm(valor: number | null) {
-  return valor === null ? '—' : `${valor.toLocaleString('pt-BR')} km`;
+function formatarPercentual(valor: number | undefined) {
+  return valor === undefined ? '—' : `${valor.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}%`;
 }
 
 export function RankingMotoristas() {
   const [mes, setMes] = useState(mesAtual());
-  const [itens, setItens] = useState<RankingItem[]>([]);
+  const [itens, setItens] = useState<LinhaRanking[]>([]);
   const [status, setStatus] = useState<Status>('loading');
   const [tentativa, setTentativa] = useState(0);
 
@@ -43,13 +56,19 @@ export function RankingMotoristas() {
 
     let cancelado = false;
 
-    api
-      .get<RankingItem[]>('/dashboard/ranking-motoristas', {
+    // A ordem vem do ranking (top 5 por viagens); os indicadores completam cada linha
+    Promise.all([
+      api.get<RankingItem[]>('/dashboard/ranking-motoristas', {
         params: { mesReferencia: mes, limite: 5 },
-      })
-      .then((res) => {
+      }),
+      api.get<IndicadoresMes>('/dashboard/indicadores', {
+        params: { mesReferencia: mes },
+      }),
+    ])
+      .then(([ranking, indicadores]) => {
         if (cancelado) return;
-        setItens(res.data);
+        const porMotorista = new Map(indicadores.data.motoristas.map((m) => [m.motoristaId, m]));
+        setItens(ranking.data.map((item) => ({ ...item, indicadores: porMotorista.get(item.motoristaId) })));
         setStatus('success');
       })
       .catch(() => {
@@ -112,25 +131,29 @@ export function RankingMotoristas() {
           <table className="ranking-table">
             <thead>
               <tr>
-                <th>#</th>
                 <th>Motorista</th>
-                <th>Viagens</th>
-                <th>Veículo</th>
-                <th>Viagem mais longa</th>
-                <th>CPF</th>
+                <th>Tipo de veículo</th>
+                <th>Nº de viagens</th>
+                <th>Disponibilidade</th>
+                <th>Utilização</th>
+                <th>Valor dos fretes</th>
+                <th>Custos</th>
+                <th>Rentabilidade</th>
+                <th>Rentab. média por viagem</th>
               </tr>
             </thead>
             <tbody>
               {itens.map((item) => (
                 <tr key={item.motoristaId}>
-                  <td>
-                    <span className={`ranking-position pos-${item.posicao}`}>{item.posicao}º</span>
-                  </td>
                   <td className="ranking-name">{item.nome ? item.nome.toLowerCase() : '—'}</td>
-                  <td>{item.totalViagens}</td>
                   <td>{item.veiculo || '—'}</td>
-                  <td>{formatarKm(item.distanciaMaximaKm)}</td>
-                  <td>{formatarDocumento(item.cpf)}</td>
+                  <td>{item.totalViagens}</td>
+                  <td>{formatarPercentual(item.indicadores?.disponibilidade)}</td>
+                  <td>{formatarPercentual(item.indicadores?.utilizacao)}</td>
+                  <td>{formatarMoeda(item.indicadores?.valorFrete)}</td>
+                  <td>{formatarMoeda(item.indicadores?.custoTotal)}</td>
+                  <td>{formatarMoeda(item.indicadores?.rentabilidade)}</td>
+                  <td>{formatarMoeda(item.indicadores?.rentabilidadeMediaViagem)}</td>
                 </tr>
               ))}
             </tbody>
