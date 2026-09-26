@@ -43,4 +43,9 @@ public class VeiculoController {
     public ResponseEntity<Map<String, UUID>> upsertLote(@RequestBody List<VeiculoLoteItem> itens) {
         return ResponseEntity.ok(service.upsertLote(itens));
     }
+
+    @PostMapping("/modelos")
+    public ResponseEntity<Map<UUID, String>> modelos(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(service.buscarModelosPorIds(ids));
+    }
 }

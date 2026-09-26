@@ -52,7 +52,8 @@ public class IndicadoresService {
         }
         motoristas.sort(Comparator.comparing(IndicadoresMotorista::rentabilidade).reversed());
 
-        return new IndicadoresMes(mesReferencia, diasNoMes, diasDisponiveis, totais(motoristas, diasDisponiveis), motoristas);
+        return new IndicadoresMes(mesReferencia, diasNoMes, diasDisponiveis, totais(motoristas, diasDisponiveis),
+                motoristas);
     }
 
     /**
@@ -65,7 +66,8 @@ public class IndicadoresService {
         return mes.lengthOfMonth();
     }
 
-    static IndicadoresMotorista indicadoresDe(SomaMotoristaView soma, String nome, long diasDisponiveis, long diasNoMes) {
+    static IndicadoresMotorista indicadoresDe(SomaMotoristaView soma, String nome, long diasDisponiveis,
+            long diasNoMes) {
         long viagens = soma.getNumeroViagens();
         long diasOperacao = soma.getDiasOperacao();
         BigDecimal frete = CalculoIndicadores.zeroSeNulo(soma.getValorFrete());
@@ -110,5 +112,54 @@ public class IndicadoresService {
                 rentabilidade,
                 CalculoIndicadores.rentabilidadeMediaPorViagem(rentabilidade, viagens),
                 CalculoIndicadores.margem(rentabilidade, frete));
+    }
+
+    /** @param mesReferencia "yyyy-MM" */
+    public List<IndicadoresPorModelo> calcularPorModelo(String mesReferencia) {
+        YearMonth mes = YearMonth.parse(mesReferencia);
+        long diasDisponiveis = diasDisponiveis(mes);
+
+        List<ViagemRepository.SomaVeiculoView> somas = viagemRepository.somasPorVeiculo(mesReferencia);
+
+        // Modelo pertence ao ms-frota: uma chamada em lote para o mes inteiro.
+        List<UUID> veiculoIds = somas.stream().map(ViagemRepository.SomaVeiculoView::getVeiculoId).toList();
+        Map<UUID, String> modelos = frotaClient.buscarModelos(veiculoIds);
+
+        // Agrupa as somas por veiculo em somas por modelo, ja que varios veiculos
+        // podem compartilhar o mesmo modelo.
+        Map<String, List<ViagemRepository.SomaVeiculoView>> porModelo = somas.stream()
+                .collect(Collectors.groupingBy(s -> modelos.getOrDefault(s.getVeiculoId(), "Não informado")));
+
+        List<IndicadoresPorModelo> resultado = new ArrayList<>();
+        for (Map.Entry<String, List<ViagemRepository.SomaVeiculoView>> entrada : porModelo.entrySet()) {
+            long viagens = 0;
+            long diasOperacao = 0;
+            BigDecimal frete = BigDecimal.ZERO;
+            BigDecimal custo = BigDecimal.ZERO;
+
+            for (ViagemRepository.SomaVeiculoView soma : entrada.getValue()) {
+                viagens += soma.getNumeroViagens();
+                diasOperacao += soma.getDiasOperacao();
+                frete = frete.add(CalculoIndicadores.zeroSeNulo(soma.getValorFrete()));
+                custo = custo.add(CalculoIndicadores.zeroSeNulo(soma.getCustoTotal()));
+            }
+
+            BigDecimal rentabilidade = CalculoIndicadores.rentabilidade(frete, custo);
+            long numeroVeiculos = entrada.getValue().size();
+
+            resultado.add(new IndicadoresPorModelo(
+                    entrada.getKey(),
+                    numeroVeiculos,
+                    viagens,
+                    diasOperacao,
+                    CalculoIndicadores.utilizacao(diasOperacao, diasDisponiveis * numeroVeiculos),
+                    frete,
+                    custo,
+                    rentabilidade,
+                    CalculoIndicadores.margem(rentabilidade, frete)));
+        }
+
+        resultado.sort(Comparator.comparing(IndicadoresPorModelo::rentabilidade).reversed());
+        return resultado;
     }
 }

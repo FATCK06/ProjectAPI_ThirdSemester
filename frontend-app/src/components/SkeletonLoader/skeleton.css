@@ -26,6 +26,67 @@
   height: 230px;
 }
 
+.card-indicadores {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid;
+  border-radius: 12px;
+  background: transparent;
+}
+
+.card-indicadores .card-header {
+  margin-bottom: 16px;
+}
+
+.card-indicadores .card-header h2 {
+  margin: 0;
+  color: #1e293b;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.card-indicadores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.card-indicadores-grid > div {
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+.card-indicadores-grid strong {
+  display: block;
+  margin-bottom: 8px;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  overflow-wrap: break-word;
+}
+
+.card-indicadores-grid p {
+  margin: 0;
+  color: #1d4ed8;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 @keyframes shimmer-effect {
   0% {
     background-position: -200% 0;

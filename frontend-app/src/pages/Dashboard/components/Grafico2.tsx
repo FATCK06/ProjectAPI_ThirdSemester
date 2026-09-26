@@ -1,108 +1,80 @@
-import { Line } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
-  Filler,
   type ChartOptions,
   type ChartData,
 } from "chart.js";
+import type { IndicadoresPorModelo } from "../../../services/Dashboard";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
-  Filler,
 );
 
-const dadosDoGrafico: ChartData<"line"> = {
-  labels: ["João", "Carlos", "Marcos", "Rafael", "André"],
+interface PropsGrafico2 {
+  porModelo: IndicadoresPorModelo[];
+}
 
-  datasets: [
-    {
-      label: "Trajetos realizados",
-      data: [24, 21, 16, 60, 36],
+function montarDados(porModelo: IndicadoresPorModelo[]): ChartData<"bar"> {
+  return {
+    labels: porModelo.map((m) => m.modelo),
+    datasets: [
+      {
+        label: "Rentabilidade (R$)",
+        data: porModelo.map((m) => m.rentabilidade),
+        backgroundColor: "rgba(29, 78, 216, 0.85)",
+        borderColor: "#1d4ed8",
+        borderWidth: 2,
+        borderRadius: 8,
+        barPercentage: 0.8,
+        categoryPercentage: 0.8,
+      },
+    ],
+  };
+}
 
-      borderColor: "#1d4ed8",
-      backgroundColor: "rgba(29, 78, 216, 0.15)",
-
-      borderWidth: 3,
-
-      pointBackgroundColor: "#1d4ed8",
-      pointBorderColor: "#ffffff",
-      pointBorderWidth: 2,
-      pointRadius: 5,
-
-      tension: 0.4,
-      fill: true,
-    },
-  ],
-};
-
-const opcoesDoGrafico: ChartOptions<"line"> = {
+const opcoesDoGrafico: ChartOptions<"bar"> = {
   responsive: true,
   maintainAspectRatio: false,
-
   plugins: {
-    legend: {
-      position: "top",
-    },
-
-    title: {
-      display: true,
-      text: "Top 5 motoristas com mais trajetos no mês",
-    },
-
+    legend: { position: "top" },
+    title: { display: true, text: "Rentabilidade por modelo de veículo" },
     tooltip: {
       callbacks: {
         label: (context) => {
-          return `${context.parsed.y} trajetos`;
+          const valor = context.parsed.y ?? 0;
+          return `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
         },
       },
     },
   },
-
   scales: {
     y: {
       beginAtZero: true,
-
-      ticks: {
-        precision: 0,
-      },
-
-      title: {
-        display: true,
-        text: "Quantidade de trajetos",
-      },
+      title: { display: true, text: "Rentabilidade (R$)" },
     },
-
-    x: {
-      title: {
-        display: true,
-        text: "Motoristas",
-      },
-    },
+    x: { title: { display: true, text: "Modelo" } },
   },
 };
 
-export function Grafico2() {
+export function Grafico2({ porModelo }: PropsGrafico2) {
   return (
     <div className="card">
       <div className="card-header">
-        <h2>Gráfico de Linha</h2>
+        <h2>Rentabilidade por modelo de veículo</h2>
       </div>
-
       <div className="card-chart">
-        <Line data={dadosDoGrafico} options={opcoesDoGrafico} />
+        <Bar data={montarDados(porModelo)} options={opcoesDoGrafico} />
       </div>
     </div>
   );
