@@ -54,22 +54,37 @@
 }
 
 .card-indicadores-grid > div {
-  padding: 14px;
-  border: 1px solid;
-  border-radius: 8px;
+  min-width: 0;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid #eeeeee;
+  border-radius: 10px;
+  background-color: #fff;
+  box-sizing: border-box;
 }
 
 .card-indicadores-grid strong {
   display: block;
-  font-size: 0.85rem;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+  overflow-wrap: break-word;
 }
 
 .card-indicadores-grid p {
-  font-size: 1.25rem;
-  font-weight: 600;
   margin: 0;
-  color: #3b82f6;
+  color: #1d4ed8;
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 @keyframes shimmer-effect {
