@@ -45,17 +45,17 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Sprint | Período | Status | Documentação | Vídeo de Incremento |
 |:------:|:-------:|:------:|:------------:|:-------------------:|
-| 1 | 07/09/2026 a 27/09/2026 | Em andamento | [Documentos da Sprint 1](./docs/sprints/sprint-01/documento-sprint01.md) | A publicar |
-| 2 | 05/10/2026 a 25/10/2026 | Pendente | [Documentos da Sprint 2](./docs/sprints/sprint-02/documento-sprint02.md) | A publicar |
-| 3 | 02/11/2026 a 22/11/2026 | Pendente | [Documentos da Sprint 3](./docs/sprints/sprint-03/documento-sprint03.md) | A publicar |
+| 1 | 07/09/2026 a 27/09/2026 | Em andamento | [Documentos da Sprint 1](./docs/academic/Backlog_Sprint1.pdf) | A publicar |
+| 2 | 05/10/2026 a 25/10/2026 | Pendente | [Documentos da Sprint 2](./docs/academic/Backlog_Sprint2.pdf) | A publicar |
+| 3 | 02/11/2026 a 22/11/2026 | Pendente | [Documentos da Sprint 3](./docs/academic/Backlog_Sprint3.pdf) | A publicar |
 
 ## Backlog do Produto
 
 | Rank | Prioridade | User Story | Estimativa | Sprint | Status |
 |:---:|:---:|:---|:---:|:---:|:---:|
-| 1 | Muito Alta | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações; | 4 | 1 | Em andamento |
-| 2 | Muito Alta | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; | 8 | 1 | Em andamento |
-| 3 | Muito Alta | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação; | 6 | 1 | Em andamento |
+| 1 | Alta | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações; | 4 | 1 | Em andamento |
+| 2 | Alta | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; | 8 | 1 | Em andamento |
+| 3 | Alta | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação; | 6 | 1 | Em andamento |
 | 4 | Alta | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota; | 6 | 2 | Pendente |
 | 5 | Alta | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações; | 5 | 2 | Pendente |
 | 6 | Alta | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram; | 6 | 2 | Pendente |
@@ -63,7 +63,7 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | 8 | Média | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema; | 6 | 3 | Pendente |
 | 9 | Baixa | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo. | 6 | 3 | Pendente |
 
-- [Acessar o Backlog do Produto (PDF)](./docs/backlog-produto.pdf)
+- [Acessar o Backlog do Produto (PDF)](./docs/academic/Backlog_do_Produto1.pdf)
 
 ## Tecnologias
 
@@ -163,8 +163,6 @@ nome-do-projeto/
 
 ## Documentação Adicional
 
-- [Documentação das Sprints](./docs/sprints)
-- [Backlog do Produto](./docs/backlog-produto.pdf)
 - [Rotas da API](./docs/rotas-api.md)
 
 ## Documentação e Manuais
@@ -176,10 +174,10 @@ nome-do-projeto/
 
 | Foto | Função | Nome | Links |
 |:----:|:------:|:----:|:-----:|
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFQwd80LGjHEw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727568322525?e=1789603200&v=beta&t=2btg-d3ZrIerf4ACRXRd9HedNLz60m06PrcH8uC8K_s" width="60" height="60" style="border-radius:12px"/> | **Product Owner** | Vinicius Konishi Gregório | <a href="https://github.com/vinicius-konishi"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQHccwKf0_ByzQ/profile-displayphoto-crop_800_800/B4DZ6qNcd9H0AI-/0/1780972112692?e=1789603200&v=beta&t=jswXVNPQAB6QAc6LR8lDpvRCZlINIuo6fhi2SDlEdps" width="60" height="60" style="border-radius:12px"/> | **Scrum Master** | Vinicius Silva Lopes | <a href="https://github.com/viniciuslopes2"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFRtAeSxgrHNw/profile-displayphoto-crop_800_800/B4DZjYj0RDHwAI-/0/1755979928154?e=1789603200&v=beta&t=mn_ouv4eaMwffqvfKltkPuxTP7abaDaXE6xcuCIwsUE" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Caio Rodrigues de Almeida | <a href="https://github.com/Caio-Almeida4"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/caio-rodri1/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQHZ36h5L5A2XA/profile-displayphoto-crop_800_800/B4DZjKEYgfHYAI-/0/1755736806505?e=1789603200&v=beta&t=4xb-9sKPHoeRIhH3S9uZvNEjYCi62JLOi5kmXJ9Nr5E" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Guilherme Fernando Portela de Oliveira | <a href="https://github.com/guilhermefpo/guilhermefpo"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/guilhermefernandoportela/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEw9VDUxHOlQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1678970447839?e=1789603200&v=beta&t=qd0SNljhZJNibhbq9CmJ9O40lsJrH9UEw9UrsO9s9AM" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Igor Martins | <a href="https://github.com/IgorMartins0729"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/igormrtns/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEKrsk9CXyjxA/profile-displayphoto-crop_800_800/B4DZzIlYwdJ4AI-/0/1772891772140?e=1789603200&v=beta&t=1F02hawljbVxSe0ds2zFec2NJgxl-aFBsZVUDmDjQwQ" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Rodolfo Ferreira Venâncio | <a href="https://github.com/Clown0o0"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/rodolfo-ferreir4/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-| <img src="https://media.licdn.com/dms/image/v2/D4E03AQHiYzkTmAZtlg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1714513797011?e=1789603200&v=beta&t=xN5UL0er77KSJ1A3LHCtgNIrbojDJAt5pvOFfpvJWO0" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Yoseph Levi Rodrigues de Lima | <a href="https://github.com/YosephLima"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/yoseph-levi-rodrigues-de-lima-7020b324a/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/konishi.jpg" width="60" height="60" style="border-radius:12px"/> | **Product Owner** | Vinicius Konishi Gregório | <a href="https://github.com/vinicius-konishi"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/vinicius.png" width="60" height="60" style="border-radius:12px"/> | **Scrum Master** | Vinicius Silva Lopes | <a href="https://github.com/viniciuslopes2"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/caio.png" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Caio Rodrigues de Almeida | <a href="https://github.com/Caio-Almeida4"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/caio-rodri1/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/guilherme.png" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Guilherme Fernando Portela de Oliveira | <a href="https://github.com/guilhermefpo/guilhermefpo"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/guilhermefernandoportela/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/igor.jpg" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Igor Martins | <a href="https://github.com/IgorMartins0729"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/igormrtns/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/rodolfo.png" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Rodolfo Ferreira Venâncio | <a href="https://github.com/Clown0o0"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/rodolfo-ferreir4/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+| <img src="./docs/img/yoseph.jpg" width="60" height="60" style="border-radius:12px"/> | **Dev Team** | Yoseph Levi Rodrigues de Lima | <a href="https://github.com/YosephLima"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/yoseph-levi-rodrigues-de-lima-7020b324a/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
