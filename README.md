@@ -63,8 +63,6 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 |  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
 |  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
 
-- [Acessar o Backlog do Produto (PDF)](./docs/academic/Backlog_do_Produto1.pdf)
-
 ## Tecnologias
 
 Principais tecnologias utilizadas no projeto:
@@ -144,6 +142,32 @@ Exemplo:
 ```bash
 git commit -m "feat(#06):adiciona tela de ranking mensal dos motoristas"
 git commit -m "fix(#02):corrige leitura de linhas invalidas na importacao da planilha de manifestos"
+```
+
+## Estratégia de Branches
+
+**Formato:** `<tipo>/descricao-breve-da-task`
+
+| Branch       | Descricao                                         |
+| ------------ | ------------------------------------------------- |
+| `main`       | Codigo estavel, pronto para entrega               |
+| `develop`    | Integracao das funcionalidades em desenvolvimento |
+| `feat/*`     | Nova funcionalidade                               |
+| `fix/*`      | Correcao de bug                                   |
+| `docs/*`     | Alteracao na documentacao                         |
+| `style/*`    | Formatacao, sem alteracao de logica               |
+| `refactor/*` | Refatoracao de codigo                             |
+| `test/*`     | Adicao ou ajuste de testes                        |
+| `chore/*`    | Tarefas gerais, configuracao, dependencias        |
+
+Cada task e desenvolvida em uma branch criada a partir da `develop`. Depois, abre-se um PR para a `develop` e, com a `develop` estavel, um PR da `develop` para a `main`. Nenhum commit direto na `main` ou na `develop`.
+
+Exemplo:
+
+```
+git checkout develop
+git pull origin develop
+git checkout -b feat/pagina-login
 ```
 
 ## Estrutura do Projeto
