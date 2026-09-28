@@ -63,7 +63,6 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | 8 | Média | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema; | 6 | 3 | Pendente |
 | 9 | Baixa | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo. | 6 | 3 | Pendente |
 
-- [Acessar o Backlog do Produto (PDF)](./docs/academic/Backlog_do_Produto1.pdf)
 
 ## Tecnologias
 
