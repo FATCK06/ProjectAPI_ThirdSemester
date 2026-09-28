@@ -4,6 +4,7 @@ import truckBg from '../../assets/images/truck-login.png';
 import './login.css';
 import { Eye, EyeOff } from 'lucide-react';
 import api from '../../services/api';
+import { useToast } from '../../components/Toast';
 
 //criando interface que reflete o contrato com o backend
 interface LoginResponse {
@@ -14,6 +15,7 @@ export function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,11 +28,18 @@ export function Login() {
 
           if (resposta.data && resposta.data.token) {
             localStorage.setItem('@Logistica:token', resposta.data.token);
+            // Guardados para a interface decidir o que mostrar (ex.: a página de
+            // status, só para Administrador). Não valem como segurança: quem manda
+            // é o perfil dentro do token, que o gateway valida a cada requisição.
+            localStorage.setItem('@Logistica:nome', resposta.data.nome ?? '');
+            localStorage.setItem('@Logistica:perfil', resposta.data.perfil ?? '');
             navigate('/dashboard');
           }
         } catch (erro) {
           console.error('Erro ao conectar com o servidor:', erro);
-          alert('Email ou enha incorretos ou servidor indisponível!');
+          toast.erro('E-mail ou senha incorretos, ou servidor indisponível.', {
+            titulo: 'Não foi possível entrar',
+          });
         }
   };   
 

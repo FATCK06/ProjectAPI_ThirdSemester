@@ -1,0 +1,68 @@
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 64px 0;
+}
+
+.loading-wrap.loading-sm {
+  gap: 12px;
+  padding: 24px 0;
+}
+
+.loading-spinner {
+  width: 56px;
+  height: 56px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: loading-girar 0.9s linear infinite;
+}
+
+.loading-sm .loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+}
+
+@keyframes loading-girar {
+  to { transform: rotate(360deg); }
+}
+
+.loading-texto {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #0f172a;
+}
+
+.loading-sm .loading-texto {
+  font-size: 14px;
+}
+
+.loading-detalhe {
+  margin: 0;
+  font-size: 13px;
+  color: #94a3b8;
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+.loading-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Girando mais devagar ainda indica espera, sem o movimento rápido */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation-duration: 2.4s;
+  }
+}

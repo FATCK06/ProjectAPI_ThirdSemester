@@ -1,0 +1,90 @@
+/* src/pages/Importacoes/Manifestos/components/step4.css */
+
+.revisao-vazio {
+  text-align: center;
+  color: #94a3b8;
+  padding: 40px 0;
+}
+
+.revisao-cabecalho {
+  margin-bottom: 16px;
+}
+
+.revisao-cabecalho h4 {
+  font-size: 16px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.revisao-cabecalho p {
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* 9 colunas: cabem na largura da tela cortando os textos longos; a rolagem só aparece em telas estreitas */
+.revisao-tabela-area {
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.revisao-tabela {
+  width: 100%;
+  min-width: 760px;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.revisao-tabela th,
+.revisao-tabela td {
+  padding: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.revisao-tabela th {
+  text-align: left;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 500;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.revisao-tabela td {
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.revisao-tabela .col-manifesto { width: 96px; }
+.revisao-tabela .col-data { width: 96px; }
+.revisao-tabela .col-mes { width: 80px; }
+.revisao-tabela .col-cpf { width: 128px; }
+.revisao-tabela .col-veiculo { width: 96px; }
+.revisao-tabela .col-valor { width: 116px; }
+
+.revisao-tabela tr:last-child td {
+  border-bottom: none;
+}
+
+.celula-forte {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.celula-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}
+
+.alinhar-direita {
+  text-align: right;
+}
+
+.revisao-nota {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+}

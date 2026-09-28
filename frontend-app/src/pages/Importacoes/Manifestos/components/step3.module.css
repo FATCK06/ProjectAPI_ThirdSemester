@@ -1,0 +1,119 @@
+.wrap {
+  container-type: inline-size;
+  width: 100%;
+}
+
+.conteudo {
+  display: flex;
+  align-items: flex-start;
+  gap: 22px;
+}
+
+.cartao {
+  flex: 1;
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+  color: #111827;
+}
+
+.rolagem {
+  overflow-x: auto;
+}
+
+.tabela {
+  width: 100%;
+  min-width: 480px;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.tabela th {
+  height: 40px;
+  padding: 0 8px;
+  background: #f3f3f3;
+  font-weight: 600;
+  text-align: center;
+}
+
+.tabela td {
+  height: 36px;
+  padding: 0 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.indice {
+  width: 56px;
+  border-right: 1px solid #e5e7eb;
+  font-weight: 500;
+}
+
+.linha {
+  cursor: pointer;
+}
+
+.linha:hover td,
+.linhaSelecionada td {
+  background: #f9fafb;
+}
+
+.rodape {
+  padding: 12px 20px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.rodape strong {
+  font-weight: 500;
+  color: #111827;
+}
+
+.painel {
+  flex: 0 0 340px;
+  box-sizing: border-box;
+  min-height: 480px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+.fechar {
+  display: block;
+  margin: 0 0 16px auto;
+  padding: 4px;
+  border: 0;
+  background: none;
+  font-size: 18px;
+  line-height: 1;
+  color: #111827;
+  cursor: pointer;
+}
+
+.blocoCinza {
+  height: 80px;
+  margin-bottom: 26px;
+  background: #d9d9d9;
+}
+
+@container (max-width: 760px) {
+  .conteudo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .painel {
+    flex: none;
+    width: 100%;
+    min-height: 0;
+  }
+}

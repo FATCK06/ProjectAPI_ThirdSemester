@@ -1,0 +1,39 @@
+.dashboard-charts {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+	width: 100%;
+}
+
+.dashboard-indicators {
+	grid-column: 1 / -1;
+	width: 100%;
+	min-height: 200px;
+}
+
+.dashboard-indicators .card-indicadores {
+	border-color: #d1d5db;
+}
+
+.dashboard-chart {
+	width: 100%;
+	min-width: 0;
+}
+
+.dashboard-chart > .card {
+	height: 420px;
+}
+
+.dashboard-driver-chart .card-chart {
+	height: 370px;
+}
+
+.dashboard-driver-chart .card-header h2 {
+	margin: 0;
+}
+
+@media (max-width: 1200px) {
+	.dashboard-charts {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
