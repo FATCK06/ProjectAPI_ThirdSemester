@@ -1,0 +1,99 @@
+@page {
+    size: A4;
+    margin: 20mm 18mm 20mm 18mm;
+
+    @bottom-right {
+        content: counter(page);
+        font: 9pt 'Segoe UI', Arial, sans-serif;
+        color: #888;
+    }
+}
+
+@page :first {
+    @bottom-right { content: none; }
+}
+
+:root {
+    --texto: #1f2328;
+    --suave: #59636e;
+    --borda: #d1d9e0;
+    --fundo-codigo: #f6f8fa;
+    --destaque: #1d4ed8;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font: 10.5pt/1.55 'Segoe UI', Arial, sans-serif;
+    color: var(--texto);
+    margin: 0;
+}
+
+.capa {
+    height: 250mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    break-after: page;
+}
+.capa img { width: 42mm; margin-bottom: 12mm; }
+.capa h1 { font-size: 30pt; border: none; margin: 0 0 4mm; color: var(--destaque); }
+.capa .subtitulo { font-size: 14pt; color: var(--suave); margin: 0 0 30mm; }
+.capa .meta { font-size: 10pt; color: var(--suave); }
+
+.arquivo + .arquivo { break-before: page; }
+
+h1, h2, h3, h4 { line-height: 1.25; break-after: avoid; }
+h1 { font-size: 20pt; border-bottom: 2px solid var(--destaque); padding-bottom: 2mm; margin: 0 0 5mm; }
+h2 { font-size: 14.5pt; border-bottom: 1px solid var(--borda); padding-bottom: 1.5mm; margin: 8mm 0 3mm; }
+h3 { font-size: 12pt; margin: 6mm 0 2mm; }
+h4 { font-size: 10.5pt; margin: 4mm 0 2mm; }
+
+a { color: var(--destaque); text-decoration: none; }
+
+hr { border: none; border-top: 1px solid var(--borda); margin: 6mm 0; }
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 3mm 0 4mm;
+    font-size: 9.5pt;
+    break-inside: auto;
+}
+tr { break-inside: avoid; }
+th, td { border: 1px solid var(--borda); padding: 1.6mm 2.4mm; text-align: left; vertical-align: top; }
+th { background: var(--fundo-codigo); font-weight: 600; }
+
+code {
+    font: 9pt Consolas, 'Courier New', monospace;
+    background: var(--fundo-codigo);
+    padding: 0.2mm 1mm;
+    border-radius: 3px;
+}
+pre {
+    background: var(--fundo-codigo);
+    border: 1px solid var(--borda);
+    border-radius: 4px;
+    padding: 3mm;
+    font-size: 8.5pt;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    word-break: break-word;
+    break-inside: avoid;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+blockquote {
+    margin: 3mm 0;
+    padding: 2mm 4mm;
+    border-left: 3px solid var(--destaque);
+    background: #eff4ff;
+    color: var(--texto);
+    break-inside: avoid;
+}
+blockquote p { margin: 0; }
+
+ul, ol { padding-left: 6mm; }
+li { margin: 0.8mm 0; }

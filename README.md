@@ -19,7 +19,7 @@ Sistema simplificado para gestão de motoristas agregados, permitindo acompanhar
 
 **Desenvolvimento** · [Tecnologias](#tecnologias) · [Pré-requisitos](#pré-requisitos) · [Como Rodar o Projeto](#como-rodar-o-projeto) · [Estrutura do Projeto](#estrutura-do-projeto)
 
-**Documentação** · [Padrões de Commit](#padrões-de-commit) · [Documentação Adicional](#documentação-adicional) · [Documentação e Manuais](#documentação-e-manuais) · [Membros da Equipe](#membros-da-equipe)
+**Documentação** · [Padrões de Commit](#padrões-de-commit) · [Documentações](#documentações) · [Membros da Equipe](#membros-da-equipe)
 
 </div>
 
@@ -43,23 +43,24 @@ A solução adota uma abordagem centralizada de acompanhamento operacional, reun
 
 O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo dividido em três sprints com períodos e entregas previamente definidos.
 
-| Sprint |         Período         |    Status    |                         Documentação                          | Vídeo de Incremento |
-| :----: | :---------------------: | :----------: | :-----------------------------------------------------------: | :-----------------: |
-|   1    | 07/09/2026 a 27/09/2026 | Em andamento | [Documentos da Sprint 1](./docs/academic/Backlog_Sprint1.pdf) |     A publicar      |
-|   2    | 05/10/2026 a 25/10/2026 |   Pendente   | [Documentos da Sprint 2](./docs/academic/Backlog_Sprint2.pdf) |     A publicar      |
-|   3    | 02/11/2026 a 22/11/2026 |   Pendente   | [Documentos da Sprint 3](./docs/academic/Backlog_Sprint3.pdf) |     A publicar      |
+| Sprint |         Período         |    Status    | Vídeo de Incremento |
+| :----: | :---------------------: | :----------: | :-----------------: |
+|   1    | 07/09/2026 a 27/09/2026 | Concluído | A publicar |
+|   2    | 05/10/2026 a 25/10/2026 | Em andamento | A publicar |
+|   3    | 02/11/2026 a 22/11/2026 | Pendente | A publicar |
+
 
 ## Backlog do Produto
 
 | Rank | Prioridade | User Story                                                                                                                  | Estimativa | Sprint |    Status    |
 | :--: | :--------: | :-------------------------------------------------------------------------------------------------------------------------- | :--------: | :----: | :----------: |
-|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    | Em andamento |
-|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    | Em andamento |
-|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    | Em andamento |
-|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    |   Pendente   |
-|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |   Pendente   |
-|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |   Pendente   |
-|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |   Pendente   |
+|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    | Concluído |
+|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    | Concluído |
+|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    | Concluído |
+|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    |   Em andamento   |
+|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |   Em andamento   |
+|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |   Em andamento   |
+|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |   Em andamento   |
 |  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
 |  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
 
@@ -185,14 +186,11 @@ nome-do-projeto/
 └── vite.config.js
 ```
 
-## Documentação Adicional
+## Documentações
 
-- [Rotas da API](./docs/rotas-api.md)
-
-## Documentação e Manuais
-
-- [**Documentação do Projeto**](./docs)
-- [**Manual do Usuário**](./docs/manual-do-usuario.md)
+- [**Documentação do Projeto**](./docs/README.md)
+- [**Manual do Usuário**](./docs/manual-usuario/README.md) · [PDF](./docs/pdf/manual-do-usuario.pdf)
+- [**Rotas da API**](./docs/api/README.md) · [PDF](./docs/pdf/rotas-api.pdf)
 
 ## Membros da Equipe
 
