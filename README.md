@@ -89,41 +89,50 @@ Antes de iniciar, certifique-se de ter instalado:
 
 ## Como Rodar o Projeto
 
-### Frontend
+O sistema tem duas partes: o backend, com quatro serviços Spring Boot em `backend/`, e o frontend React em `frontend-app/`.
+
+### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-projeto.git
+git clone https://github.com/FATCK06/ProjectAPI_ThirdSemester.git
+cd ProjectAPI_ThirdSemester
+```
 
-cd nome-do-projeto/frontend
+### 2. Configurar as credenciais
 
+As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Em cada serviço, entre em `src/main/resources/`, copie o `application-dev.properties.example` para `application-dev.properties` e preencha com os dados passados pelo time.
+
+| Serviço        | Pasta                             | Porta | O que preencher                         |
+| -------------- | --------------------------------- | ----- | --------------------------------------- |
+| `ms-usuarios`  | `backend/ms-usuarios/ms-usuarios` | 8081  | Banco e chave do JWT                    |
+| `ms-frota`     | `backend/ms-frota`                | 8082  | Banco                                   |
+| `ms-operacoes` | `backend/ms-operacoes`            | 8083  | Banco                                   |
+| `api-gateway`  | `backend/api-gateway`             | 8080  | Chave do JWT (a mesma do `ms-usuarios`) |
+
+O `application-dev.properties` já está no `.gitignore`, então não corre risco de ser commitado.
+
+### 3. Subir o backend
+
+Não é preciso instalar o Maven: cada serviço tem o Maven Wrapper. Abra um terminal por serviço, entre na pasta dele (tabela acima) e rode:
+
+```bash
+./mvnw spring-boot:run      # Linux e macOS
+mvnw.cmd spring-boot:run    # Windows
+```
+
+O serviço está no ar quando aparece `Started ...Application` no terminal. Se preferir, dá para rodar pela IDE, executando a classe `*Application` de cada serviço.
+
+No Windows, o `backend/subir-tudo.cmd` sobe os quatro de uma vez (cada um na sua janela) e o `backend/parar-tudo.cmd` derruba todos.
+
+### 4. Subir o frontend
+
+```bash
+cd frontend-app
 npm install
-
-npm run dev
-
-npm run build
-```
-
-Caso o projeto utilize variaveis de ambiente, copie o arquivo de exemplo:
-
-```bash
-cp .env.example .env
-```
-
-### Backend
-
-```bash
-cd nome-do-projeto/backend
-
-npm install
-
 npm run dev
 ```
 
-Caso o projeto utilize variaveis de ambiente, copie o arquivo de exemplo:
-
-```bash
-cp .env.example .env
-```
+Acesse `http://localhost:5173`. O frontend chama o gateway em `http://localhost:8080/api`. Para usar outro endereço, crie um `frontend-app/.env.local` com `VITE_API_URL=<endereço>`.
 
 ## Padrões de Commit
 
