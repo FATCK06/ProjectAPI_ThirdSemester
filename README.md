@@ -15,7 +15,7 @@ Sistema simplificado para gestão de motoristas agregados, permitindo acompanhar
 
 **Projeto** · [Sobre o Projeto](#sobre-o-projeto) · [Objetivo](#objetivo) · [Proposta de Solução](#proposta-de-solução)
 
-**Gestão** · [Sprints](#sprints) · [Backlog do Produto](#backlog-do-produto)
+**Gestão** · [Sprints](#sprints) · [DoD e DoR](#dod-e-dor) · [Backlog do Produto](#backlog-do-produto)
 
 **Desenvolvimento** · [Tecnologias](#tecnologias) · [Pré-requisitos](#pré-requisitos) · [Como Rodar o Projeto](#como-rodar-o-projeto) · [Estrutura do Projeto](#estrutura-do-projeto)
 
@@ -49,6 +49,31 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 |   2    | 05/10/2026 a 25/10/2026 | Em andamento | A publicar |
 |   3    | 02/11/2026 a 22/11/2026 | Pendente | A publicar |
 
+## DoD e DoR
+
+<details>
+<summary><strong>Definition of Ready (DoR)</strong></summary>
+
+- A história deve estar clara, priorizada e alinhada ao backlog do produto.
+- O objetivo do usuário e o valor de negócio devem estar definidos.
+- Os requisitos devem estar descritos com contexto suficiente para implementação.
+- As regras de importação, validação e consistência dos dados devem estar explícitas.
+- A história precisa ter critérios de aceitação que permitam validar o resultado final.
+- A entrega deve estar dentro do escopo da Sprint atual e com dependências identificadas.
+
+</details>
+
+<details>
+<summary><strong>Definition of Done (DoD)</strong></summary>
+
+- A funcionalidade foi implementada e integrada ao fluxo principal do sistema.
+- A importação da planilha de manifestos está funcionando corretamente.
+- Os dados são tratados e validados para garantir consistência e evitar inconsistências na operação.
+- O sistema apresenta um resumo visual dos dados importados de forma clara e útil para conferência.
+- A funcionalidade foi testada e validada contra os critérios de aceitação da história.
+- O resultado está pronto para revisão, apresentação e uso pelo cliente ou pela equipe.
+
+</details>
 
 ## Backlog do Produto
 
