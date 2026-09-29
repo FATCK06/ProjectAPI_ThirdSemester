@@ -1,0 +1,12 @@
+{
+  "name": "docs-pdf",
+  "private": true,
+  "type": "module",
+  "description": "Gera os PDFs de docs/pdf a partir dos arquivos .md",
+  "scripts": {
+    "pdf": "node gerar-pdfs.mjs"
+  },
+  "dependencies": {
+    "marked": "^18.0.0"
+  }
+}
