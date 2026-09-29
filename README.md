@@ -80,9 +80,10 @@ Principais tecnologias utilizadas no projeto:
 ## Pré-requisitos
 
 Antes de iniciar, certifique-se de ter instalado:
-
-- Node.js (versao >= 18)
+- JDK 17
+- Node.js 18 ou superior
 - npm ou yarn
+- PostgreSQL (banco hospedado no Supabase)
 - Git
 
 ## Como Rodar o Projeto
