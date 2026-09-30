@@ -15,7 +15,7 @@ Sistema simplificado para gestão de motoristas agregados, permitindo acompanhar
 
 **Projeto** · [Sobre o Projeto](#sobre-o-projeto) · [Objetivo](#objetivo) · [Proposta de Solução](#proposta-de-solução)
 
-**Gestão** · [Sprints](#sprints) · [DoD e DoR](#dod-e-dor) · [Backlog do Produto](#backlog-do-produto)
+**Gestão** · [Sprints](#sprints) · [DoD e DoR](#dod-e-dor) · [Backlog do Produto](#backlog-do-produto) · [Estratégia de Branches](#estratégia-de-branches)
 
 **Desenvolvimento** · [Tecnologias](#tecnologias) · [Pré-requisitos](#pré-requisitos) · [Como Rodar o Projeto](#como-rodar-o-projeto) · [Estrutura do Projeto](#estrutura-do-projeto)
 
@@ -45,9 +45,9 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Sprint |         Período         |    Status    | Vídeo de Incremento |
 | :----: | :---------------------: | :----------: | :-----------------: |
-|   1    | 07/09/2026 a 27/09/2026 | Concluído | A publicar |
-|   2    | 05/10/2026 a 25/10/2026 | Em andamento | A publicar |
-|   3    | 02/11/2026 a 22/11/2026 | Pendente | A publicar |
+|   1    | 07/09/2026 a 27/09/2026 |  Concluído   |     A publicar      |
+|   2    | 05/10/2026 a 25/10/2026 | Em andamento |     A publicar      |
+|   3    | 02/11/2026 a 22/11/2026 |   Pendente   |     A publicar      |
 
 ## DoD e DoR
 
@@ -79,13 +79,13 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | Prioridade | User Story                                                                                                                  | Estimativa | Sprint |    Status    |
 | :--: | :--------: | :-------------------------------------------------------------------------------------------------------------------------- | :--------: | :----: | :----------: |
-|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    | Concluído |
-|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    | Concluído |
-|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    | Concluído |
-|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    |   Em andamento   |
-|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |   Em andamento   |
-|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |   Em andamento   |
-|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |   Em andamento   |
+|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    |  Concluído   |
+|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    |  Concluído   |
+|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    |  Concluído   |
+|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    | Em andamento |
+|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    | Em andamento |
+|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    | Em andamento |
+|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    | Em andamento |
 |  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
 |  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
 
@@ -106,6 +106,7 @@ Principais tecnologias utilizadas no projeto:
 ## Pré-requisitos
 
 Antes de iniciar, certifique-se de ter instalado:
+
 - JDK 17
 - Node.js 18 ou superior
 - npm ou yarn
