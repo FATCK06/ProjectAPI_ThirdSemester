@@ -209,16 +209,55 @@ git checkout -b feat/pagina-login
 ## Estrutura do Projeto
 
 ```
-nome-do-projeto/
-├── src/
-│   ├── components/     # Componentes reutilizaveis
-│   ├── hooks/          # Custom hooks (ex: useWizard)
-│   ├── context/        # Context API
-│   ├── pages/          # Paginas e rotas
-│   └── App.jsx
-├── public/
-├── package.json
-└── vite.config.js
+ProjectAPI_ThirdSemester                    | Sistema de gestão logística
+├─ backend/                                 | Serviços do sistema
+│  ├─ api-gateway/                          | Gateway da API
+│  ├─ ms-frota/                             | Gestão da frota
+│  ├─ ms-operacoes/                         | Operações e importações
+│  └─ ms-usuarios/                          | Gestão de usuários
+├─ db/                                      | Banco de dados
+│  └─ migration/                            | Migrações do banco
+├─ docs/                                    | Documentação
+│  ├─ academic/                             | Materiais acadêmicos
+│  ├─ api/                                  | Documentação da API
+│  ├─ arquitetura/                          | Arquitetura do sistema
+│  │  └─ decisoes/                          | Decisões arquiteturais
+│  ├─ img/                                  | Imagens da documentação
+│  ├─ manual-usuario/                       | Manual do usuário
+│  │  └─ img/                               | Imagens do manual
+│  ├─ pdf/                                  | Documentos PDF
+│  ├─ scripts/                              | Geração de documentos
+│  └─ task/                                 | Tarefas do projeto
+│     ├─ arquitetura-microservicos/         | Arquitetura de microsserviços
+│     └─ docker-ambiente-local/             | Ambiente local com Docker
+└─ frontend-app/                            | Aplicação web
+   ├─ public/                               | Arquivos públicos
+   └─ src/                                  | Código-fonte
+      ├─ assets/                            | Recursos visuais
+      │  └─ images/                         | Imagens
+      ├─ components/                        | Componentes da interface
+      │  ├─ Loading/                        | Carregamento
+      │  ├─ RankingMotoristas/              | Ranking de motoristas
+      │  ├─ Sidebar/                        | Navegação lateral
+      │  ├─ SkeletonLoader/                 | Esqueletos de carregamento
+      │  │  ├─ CardSkeleton/                | Esqueleto de cartão
+      │  │  └─ TableSkeleton/               | Esqueleto de tabela
+      │  └─ Toast/                          | Notificações
+      ├─ contexts/                          | Contextos compartilhados
+      ├─ layouts/                           | Layouts das páginas
+      ├─ pages/                             | Páginas da aplicação
+      │  ├─ Dashboard/                      | Painel principal
+      │  │  └─ components/                  | Componentes do painel
+      │  ├─ Importacoes/                    | Importação de dados
+      │  │  ├─ Manifestos/                  | Importação de manifestos
+      │  │  │  └─ components/               | Componentes de manifestos
+      │  │  └─ Veiculos/                    | Importação de veículos
+      │  ├─ Login/                          | Autenticação
+      │  ├─ Status/                         | Status dos serviços
+      │  └─ Usuarios/                       | Gestão de usuários
+      │     └─ Cadastro/                    | Cadastro de usuários
+      ├─ routes/                            | Rotas da aplicação
+      └─ services/                          | Comunicação com as APIs
 ```
 
 ## Documentações
