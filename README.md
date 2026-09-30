@@ -45,21 +45,21 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Sprint |         Período         |    Status    | Vídeo de Incremento |
 | :----: | :---------------------: | :----------: | :-----------------: |
-|   1    | 07/09/2026 a 27/09/2026 | Concluído | A publicar |
-|   2    | 05/10/2026 a 25/10/2026 | Em andamento | A publicar |
-|   3    | 02/11/2026 a 22/11/2026 | Pendente | A publicar |
+|   1    | 07/09/2026 a 27/09/2026 |  Concluído   |     A publicar      |
+|   2    | 05/10/2026 a 25/10/2026 | Em andamento |     A publicar      |
+|   3    | 02/11/2026 a 22/11/2026 |   Pendente   |     A publicar      |
 
 ## Backlog do Produto
 
 | Rank | Prioridade | User Story                                                                                                                  | Estimativa | Sprint |    Status    |
 | :--: | :--------: | :-------------------------------------------------------------------------------------------------------------------------- | :--------: | :----: | :----------: |
-|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    | Concluído |
-|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    | Concluído |
-|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    | Concluído |
-|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    |   Em andamento   |
-|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |   Em andamento   |
-|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |   Em andamento   |
-|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |   Em andamento   |
+|  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    |  Concluído   |
+|  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    |  Concluído   |
+|  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    |  Concluído   |
+|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    | Em andamento |
+|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    | Em andamento |
+|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    | Em andamento |
+|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    | Em andamento |
 |  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
 |  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
 
@@ -141,6 +141,7 @@ Principais tecnologias utilizadas no projeto:
 ## Pré-requisitos
 
 Antes de iniciar, certifique-se de ter instalado:
+
 - JDK 17
 - Node.js 18 ou superior
 - npm ou yarn
@@ -149,41 +150,50 @@ Antes de iniciar, certifique-se de ter instalado:
 
 ## Como Rodar o Projeto
 
-### Frontend
+O sistema tem duas partes: o backend, com quatro serviços Spring Boot em `backend/`, e o frontend React em `frontend-app/`.
+
+### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-projeto.git
+git clone https://github.com/FATCK06/ProjectAPI_ThirdSemester.git
+cd ProjectAPI_ThirdSemester
+```
 
-cd nome-do-projeto/frontend
+### 2. Configurar as credenciais
 
+As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Em cada serviço, entre em `src/main/resources/`, copie o `application-dev.properties.example` para `application-dev.properties` e preencha com os dados passados pelo time.
+
+| Serviço        | Pasta                             | Porta | O que preencher                         |
+| -------------- | --------------------------------- | ----- | --------------------------------------- |
+| `ms-usuarios`  | `backend/ms-usuarios/ms-usuarios` | 8081  | Banco e chave do JWT                    |
+| `ms-frota`     | `backend/ms-frota`                | 8082  | Banco                                   |
+| `ms-operacoes` | `backend/ms-operacoes`            | 8083  | Banco                                   |
+| `api-gateway`  | `backend/api-gateway`             | 8080  | Chave do JWT (a mesma do `ms-usuarios`) |
+
+O `application-dev.properties` já está no `.gitignore`, então não corre risco de ser commitado.
+
+### 3. Subir o backend
+
+Não é preciso instalar o Maven: cada serviço tem o Maven Wrapper. Abra um terminal por serviço, entre na pasta dele (tabela acima) e rode:
+
+```bash
+./mvnw spring-boot:run      # Linux e macOS
+mvnw.cmd spring-boot:run    # Windows
+```
+
+O serviço está no ar quando aparece `Started ...Application` no terminal. Se preferir, dá para rodar pela IDE, executando a classe `*Application` de cada serviço.
+
+No Windows, o `backend/subir-tudo.cmd` sobe os quatro de uma vez (cada um na sua janela) e o `backend/parar-tudo.cmd` derruba todos.
+
+### 4. Subir o frontend
+
+```bash
+cd frontend-app
 npm install
-
-npm run dev
-
-npm run build
-```
-
-Caso o projeto utilize variaveis de ambiente, copie o arquivo de exemplo:
-
-```bash
-cp .env.example .env
-```
-
-### Backend
-
-```bash
-cd nome-do-projeto/backend
-
-npm install
-
 npm run dev
 ```
 
-Caso o projeto utilize variaveis de ambiente, copie o arquivo de exemplo:
-
-```bash
-cp .env.example .env
-```
+Acesse `http://localhost:5173`. O frontend chama o gateway em `http://localhost:8080/api`. Para usar outro endereço, crie um `frontend-app/.env.local` com `VITE_API_URL=<endereço>`.
 
 ## Padrões de Commit
 
@@ -235,16 +245,55 @@ git checkout -b feat/pagina-login
 ## Estrutura do Projeto
 
 ```
-nome-do-projeto/
-├── src/
-│   ├── components/     # Componentes reutilizaveis
-│   ├── hooks/          # Custom hooks (ex: useWizard)
-│   ├── context/        # Context API
-│   ├── pages/          # Paginas e rotas
-│   └── App.jsx
-├── public/
-├── package.json
-└── vite.config.js
+ProjectAPI_ThirdSemester                    | Sistema de gestão logística
+├─ backend/                                 | Serviços do sistema
+│  ├─ api-gateway/                          | Gateway da API
+│  ├─ ms-frota/                             | Gestão da frota
+│  ├─ ms-operacoes/                         | Operações e importações
+│  └─ ms-usuarios/                          | Gestão de usuários
+├─ db/                                      | Banco de dados
+│  └─ migration/                            | Migrações do banco
+├─ docs/                                    | Documentação
+│  ├─ academic/                             | Materiais acadêmicos
+│  ├─ api/                                  | Documentação da API
+│  ├─ arquitetura/                          | Arquitetura do sistema
+│  │  └─ decisoes/                          | Decisões arquiteturais
+│  ├─ img/                                  | Imagens da documentação
+│  ├─ manual-usuario/                       | Manual do usuário
+│  │  └─ img/                               | Imagens do manual
+│  ├─ pdf/                                  | Documentos PDF
+│  ├─ scripts/                              | Geração de documentos
+│  └─ task/                                 | Tarefas do projeto
+│     ├─ arquitetura-microservicos/         | Arquitetura de microsserviços
+│     └─ docker-ambiente-local/             | Ambiente local com Docker
+└─ frontend-app/                            | Aplicação web
+   ├─ public/                               | Arquivos públicos
+   └─ src/                                  | Código-fonte
+      ├─ assets/                            | Recursos visuais
+      │  └─ images/                         | Imagens
+      ├─ components/                        | Componentes da interface
+      │  ├─ Loading/                        | Carregamento
+      │  ├─ RankingMotoristas/              | Ranking de motoristas
+      │  ├─ Sidebar/                        | Navegação lateral
+      │  ├─ SkeletonLoader/                 | Esqueletos de carregamento
+      │  │  ├─ CardSkeleton/                | Esqueleto de cartão
+      │  │  └─ TableSkeleton/               | Esqueleto de tabela
+      │  └─ Toast/                          | Notificações
+      ├─ contexts/                          | Contextos compartilhados
+      ├─ layouts/                           | Layouts das páginas
+      ├─ pages/                             | Páginas da aplicação
+      │  ├─ Dashboard/                      | Painel principal
+      │  │  └─ components/                  | Componentes do painel
+      │  ├─ Importacoes/                    | Importação de dados
+      │  │  ├─ Manifestos/                  | Importação de manifestos
+      │  │  │  └─ components/               | Componentes de manifestos
+      │  │  └─ Veiculos/                    | Importação de veículos
+      │  ├─ Login/                          | Autenticação
+      │  ├─ Status/                         | Status dos serviços
+      │  └─ Usuarios/                       | Gestão de usuários
+      │     └─ Cadastro/                    | Cadastro de usuários
+      ├─ routes/                            | Rotas da aplicação
+      └─ services/                          | Comunicação com as APIs
 ```
 
 ## Documentações
