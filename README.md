@@ -45,7 +45,7 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Sprint |         Período         |    Status    | Vídeo de Incremento |
 | :----: | :---------------------: | :----------: | :-----------------: |
-|   1    | 07/09/2026 a 27/09/2026 |  Concluído   |     A publicar      |
+|   1    | 07/09/2026 a 27/09/2026 |  Concluído   | [Vídeo Sprint 1](https://youtu.be/goyPNGYXRPQ) |
 |   2    | 05/10/2026 a 25/10/2026 | Em andamento |     A publicar      |
 |   3    | 02/11/2026 a 22/11/2026 |   Pendente   |     A publicar      |
 
