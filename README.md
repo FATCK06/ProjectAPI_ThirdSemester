@@ -45,7 +45,7 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Sprint |         Período         |    Status    | Vídeo de Incremento |
 | :----: | :---------------------: | :----------: | :-----------------: |
-|   1    | 07/09/2026 a 27/09/2026 |  Concluído   |     A publicar      |
+|   1    | 07/09/2026 a 27/09/2026 |  Concluído   | [Vídeo Sprint 1](https://youtu.be/goyPNGYXRPQ) |
 |   2    | 05/10/2026 a 25/10/2026 | Em andamento |     A publicar      |
 |   3    | 02/11/2026 a 22/11/2026 |   Pendente   |     A publicar      |
 
@@ -69,11 +69,11 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 ### Backlog da Sprint 1
 
-| Rank | Prioridade | User Story | Estimativa |
-| :--: | :--------: | :--------- | :--------: |
-| 1 | Alta | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações. | 4 |
-| 2 | Alta | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações. | 8 |
-| 3 | Alta | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação. | 6 |
+| Rank | User Story | Estimativa |
+| :--: | :--------- | :--------: |
+| 1 | Como operador, quero uma interface para visualizar a quantidade de viagens realizadas por cada motorista e acompanhar a produtividade. | 6 |
+| 2 | Como operador, quero que uma planilha XML seja tratada pelo sistema e apresentada em um resumo visual. | 8 |
+| 3 | Como operador, desejo importar a planilha de controle para carregar os dados dos motoristas no sistema. | 6 |
 
 ### Definition of Ready (DoR)
 
@@ -101,10 +101,9 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | Prioridade | User Story | Estimativa |
 | :--: | :--------: | :--------- | :--------: |
-| 4 | Alta | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota. | 6 |
-| 5 | Alta | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações. | 5 |
-| 6 | Alta | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram. | 6 |
-| 7 | Alta | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados. | 4 |
+| 4 | Alta | Como operador, quero filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos. | 6 |
+| 5 | Média | Como gestor, quero um painel para visualizar a lista de motoristas agregados da frota. | 6 |
+| 6 | Média | Como gestor, quero consultar a ficha de desempenho de um motorista para visualizar seu desempenho. | 5 |
 
 ### Definition of Ready (DoR)
 
