@@ -12,17 +12,26 @@ export function AppRoutes() {
 
   return (
     <Routes>
+      {/* Rota Pública */}
       <Route path="/login" element={<Login />} />
 
-      <Route element={PrivateRoute />}>
+      {/* Rotas Privadas protegidas pelo PrivateRoute */}
+      <Route element={<PrivateRoute />}>
         <Route element={<DefaultLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/usuarios/novo" element={<CadastroUsuario />} />
           <Route path="/status" element={<StatusServicos />} />  
         </Route>
+      </Route>
 
-      <Route path="/" element={<Navigate to="/dashboard" />} />
+      <Route
+        path="/"
+        element={<Navigate to={token ? "/dashboard" : "/login"} replace />}
+      />
+
+      {/* Rota coringa para capturar URLs inexistentes */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-  );
-}
+  );     
+}  

@@ -5,7 +5,6 @@ export function PrivateRoute(){
 
     const isTokenValid = (tokenStr: string | null): boolean => {
         if (!tokenStr) return false;
-    }
 
     try {
         const [, payloadBase64] = tokenStr.split('.');
