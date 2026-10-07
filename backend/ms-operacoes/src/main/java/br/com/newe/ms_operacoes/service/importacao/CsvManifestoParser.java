@@ -3,15 +3,22 @@ package br.com.newe.ms_operacoes.service.importacao;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
+import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.DuplicateHeaderMode;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +26,70 @@ import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 
 @Component
 public class CsvManifestoParser {
+
+    /**
+     * Recusa o arquivo que nao tem como ser importado: vazio, sem cabecalho ou
+     * so com o cabecalho. Sem isso, a primeira linha de dados vira "cabecalho" e o
+     * parse estoura (celula vazia vira coluna sem nome), ou o usuario passa por
+     * todas as etapas para descobrir no fim que nao havia nada a gravar.
+     *
+     * Cabecalho e reconhecido por conter ao menos uma das colunas esperadas;
+     * colunas obrigatorias faltando continuam sendo apontadas no mapeamento.
+     *
+     * @throws ArquivoInvalidoException com o motivo, pronto para a tela
+     */
+    public void verificarEstrutura(byte[] conteudo) throws IOException {
+        List<String> cabecalho = lerCabecalhoTolerante(conteudo);
+
+        if (cabecalho.stream().allMatch(c -> c == null || c.isBlank())) {
+            throw new ArquivoInvalidoException(
+                    "O arquivo nao pode ser importado pois esta vazio.");
+        }
+
+        Set<String> presentes = new HashSet<>();
+        cabecalho.stream().filter(Objects::nonNull).map(CsvManifestoParser::normalizar).forEach(presentes::add);
+        boolean reconhecido = ManifestoCsvConfig.COLUNAS_ESPERADAS.stream()
+                .anyMatch(c -> presentes.contains(normalizar(c.nome())));
+        if (!reconhecido) {
+            throw new ArquivoInvalidoException(
+                    "O arquivo nao pode ser importado pois falta o cabecalho. A primeira linha deve "
+                            + "conter os nomes das colunas separados por ';' (ex.: Manifesto;Data;CPF;Veículo).");
+        }
+
+        try (CSVParser parser = abrir(conteudo, ManifestoCsvConfig.CSV_FORMAT)) {
+            boolean temDado = parser.stream()
+                    .anyMatch(r -> r.stream().anyMatch(v -> v != null && !v.isBlank()));
+            if (!temDado) {
+                throw new ArquivoInvalidoException(
+                        "O arquivo nao pode ser importado pois nao contem nenhum dado, apenas o cabecalho.");
+            }
+        } catch (IllegalArgumentException | UncheckedIOException e) {
+            // Cabecalho existe, mas com coluna sem nome (ex.: ';' sobrando no fim da linha).
+            throw new ArquivoInvalidoException(
+                    "O arquivo nao pode ser importado pois o cabecalho esta mal formado: " + e.getMessage());
+        }
+    }
+
+    /** Cabecalho lido sem recusar coluna sem nome, so para diagnosticar o arquivo. */
+    private List<String> lerCabecalhoTolerante(byte[] conteudo) throws IOException {
+        CSVFormat tolerante = CSVFormat.Builder.create(ManifestoCsvConfig.CSV_FORMAT)
+                .setAllowMissingColumnNames(true)
+                .setDuplicateHeaderMode(DuplicateHeaderMode.ALLOW_ALL)
+                .build();
+        try (CSVParser parser = abrir(conteudo, tolerante)) {
+            return parser.getHeaderNames();
+        } catch (IllegalArgumentException | UncheckedIOException e) {
+            return List.of();
+        }
+    }
+
+    private static CSVParser abrir(byte[] conteudo, CSVFormat formato) throws IOException {
+        return formato.parse(new InputStreamReader(new ByteArrayInputStream(conteudo), ManifestoCsvConfig.CHARSET));
+    }
+
+    private static String normalizar(String coluna) {
+        return coluna.trim().toLowerCase(Locale.ROOT);
+    }
 
     /**
      * Converte o arquivo inteiro, separando o que deu certo do que nao deu.
