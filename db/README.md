@@ -30,7 +30,6 @@ A regra 3 não é burocracia: foi ignorá-la que gerou as tabelas duplicadas
 | `V2__criar_agregados.sql` | criado — tabela `agregados` + `viagens.id_agregado` |
 | `V3__viagens_campos_do_manifesto.sql` | criado — campos do CSV, `mes_referencia`, seed de `tipos_custo` |
 | `V4__agregados_tipo_pessoa_varchar.sql` | criado — `agregados.tipo_pessoa` para varchar |
-| `V7__controle_disponibilidade.sql` | criado — tabela `controle_disponibilidade` (situação do motorista por mês, gravada na importação) |
 
 **O Flyway ainda está desligado em todos os serviços** (`spring.flyway.enabled=false`).
 Ligar exige dois cuidados, explicados abaixo.

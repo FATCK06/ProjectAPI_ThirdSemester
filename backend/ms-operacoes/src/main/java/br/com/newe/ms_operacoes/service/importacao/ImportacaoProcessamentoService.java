@@ -182,8 +182,9 @@ public class ImportacaoProcessamentoService {
     }
 
     /**
-     * Situacao dos motoristas nos meses tocados pelo arquivo. Roda com as viagens
-     * ja commitadas: se falhar, a importacao continua CONCLUIDO e nada e desfeito -
+     * Dias de cada motorista (controle_disponibilidade) nos meses tocados pelo
+     * arquivo, base da situacao exibida na tela. Roda com as viagens ja
+     * commitadas: se falhar, a importacao continua CONCLUIDO e nada e desfeito -
      * a proxima importacao do mes recalcula.
      */
     private void recalcularSituacao(Long id, List<LinhaManifesto> linhas) {
@@ -194,7 +195,7 @@ public class ImportacaoProcessamentoService {
         try {
             situacaoMotoristaService.recalcularMeses(meses);
         } catch (Exception e) {
-            log.error("Importacao {}: falha ao recalcular a situacao dos motoristas nos meses {}", id, meses, e);
+            log.error("Importacao {}: falha ao recalcular controle_disponibilidade nos meses {}", id, meses, e);
         }
     }
 

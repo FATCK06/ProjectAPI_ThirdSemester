@@ -13,7 +13,8 @@ import br.com.newe.ms_operacoes.models.enums.SituacaoMotorista;
 import br.com.newe.ms_operacoes.service.indicadores.SituacaoMotoristaService;
 
 /**
- * Situacao dos motoristas no mes, gravada no tratamento da importacao.
+ * Situacao dos motoristas no mes, classificada sobre os dias gravados na
+ * importacao (controle_disponibilidade).
  *
  * Escopo: so motoristas com viagem no mes - quem nao rodou nenhum dia nao tem
  * linha em controle_disponibilidade.

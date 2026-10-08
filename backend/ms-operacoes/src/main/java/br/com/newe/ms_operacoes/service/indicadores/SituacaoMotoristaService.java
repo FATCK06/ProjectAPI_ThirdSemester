@@ -1,7 +1,6 @@
 package br.com.newe.ms_operacoes.service.indicadores;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,11 +28,13 @@ import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaMotoristaView;
 import br.com.newe.ms_operacoes.service.indicadores.ClassificadorSituacao.Classificacao;
 
 /**
- * Situacao de cada motorista por mes (controle_disponibilidade).
+ * Situacao de cada motorista por mes, a partir de controle_disponibilidade.
  *
- * Ao contrario do ranking do IndicadoresService, aqui o resultado e gravado: o
- * recalculo roda no fim da importacao e a consulta so le a tabela, sem
- * reclassificar.
+ * A importacao grava os dias (disponiveis e em operacao) de cada motorista no
+ * mes; a consulta so le a tabela, sem tocar em viagens. A tabela existente nao
+ * tem coluna para utilizacao, faixa ou situacao e nao pode ser alterada, entao a
+ * classificacao e feita na consulta, sobre os dias gravados. Efeito colateral:
+ * trocar os cortes no application.properties vale na hora, sem reimportar.
  *
  * Escopo: so motoristas com viagem no mes. Quem nao rodou nenhum dia nao
  * aparece em viagens, e o cadastro completo de motoristas e do ms-frota.
@@ -61,7 +62,7 @@ public class SituacaoMotoristaService {
     }
 
     /**
-     * Recalcula e grava (upsert por motorista + mes) a situacao dos meses
+     * Recalcula e grava (upsert por motorista + mes) os dias dos meses
      * informados.
      *
      * Usa o total de viagens do mes no banco, e nao so as do arquivo: outro
@@ -82,7 +83,6 @@ public class SituacaoMotoristaService {
 
     private void recalcularMes(String mesReferencia) {
         long diasDisponiveis = IndicadoresService.diasDisponiveis(YearMonth.parse(mesReferencia));
-        LocalDateTime agora = LocalDateTime.now();
 
         Map<UUID, ControleDisponibilidade> existentes = new HashMap<>();
         for (ControleDisponibilidade c : controleRepository.findByMesReferencia(mesReferencia)) {
@@ -91,9 +91,6 @@ public class SituacaoMotoristaService {
 
         List<ControleDisponibilidade> gravar = new ArrayList<>();
         for (SomaMotoristaView soma : viagemRepository.somasPorMotorista(mesReferencia)) {
-            long diasOperacao = soma.getDiasOperacao();
-            Classificacao classificacao = classificador.classificar(diasOperacao, diasDisponiveis);
-
             ControleDisponibilidade controle = existentes.remove(soma.getMotoristaId());
             if (controle == null) {
                 controle = new ControleDisponibilidade();
@@ -101,11 +98,7 @@ public class SituacaoMotoristaService {
                 controle.setMesReferencia(mesReferencia);
             }
             controle.setDiasDisponiveis(Math.toIntExact(diasDisponiveis));
-            controle.setDiasOperacao(Math.toIntExact(diasOperacao));
-            controle.setUtilizacao(classificacao.utilizacao());
-            controle.setFaixaUtilizacao(classificacao.faixa());
-            controle.setSituacao(classificacao.situacao());
-            controle.setAtualizadoEm(agora);
+            controle.setDiasOperacao(Math.toIntExact(soma.getDiasOperacao()));
             gravar.add(controle);
         }
         controleRepository.saveAll(gravar);
@@ -117,7 +110,7 @@ public class SituacaoMotoristaService {
     }
 
     /**
-     * Le o que foi gravado no tratamento; nao reclassifica.
+     * Le os dias gravados na importacao e classifica cada motorista.
      *
      * Ordem: DISPONIVEL primeiro, depois menor utilizacao, depois nome.
      *
@@ -126,32 +119,37 @@ public class SituacaoMotoristaService {
      * @param situacao null traz todas
      */
     public List<SituacaoMotoristaDTO> listar(String mesReferencia, SituacaoMotorista situacao) {
-        List<ControleDisponibilidade> linhas = situacao == null
-                ? controleRepository.findByMesReferencia(mesReferencia)
-                : controleRepository.findByMesReferenciaAndSituacao(mesReferencia, situacao);
+        // Situacao nao e coluna da tabela: o filtro e aplicado depois de classificar.
+        Map<ControleDisponibilidade, Classificacao> classificados = new HashMap<>();
+        for (ControleDisponibilidade c : controleRepository.findByMesReferencia(mesReferencia)) {
+            Classificacao classificacao = classificador.classificar(c.getDiasOperacao(), c.getDiasDisponiveis());
+            if (situacao == null || classificacao.situacao() == situacao) {
+                classificados.put(c, classificacao);
+            }
+        }
 
-        if (linhas.isEmpty()) {
+        if (classificados.isEmpty()) {
             return List.of();
         }
 
         // Nome pertence ao ms-frota: uma chamada em lote para o mes inteiro.
-        List<UUID> ids = linhas.stream().map(ControleDisponibilidade::getIdMotorista).toList();
+        List<UUID> ids = classificados.keySet().stream().map(ControleDisponibilidade::getIdMotorista).toList();
         Map<UUID, MotoristaResumo> cadastro = frotaClient.buscarMotoristas(ids).stream()
                 .collect(Collectors.toMap(MotoristaResumo::id, Function.identity()));
 
-        List<SituacaoMotoristaDTO> resultado = new ArrayList<>(linhas.size());
-        for (ControleDisponibilidade c : linhas) {
+        List<SituacaoMotoristaDTO> resultado = new ArrayList<>(classificados.size());
+        classificados.forEach((c, classificacao) -> {
             MotoristaResumo resumo = cadastro.get(c.getIdMotorista());
             resultado.add(new SituacaoMotoristaDTO(
                     c.getIdMotorista(),
                     resumo != null ? resumo.nome() : null,
                     c.getDiasDisponiveis(),
                     c.getDiasOperacao(),
-                    c.getUtilizacao(),
-                    c.getFaixaUtilizacao(),
-                    c.getSituacao(),
-                    c.getSituacao() == SituacaoMotorista.SEM_DIAS_DISPONIVEIS ? AVISO_SEM_DIAS : null));
-        }
+                    classificacao.utilizacao(),
+                    classificacao.faixa(),
+                    classificacao.situacao(),
+                    classificacao.situacao() == SituacaoMotorista.SEM_DIAS_DISPONIVEIS ? AVISO_SEM_DIAS : null));
+        });
         resultado.sort(ORDEM);
         return resultado;
     }

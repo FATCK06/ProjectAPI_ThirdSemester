@@ -1,15 +1,13 @@
 package br.com.newe.ms_operacoes.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import br.com.newe.ms_operacoes.models.ControleDisponibilidade;
-import br.com.newe.ms_operacoes.models.enums.SituacaoMotorista;
 
-public interface ControleDisponibilidadeRepository extends JpaRepository<ControleDisponibilidade, Integer> {
+public interface ControleDisponibilidadeRepository extends JpaRepository<ControleDisponibilidade, UUID> {
 
     List<ControleDisponibilidade> findByMesReferencia(String mesReferencia);
-
-    List<ControleDisponibilidade> findByMesReferenciaAndSituacao(String mesReferencia, SituacaoMotorista situacao);
 }

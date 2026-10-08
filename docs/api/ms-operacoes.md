@@ -393,7 +393,9 @@ Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
 
 ### `GET /api/dashboard/motoristas/situacao`
 
-Situação de cada motorista no mês, lida da tabela `controle_disponibilidade`. A situação é **gravada no tratamento da importação** (fim do `/executar`) e nunca recalculada na consulta.
+Situação de cada motorista no mês, a partir da tabela `controle_disponibilidade`. A importação (fim do `/executar`) grava os **dias disponíveis e em operação** de cada motorista; a consulta só lê essa tabela, sem tocar em `viagens`.
+
+A tabela não tem colunas para utilização, faixa e situação (o schema do Supabase é fixo), então esses três campos são **calculados na consulta** a partir dos dias gravados. Por isso, mudar os cortes vale na hora, sem reimportar.
 
 **Escopo:** só motoristas com viagem no mês. Quem não rodou nenhum dia não aparece.
 
@@ -439,6 +441,6 @@ Ordem: `DISPONIVEL` primeiro, depois menor utilização, depois nome. Sem result
 
 Os cortes ficam em `application.properties` (`situacao.utilizacao.corte-baixa=40` e `situacao.utilizacao.corte-alta=70`) e são **provisórios — PENDENTE (Newe)**.
 
-A cada importação, os meses presentes no arquivo são recalculados a partir de todas as viagens do mês no banco. Se o recálculo falhar, a importação continua `CONCLUIDO` (as viagens já foram gravadas) e o erro fica no log; a próxima importação do mês recalcula.
+A cada importação, os dias dos meses presentes no arquivo são recalculados a partir de todas as viagens do mês no banco. Se o recálculo falhar, a importação continua `CONCLUIDO` (as viagens já foram gravadas) e o erro fica no log; a próxima importação do mês recalcula.
 
 **Erros:** `400` se `mesReferencia` ou `situacao` forem inválidos.

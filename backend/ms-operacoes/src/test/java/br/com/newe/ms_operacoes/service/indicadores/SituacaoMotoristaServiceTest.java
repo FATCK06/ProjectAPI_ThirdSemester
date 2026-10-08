@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -52,7 +53,7 @@ class SituacaoMotoristaServiceTest {
             Iterable<ControleDisponibilidade> itens = inv.getArgument(0);
             for (ControleDisponibilidade c : itens) {
                 if (c.getId() == null) {
-                    c.setId(tabela.size() + 1);
+                    c.setId(UUID.randomUUID());
                     tabela.add(c);
                 }
             }
@@ -75,10 +76,6 @@ class SituacaoMotoristaServiceTest {
         assertThat(c.getMesReferencia()).isEqualTo(MES);
         assertThat(c.getDiasDisponiveis()).isEqualTo(30);
         assertThat(c.getDiasOperacao()).isEqualTo(9);
-        assertThat(c.getUtilizacao()).isEqualByComparingTo("30.00");
-        assertThat(c.getFaixaUtilizacao()).isEqualTo(FaixaUtilizacao.BAIXA);
-        assertThat(c.getSituacao()).isEqualTo(SituacaoMotorista.DISPONIVEL);
-        assertThat(c.getAtualizadoEm()).isNotNull();
     }
 
     // Segunda importacao do mesmo mes: outro arquivo trouxe mais dias do motorista.
@@ -89,16 +86,31 @@ class SituacaoMotoristaServiceTest {
                 .thenReturn(List.of(soma(motorista, 24)));
 
         service.recalcularMeses(List.of(MES));
-        Integer idOriginal = tabela.get(0).getId();
+        UUID idOriginal = tabela.get(0).getId();
         service.recalcularMeses(List.of(MES));
 
         assertThat(tabela).hasSize(1);
         ControleDisponibilidade c = tabela.get(0);
         assertThat(c.getId()).isEqualTo(idOriginal);
         assertThat(c.getDiasOperacao()).isEqualTo(24);
-        assertThat(c.getUtilizacao()).isEqualByComparingTo("80.00");
-        assertThat(c.getFaixaUtilizacao()).isEqualTo(FaixaUtilizacao.ALTA);
-        assertThat(c.getSituacao()).isEqualTo(SituacaoMotorista.INDISPONIVEL);
+    }
+
+    // A classificacao sai dos dias gravados: 24 de 30 = 80% -> alta.
+    @Test
+    void listarClassificaPelosDiasGravados() {
+        tabela.add(controle(motorista, 24, 30));
+        when(frotaClient.buscarMotoristas(anyCollection()))
+                .thenReturn(List.of(new MotoristaResumo(motorista, "JOAO", null)));
+
+        List<SituacaoMotoristaDTO> lista = service.listar(MES, null);
+
+        assertThat(lista).singleElement().satisfies(d -> {
+            assertThat(d.nome()).isEqualTo("JOAO");
+            assertThat(d.utilizacao()).isEqualByComparingTo("80.00");
+            assertThat(d.faixaUtilizacao()).isEqualTo(FaixaUtilizacao.ALTA);
+            assertThat(d.situacao()).isEqualTo(SituacaoMotorista.INDISPONIVEL);
+            assertThat(d.aviso()).isNull();
+        });
     }
 
     @Test
@@ -108,10 +120,10 @@ class SituacaoMotoristaServiceTest {
         UUID baixaA = UUID.randomUUID();
         UUID intermediaria = UUID.randomUUID();
         tabela.addAll(List.of(
-                controle(alta, "90.00", SituacaoMotorista.INDISPONIVEL),
-                controle(intermediaria, "50.00", SituacaoMotorista.DISPONIVEL),
-                controle(baixaB, "10.00", SituacaoMotorista.DISPONIVEL),
-                controle(baixaA, "10.00", SituacaoMotorista.DISPONIVEL)));
+                controle(alta, 27, 30),
+                controle(intermediaria, 15, 30),
+                controle(baixaB, 3, 30),
+                controle(baixaA, 3, 30)));
         when(frotaClient.buscarMotoristas(anyCollection())).thenReturn(List.of(
                 new MotoristaResumo(alta, "ANA", null),
                 new MotoristaResumo(intermediaria, "BETO", null),
@@ -122,30 +134,45 @@ class SituacaoMotoristaServiceTest {
 
         assertThat(lista).extracting(SituacaoMotoristaDTO::nome)
                 .containsExactly("ALICE", "BRUNO", "BETO", "ANA");
-        assertThat(lista).allSatisfy(d -> assertThat(d.aviso()).isNull());
+    }
+
+    @Test
+    void filtroDeSituacaoAplicadoDepoisDeClassificar() {
+        UUID disponivel = UUID.randomUUID();
+        tabela.addAll(List.of(controle(disponivel, 3, 30), controle(motorista, 27, 30)));
+        when(frotaClient.buscarMotoristas(anyCollection())).thenReturn(List.of());
+
+        List<SituacaoMotoristaDTO> lista = service.listar(MES, SituacaoMotorista.INDISPONIVEL);
+
+        assertThat(lista).extracting(SituacaoMotoristaDTO::motoristaId).containsExactly(motorista);
     }
 
     @Test
     void semDiasDisponiveisTrazAviso() {
-        ControleDisponibilidade c = controle(motorista, null, SituacaoMotorista.SEM_DIAS_DISPONIVEIS);
-        when(controleRepository.findByMesReferenciaAndSituacao(MES, SituacaoMotorista.SEM_DIAS_DISPONIVEIS))
-                .thenReturn(List.of(c));
+        tabela.add(controle(motorista, 5, 0));
         when(frotaClient.buscarMotoristas(anyCollection())).thenReturn(List.of());
 
         List<SituacaoMotoristaDTO> lista = service.listar(MES, SituacaoMotorista.SEM_DIAS_DISPONIVEIS);
 
         assertThat(lista).singleElement().satisfies(d -> {
             assertThat(d.utilizacao()).isNull();
+            assertThat(d.faixaUtilizacao()).isNull();
             assertThat(d.aviso()).isEqualTo("Motorista sem dias disponíveis registrados no período.");
         });
     }
 
-    private static ControleDisponibilidade controle(UUID id, String utilizacao, SituacaoMotorista situacao) {
+    @Test
+    void mesSemLinhasNaoChamaOMsFrota() {
+        assertThat(service.listar(MES, null)).isEmpty();
+        verifyNoInteractions(frotaClient);
+    }
+
+    private static ControleDisponibilidade controle(UUID id, int diasOperacao, int diasDisponiveis) {
         ControleDisponibilidade c = new ControleDisponibilidade();
         c.setIdMotorista(id);
         c.setMesReferencia(MES);
-        c.setUtilizacao(utilizacao == null ? null : new BigDecimal(utilizacao));
-        c.setSituacao(situacao);
+        c.setDiasOperacao(diasOperacao);
+        c.setDiasDisponiveis(diasDisponiveis);
         return c;
     }
 
