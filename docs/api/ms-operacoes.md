@@ -19,6 +19,7 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
 | `GET` | `/api/dashboard/ranking-motoristas` | Top N motoristas por número de viagens |
+| `GET` | `/api/dashboard/motoristas/situacao` | Situação (disponível/indisponível) de cada motorista no mês |
 
 ---
 
@@ -389,3 +390,55 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
 ```
 
 Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/dashboard/motoristas/situacao`
+
+Situação de cada motorista no mês, lida da tabela `controle_disponibilidade`. A situação é **gravada no tratamento da importação** (fim do `/executar`) e nunca recalculada na consulta.
+
+**Escopo:** só motoristas com viagem no mês. Quem não rodou nenhum dia não aparece.
+
+| Parâmetro | Tipo | Regra |
+|---|---|---|
+| `mesReferencia` | query | obrigatório, `AAAA-MM` com mês de 01 a 12 |
+| `situacao` | query | opcional: `DISPONIVEL`, `INDISPONIVEL` ou `SEM_DIAS_DISPONIVEIS` |
+
+```
+GET /api/dashboard/motoristas/situacao?mesReferencia=2026-09&situacao=DISPONIVEL
+```
+
+**Resposta `200`:**
+
+```json
+[
+  {
+    "motoristaId": "a1b2c3d4-0000-4000-8000-000000000001",
+    "nome": "JOAO DA SILVA",
+    "diasDisponiveis": 30,
+    "diasOperacao": 9,
+    "utilizacao": 30.00,
+    "faixaUtilizacao": "BAIXA",
+    "situacao": "DISPONIVEL",
+    "aviso": null
+  }
+]
+```
+
+Ordem: `DISPONIVEL` primeiro, depois menor utilização, depois nome. Sem resultado devolve `[]` (a mensagem "Nenhum motorista disponível com os filtros aplicados." é do front).
+
+**Regras do tratamento:**
+
+| Item | Regra |
+|---|---|
+| Utilização | dias em operação ÷ dias disponíveis × 100, 2 casas (HALF_UP). Pode passar de 100 |
+| Dias em operação | dias distintos com viagem no mês, somando todas as importações |
+| Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês — PENDENTE do cliente) |
+| `BAIXA` | utilização < corte baixo → `DISPONIVEL` |
+| `INTERMEDIARIA` | corte baixo ≤ utilização < corte alto → `DISPONIVEL` |
+| `ALTA` | utilização ≥ corte alto → `INDISPONIVEL` |
+| Dias disponíveis ≤ 0 | sem faixa, `utilizacao: null`, situação `SEM_DIAS_DISPONIVEIS` e `aviso: "Motorista sem dias disponíveis registrados no período."` |
+
+Os cortes ficam em `application.properties` (`situacao.utilizacao.corte-baixa=40` e `situacao.utilizacao.corte-alta=70`) e são **provisórios — PENDENTE (Newe)**.
+
+A cada importação, os meses presentes no arquivo são recalculados a partir de todas as viagens do mês no banco. Se o recálculo falhar, a importação continua `CONCLUIDO` (as viagens já foram gravadas) e o erro fica no log; a próxima importação do mês recalcula.
+
+**Erros:** `400` se `mesReferencia` ou `situacao` forem inválidos.

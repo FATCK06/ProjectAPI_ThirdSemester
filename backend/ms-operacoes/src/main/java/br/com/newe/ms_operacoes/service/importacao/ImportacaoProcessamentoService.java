@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
+import br.com.newe.ms_operacoes.service.indicadores.SituacaoMotoristaService;
 
 /**
  * As duas operacoes do fluxo em etapas.
@@ -40,17 +44,20 @@ public class ImportacaoProcessamentoService {
     private final ResolvedorFrota resolvedorFrota;
     private final ManifestoBatchWriter batchWriter;
     private final ImportacaoService importacaoService;
+    private final SituacaoMotoristaService situacaoMotoristaService;
 
     public ImportacaoProcessamentoService(
             CsvManifestoParser parser,
             ResolvedorFrota resolvedorFrota,
             ManifestoBatchWriter batchWriter,
-            ImportacaoService importacaoService
+            ImportacaoService importacaoService,
+            SituacaoMotoristaService situacaoMotoristaService
     ) {
         this.parser = parser;
         this.resolvedorFrota = resolvedorFrota;
         this.batchWriter = batchWriter;
         this.importacaoService = importacaoService;
+        this.situacaoMotoristaService = situacaoMotoristaService;
     }
 
     /**
@@ -158,6 +165,8 @@ public class ImportacaoProcessamentoService {
             int gravadas = batchWriter.gravarEmLote(id, resultado.linhas(), referencias);
             importacaoService.marcarConcluido(id, gravadas);
 
+            recalcularSituacao(id, resultado.linhas());
+
             return gravadas;
 
         } catch (ArquivoComErroException | ArquivoInvalidoException e) {
@@ -169,6 +178,23 @@ public class ImportacaoProcessamentoService {
             log.error("Falha ao executar importacao {}", id, e);
             importacaoService.marcarErro(id);
             throw new ImportacaoFalhouException(e);
+        }
+    }
+
+    /**
+     * Situacao dos motoristas nos meses tocados pelo arquivo. Roda com as viagens
+     * ja commitadas: se falhar, a importacao continua CONCLUIDO e nada e desfeito -
+     * a proxima importacao do mes recalcula.
+     */
+    private void recalcularSituacao(Long id, List<LinhaManifesto> linhas) {
+        Set<String> meses = linhas.stream()
+                .map(LinhaManifesto::mesReferencia)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
+        try {
+            situacaoMotoristaService.recalcularMeses(meses);
+        } catch (Exception e) {
+            log.error("Importacao {}: falha ao recalcular a situacao dos motoristas nos meses {}", id, meses, e);
         }
     }
 

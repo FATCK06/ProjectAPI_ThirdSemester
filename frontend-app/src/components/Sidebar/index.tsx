@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity } from 'lucide-react';
+import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Users } from 'lucide-react';
 import neweLogo from '../../assets/image 3.png';
 import './sidebar.css';
 import { useState } from 'react';
@@ -48,6 +48,15 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
         >
           <LayoutDashboard size={20} />
           {!isMinimized && <span>Dashboard</span>}
+        </NavLink>
+
+        <NavLink
+          to="/motoristas"
+          className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+          title="Motoristas"
+        >
+          <Users size={20} />
+          {!isMinimized && <span>Motoristas</span>}
         </NavLink>
 
         <div className="nav-accordion">
