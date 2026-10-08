@@ -7,10 +7,8 @@ interface CardSkeletonProps {
 
 export function CardSkeleton({ children, isLoading }: CardSkeletonProps) {
   return (
-    <div className="card">
-      <div className={`card-chart skeleton-base ${isLoading ? "shimmer" : ""}`}>
-        {children}
-      </div>
+    <div className={`card-skeleton-frame skeleton-base ${isLoading ? "shimmer" : ""}`}>
+      {!isLoading && children}
     </div>
   );
 }

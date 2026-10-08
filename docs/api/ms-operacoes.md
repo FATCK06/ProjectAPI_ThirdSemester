@@ -361,7 +361,7 @@ Os mesmos indicadores agrupados por modelo de veículo.
 
 ### `GET /api/dashboard/ranking-motoristas`
 
-Os N motoristas com mais viagens no mês, com a placa do veículo usado na viagem mais longa (km de chegada − km de saída; em empate, a mais recente).
+Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa (km de chegada − km de saída; em empate, a mais recente).
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|
@@ -382,7 +382,7 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
     "nome": "JOAO DA SILVA",
     "cpf": "12345678901",
     "totalViagens": 22,
-    "veiculo": "ABC1D23",
+    "tipoVeiculo": "FH 540",
     "distanciaMaximaKm": 480
   }
 ]
