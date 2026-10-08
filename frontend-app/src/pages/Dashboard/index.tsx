@@ -19,7 +19,7 @@ function mesAtual(): string {
 }
 
 export function Dashboard() {
-  const [mesReferencia, setMesReferencia] = useState("2026-06");
+  const [mesReferencia, setMesReferencia] = useState(mesAtual);
   const [indicadores, setIndicadores] = useState<IndicadoresMes | null>(null);
   const [porModelo, setPorModelo] = useState<IndicadoresPorModelo[] | null>(
     null,
@@ -66,6 +66,23 @@ export function Dashboard() {
         width: "100%",
       }}
     >
+      <div className="dashboard-header">
+        <div>
+          <h1>Dashboard</h1>
+          <p>Indicadores e rentabilidade por período</p>
+        </div>
+
+        <div className="dashboard-month-filter">
+          <label htmlFor="dashboard-mes">Mês de referência</label>
+          <input
+            id="dashboard-mes"
+            type="month"
+            value={mesReferencia}
+            onChange={(event) => setMesReferencia(event.target.value)}
+          />
+        </div>
+      </div>
+
       <div className="dashboard-charts">
         <div className="dashboard-indicators">
           {isLoading ? (

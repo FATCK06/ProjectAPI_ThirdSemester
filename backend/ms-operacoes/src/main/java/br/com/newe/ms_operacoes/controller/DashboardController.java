@@ -85,14 +85,14 @@ public class DashboardController {
             }
         }
 
-        // Nome, CPF e placa pertencem ao ms-frota: uma chamada em lote para cada
+        // Nome, CPF e modelo pertencem ao ms-frota: uma chamada em lote para cada
         Map<UUID, MotoristaResumo> motoristas = frotaClient.buscarMotoristas(motoristaIds).stream()
                 .collect(Collectors.toMap(MotoristaResumo::id, Function.identity()));
         List<UUID> veiculoIds = maisLonga.values().stream()
                 .map(ViagemRepository.ViagemKmView::getVeiculoId)
                 .distinct()
                 .toList();
-        Map<UUID, String> placas = frotaClient.buscarPlacas(veiculoIds);
+        Map<UUID, String> tiposVeiculo = frotaClient.buscarTiposVeiculo(veiculoIds);
 
         List<RankingMotoristaDTO> ranking = new ArrayList<>();
         for (int i = 0; i < linhas.size(); i++) {
@@ -105,7 +105,7 @@ public class DashboardController {
                     motorista != null ? motorista.nome() : null,
                     motorista != null ? motorista.cpf() : null,
                     linha.getTotalViagens(),
-                    viagem != null ? placas.get(viagem.getVeiculoId()) : null,
+                    viagem != null ? tiposVeiculo.getOrDefault(viagem.getVeiculoId(), "Não informado") : null,
                     maiorDistancia.get(linha.getMotoristaId())));
         }
 

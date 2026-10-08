@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,5 +107,16 @@ public class VeiculoService {
             modelos.put(veiculo.getIdVeiculo(), veiculo.getModelo() != null ? veiculo.getModelo() : "Não informado");
         }
         return modelos;
+    }
+
+    public Map<UUID, String> buscarTiposPorIds(List<UUID> ids) {
+        Map<UUID, String> tipos = new HashMap<>();
+        if (ids.isEmpty()) {
+            return tipos;
+        }
+        for (VeiculoRepository.VeiculoTipoView veiculo : repository.buscarTiposPorIds(ids)) {
+            tipos.put(veiculo.getId(), veiculo.getDescricao() != null ? veiculo.getDescricao() : "Não informado");
+        }
+        return tipos;
     }
 }

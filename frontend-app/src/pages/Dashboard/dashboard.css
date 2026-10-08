@@ -1,3 +1,38 @@
+.dashboard-header {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.dashboard-header h1 {
+	font-size: 24px;
+	color: #1e293b;
+}
+
+.dashboard-header p {
+	margin-top: 4px;
+	font-size: 14px;
+	color: #64748b;
+}
+
+.dashboard-month-filter {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #64748b;
+}
+
+.dashboard-month-filter input {
+	font: inherit;
+	padding: 8px 10px;
+	border: 1px solid #cbd5e1;
+	border-radius: 8px;
+	color: #334155;
+	background: #ffffff;
+}
+
 .dashboard-charts {
 	display: grid;
 	grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -20,11 +55,15 @@
 	min-width: 0;
 }
 
-.dashboard-chart > .card {
+.dashboard-chart > .card-skeleton-frame {
 	height: 420px;
 }
 
-.dashboard-driver-chart .card-chart {
+.card-skeleton-frame > .card {
+	height: 100%;
+}
+
+.dashboard-chart .card-chart {
 	height: 370px;
 }
 
@@ -35,5 +74,17 @@
 @media (max-width: 1200px) {
 	.dashboard-charts {
 		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 640px) {
+	.dashboard-header {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.dashboard-month-filter {
+		align-items: flex-start;
+		flex-direction: column;
 	}
 }
