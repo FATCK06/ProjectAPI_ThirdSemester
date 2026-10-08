@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,7 +25,9 @@ import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.importacao.ArquivoInvalidoException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
+import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
@@ -47,17 +50,20 @@ public class ImportacaoController {
     private final PerfilResolver perfilResolver;
     private final ImportacaoProcessamentoService processamentoService;
     private final ViagemRepository viagemRepository;
+    private final CsvManifestoParser parser;
 
     public ImportacaoController(
             ImportacaoService service,
             PerfilResolver perfilResolver,
             ImportacaoProcessamentoService processamentoService,
-            ViagemRepository viagemRepository
+            ViagemRepository viagemRepository,
+            CsvManifestoParser parser
     ) {
         this.service = service;
         this.perfilResolver = perfilResolver;
         this.processamentoService = processamentoService;
         this.viagemRepository = viagemRepository;
+        this.parser = parser;
     }
 
     // ── Etapa 1: receber ─────────────────────────────────────────────────────
@@ -83,8 +89,12 @@ public class ImportacaoController {
             return erro(HttpStatus.BAD_REQUEST, "Formato nao aceito. Envie um arquivo .csv");
         }
 
+        byte[] conteudo = arquivo.getBytes();
+        // Vazio, sem cabecalho ou so com cabecalho: recusa ja aqui, antes de guardar.
+        parser.verificarEstrutura(conteudo);
+
         Importacao importacao = service.receber(
-                nome, arquivo.getBytes(), perfilResolver.resolverUsuario(request));
+                nome, conteudo, perfilResolver.resolverUsuario(request));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", importacao.getId(),
@@ -196,6 +206,12 @@ public class ImportacaoController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(viagemRepository.buscarIdsMotoristasPorArquivo(id));
+    }
+
+    /** Arquivo que nao tem como ser importado: o motivo vai para a tela, nao um 500. */
+    @ExceptionHandler(ArquivoInvalidoException.class)
+    public ResponseEntity<Map<String, String>> arquivoInvalido(ArquivoInvalidoException e) {
+        return erro(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     private ResponseEntity<Map<String, String>> erro(HttpStatus status, String mensagem) {

@@ -62,6 +62,8 @@ public class ImportacaoProcessamentoService {
     public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho, Severidade severidade)
             throws IOException {
         byte[] conteudo = importacao.getArquivoConteudo();
+        // Arquivos guardados antes da checagem no upload tambem passam por aqui.
+        parser.verificarEstrutura(conteudo);
 
         ResultadoParse resultado = parser.parse(conteudo);
         List<String> colunas = parser.lerColunas(conteudo);
@@ -136,6 +138,7 @@ public class ImportacaoProcessamentoService {
         Long id = importacao.getId();
 
         try {
+            parser.verificarEstrutura(importacao.getArquivoConteudo());
             ResultadoParse resultado = parser.parse(importacao.getArquivoConteudo());
 
             if (resultado.temErro()) {
@@ -157,7 +160,7 @@ public class ImportacaoProcessamentoService {
 
             return gravadas;
 
-        } catch (ArquivoComErroException e) {
+        } catch (ArquivoComErroException | ArquivoInvalidoException e) {
             // Nao e falha da importacao: o arquivo so precisa ser corrigido e reenviado.
             // Manter o status permite ao usuario voltar, conferir os erros e tentar de novo.
             throw e;
