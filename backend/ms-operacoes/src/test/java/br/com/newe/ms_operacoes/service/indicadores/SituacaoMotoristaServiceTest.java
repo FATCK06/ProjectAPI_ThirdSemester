@@ -181,6 +181,7 @@ class SituacaoMotoristaServiceTest {
             public UUID getMotoristaId() { return id; }
             public Long getNumeroViagens() { return diasOperacao; }
             public Long getDiasOperacao() { return diasOperacao; }
+            public Long getViagensApuradas() { return 0L; }
             public BigDecimal getValorFrete() { return null; }
             public BigDecimal getCustoTotal() { return null; }
         };

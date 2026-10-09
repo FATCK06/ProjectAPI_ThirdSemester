@@ -61,7 +61,7 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
                             <th>Agregado</th>
                             <th>Veículo</th>
                             <th>Destino</th>
-                            <th className="alinhar-direita">Valor frete</th>
+                            <th className="alinhar-direita">Frete agregado</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -83,7 +83,7 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
             </div>
 
             <p className="revisao-nota">
-                A coluna <strong>Mês</strong> vem da data de cada linha, não do arquivo — por isso um
+                A coluna <strong>Mês</strong> vem da data de cada linha, não do arquivo. Por isso, um
                 arquivo trimestral gera viagens em meses diferentes.
             </p>
         </div>
