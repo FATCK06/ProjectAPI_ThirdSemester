@@ -1,0 +1,37 @@
+.ui-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+  height: 100%;            /* novo: o card preenche a altura da célula da grade */
+  box-sizing: border-box;  /* novo: o padding não aumenta a altura total */
+}
+
+.ui-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ui-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.ui-card-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+/* novo: área onde o Chart.js desenha o gráfico */
+.ui-card-chart {
+  position: relative;
+  height: 260px;
+}

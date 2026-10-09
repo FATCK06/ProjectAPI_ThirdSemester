@@ -10,22 +10,6 @@
   animation: shimmer-effect 1.5s infinite linear;
 }
 
-.card {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  width: 100%;
-  height: 300px;
-  padding: 7px;
-}
-
-.card-chart {
-  position: relative;
-  width: 100%;
-  height: 230px;
-}
-
 .card-indicadores {
   width: 100%;
   padding: 16px;

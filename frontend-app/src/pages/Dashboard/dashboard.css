@@ -34,16 +34,13 @@
 }
 
 .dashboard-charts {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 1fr));
-	gap: 12px;
-	width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
 }
 
 .dashboard-indicators {
-	grid-column: 1 / -1;
-	width: 100%;
-	min-height: 200px;
+  grid-column: 1 / -1; /* indicadores ocupam a linha toda */
 }
 
 .dashboard-indicators .card-indicadores {

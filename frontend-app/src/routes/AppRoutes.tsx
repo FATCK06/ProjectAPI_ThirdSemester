@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '../pages/Login';
-import { Dashboard } from '../pages/Dashboard';
+import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { DefaultLayout } from '../layouts/DefaultLayout';
 import { ManifestosImport } from '../pages/Importacoes/Manifestos';
 import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
