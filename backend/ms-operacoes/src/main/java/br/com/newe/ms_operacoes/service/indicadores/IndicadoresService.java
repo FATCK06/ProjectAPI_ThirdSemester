@@ -123,12 +123,12 @@ public class IndicadoresService {
 
         // Modelo pertence ao ms-frota: uma chamada em lote para o mes inteiro.
         List<UUID> veiculoIds = somas.stream().map(ViagemRepository.SomaVeiculoView::getVeiculoId).toList();
-        Map<UUID, String> modelos = frotaClient.buscarModelos(veiculoIds);
+        Map<UUID, String> tiposVeiculo = frotaClient.buscarTiposVeiculo(veiculoIds);
 
         // Agrupa as somas por veiculo em somas por modelo, ja que varios veiculos
         // podem compartilhar o mesmo modelo.
         Map<String, List<ViagemRepository.SomaVeiculoView>> porModelo = somas.stream()
-                .collect(Collectors.groupingBy(s -> modelos.getOrDefault(s.getVeiculoId(), "Não informado")));
+                .collect(Collectors.groupingBy(s -> tiposVeiculo.getOrDefault(s.getVeiculoId(), "Não informado")));
 
         List<IndicadoresPorModelo> resultado = new ArrayList<>();
         for (Map.Entry<String, List<ViagemRepository.SomaVeiculoView>> entrada : porModelo.entrySet()) {

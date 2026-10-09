@@ -1,27 +1,10 @@
 import { Bar } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  type ChartOptions,
-  type ChartData,
-} from "chart.js";
-import type { IndicadoresPorModelo } from "../../../services/Dashboard";
+import type { ChartData, ChartOptions } from "chart.js";
+import "../../../../components/chartSetup";
+import { Card } from "../../../../components/Card/Card";
+import type { IndicadoresPorModelo } from "../../../../services/Dashboard";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-);
-
-interface PropsGrafico2 {
+interface PropsGraficoModelos {
   porModelo: IndicadoresPorModelo[];
 }
 
@@ -43,12 +26,11 @@ function montarDados(porModelo: IndicadoresPorModelo[]): ChartData<"bar"> {
   };
 }
 
-const opcoesDoGrafico: ChartOptions<"bar"> = {
+const opcoes: ChartOptions<"bar"> = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
-    legend: { position: "top" },
-    title: { display: true, text: "Rentabilidade por modelo de veículo" },
+    legend: { display: false },
     tooltip: {
       callbacks: {
         label: (context) => {
@@ -67,17 +49,14 @@ const opcoesDoGrafico: ChartOptions<"bar"> = {
   },
 };
 
-export function Grafico2({ porModelo }: PropsGrafico2) {
+export function GraficoModelos({ porModelo }: PropsGraficoModelos) {
   return (
-    <div className="card">
-      <div className="card-header">
-        <h2>Rentabilidade por modelo de veículo</h2>
+    <Card titulo="Rentabilidade por modelo de veículo">
+      <div className="ui-card-chart">
+        <Bar data={montarDados(porModelo)} options={opcoes} />
       </div>
-      <div className="card-chart">
-        <Bar data={montarDados(porModelo)} options={opcoesDoGrafico} />
-      </div>
-    </div>
+    </Card>
   );
 }
 
-export default Grafico2;
+export default GraficoModelos;

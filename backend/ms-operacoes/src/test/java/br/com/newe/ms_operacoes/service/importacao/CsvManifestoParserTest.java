@@ -1,6 +1,8 @@
 package br.com.newe.ms_operacoes.service.importacao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -97,5 +99,43 @@ class CsvManifestoParserTest {
         ResultadoParse resultado = parse("00123;01/04/2026;12345678901;ABC1D23;100;5;10,00");
 
         assertThat(resultado.linhas().get(0).idManifesto()).isEqualTo(123);
+    }
+
+    private void verificar(String csv) throws IOException {
+        parser.verificarEstrutura(csv.getBytes(ManifestoCsvConfig.CHARSET));
+    }
+
+    @Test
+    void arquivoSemCabecalhoERecusado() {
+        assertThatThrownBy(() -> verificar("123;01/04/2026;12345678901;ABC1D23\n456;02/04/2026;;XYZ9A87\n"))
+                .isInstanceOf(ArquivoInvalidoException.class)
+                .hasMessageContaining("falta o cabecalho");
+    }
+
+    @Test
+    void arquivoSoComCabecalhoERecusado() {
+        assertThatThrownBy(() -> verificar(CABECALHO + "\n"))
+                .isInstanceOf(ArquivoInvalidoException.class)
+                .hasMessageContaining("nao contem nenhum dado");
+    }
+
+    @Test
+    void arquivoComLinhasEmBrancoDepoisDoCabecalhoERecusado() {
+        assertThatThrownBy(() -> verificar(CABECALHO + "\n;;;;;;\n;;;;;;\n"))
+                .isInstanceOf(ArquivoInvalidoException.class)
+                .hasMessageContaining("nao contem nenhum dado");
+    }
+
+    @Test
+    void arquivoEmBrancoERecusado() {
+        assertThatThrownBy(() -> verificar("\n\n"))
+                .isInstanceOf(ArquivoInvalidoException.class)
+                .hasMessageContaining("esta vazio");
+    }
+
+    @Test
+    void arquivoComCabecalhoEDadosPassa() {
+        assertThatCode(() -> verificar(CABECALHO + "\n123;01/04/2026;12345678901;ABC1D23;100;5;10,00\n"))
+                .doesNotThrowAnyException();
     }
 }

@@ -48,4 +48,9 @@ public class VeiculoController {
     public ResponseEntity<Map<UUID, String>> modelos(@RequestBody List<UUID> ids) {
         return ResponseEntity.ok(service.buscarModelosPorIds(ids));
     }
+
+    @PostMapping("/tipos")
+    public ResponseEntity<Map<UUID, String>> tipos(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(service.buscarTiposPorIds(ids));
+    }
 }

@@ -18,8 +18,18 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
     @Query("select v.placa as placa, v.idVeiculo as id from Veiculo v where v.placa in :placas")
     List<VeiculoPlacaId> buscarIdsPorPlaca(@Param("placas") Collection<String> placas);
 
+    @Query(value = "select v.id_veiculo as id, c.descricao as descricao "
+            + "from veiculos v left join tipo_veiculos c on c.id_tipo = v.id_tipo "
+            + "where v.id_veiculo in :ids", nativeQuery = true)
+    List<VeiculoTipoView> buscarTiposPorIds(@Param("ids") Collection<UUID> ids);
+
     interface VeiculoPlacaId {
         String getPlaca();
         UUID getId();
+    }
+
+    interface VeiculoTipoView {
+        UUID getId();
+        String getDescricao();
     }
 }

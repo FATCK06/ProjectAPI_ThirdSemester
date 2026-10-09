@@ -9,7 +9,7 @@ interface RankingItem {
   nome: string | null;
   cpf: string | null;
   totalViagens: number;
-  veiculo: string | null;
+  tipoVeiculo: string | null;
   distanciaMaximaKm: number | null;
 }
 
@@ -146,7 +146,7 @@ export function RankingMotoristas() {
               {itens.map((item) => (
                 <tr key={item.motoristaId}>
                   <td className="ranking-name">{item.nome ? item.nome.toLowerCase() : '—'}</td>
-                  <td>{item.veiculo || '—'}</td>
+                  <td>{item.tipoVeiculo || '—'}</td>
                   <td>{item.totalViagens}</td>
                   <td>{formatarPercentual(item.indicadores?.disponibilidade)}</td>
                   <td>{formatarPercentual(item.indicadores?.utilizacao)}</td>
