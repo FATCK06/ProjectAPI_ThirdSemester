@@ -121,6 +121,9 @@ public class Viagem {
     @Column(name = "valor_fretes")
     private BigDecimal valorFretes;
 
+    @Column(name = "vale_frete")
+    private BigDecimal valeFrete;
+
     @Column(name = "valor_nf")
     private BigDecimal valorNf;
 
@@ -390,6 +393,14 @@ public class Viagem {
 
     public void setValorFretes(BigDecimal valorFretes) {
         this.valorFretes = valorFretes;
+    }
+
+    public BigDecimal getValeFrete() {
+        return valeFrete;
+    }
+
+    public void setValeFrete(BigDecimal valeFrete) {
+        this.valeFrete = valeFrete;
     }
 
     public BigDecimal getValorNf() {

@@ -69,6 +69,7 @@ public class IndicadoresService {
     static IndicadoresMotorista indicadoresDe(SomaMotoristaView soma, String nome, long diasDisponiveis,
             long diasNoMes) {
         long viagens = soma.getNumeroViagens();
+        long apuradas = soma.getViagensApuradas() == null ? 0 : soma.getViagensApuradas();
         long diasOperacao = soma.getDiasOperacao();
         BigDecimal frete = CalculoIndicadores.zeroSeNulo(soma.getValorFrete());
         BigDecimal custo = CalculoIndicadores.zeroSeNulo(soma.getCustoTotal());
@@ -78,6 +79,7 @@ public class IndicadoresService {
                 soma.getMotoristaId(),
                 nome,
                 viagens,
+                apuradas,
                 diasOperacao,
                 diasDisponiveis,
                 CalculoIndicadores.utilizacao(diasOperacao, diasDisponiveis),
@@ -85,18 +87,22 @@ public class IndicadoresService {
                 frete,
                 custo,
                 rentabilidade,
-                CalculoIndicadores.rentabilidadeMediaPorViagem(rentabilidade, viagens),
+                // So as viagens que entraram na rentabilidade: dividir pelas demais
+                // puxaria a media para baixo sem motivo.
+                CalculoIndicadores.rentabilidadeMediaPorViagem(rentabilidade, apuradas),
                 CalculoIndicadores.margem(rentabilidade, frete));
     }
 
     static IndicadoresMes.Totais totais(List<IndicadoresMotorista> motoristas, long diasDisponiveis) {
         long viagens = 0;
+        long apuradas = 0;
         long diasOperacao = 0;
         BigDecimal frete = BigDecimal.ZERO;
         BigDecimal custo = BigDecimal.ZERO;
 
         for (IndicadoresMotorista m : motoristas) {
             viagens += m.numeroViagens();
+            apuradas += m.viagensApuradas();
             diasOperacao += m.diasOperacao();
             frete = frete.add(m.valorFrete());
             custo = custo.add(m.custoTotal());
@@ -106,11 +112,12 @@ public class IndicadoresService {
         return new IndicadoresMes.Totais(
                 motoristas.size(),
                 viagens,
+                apuradas,
                 CalculoIndicadores.utilizacao(diasOperacao, diasDisponiveis * motoristas.size()),
                 frete,
                 custo,
                 rentabilidade,
-                CalculoIndicadores.rentabilidadeMediaPorViagem(rentabilidade, viagens),
+                CalculoIndicadores.rentabilidadeMediaPorViagem(rentabilidade, apuradas),
                 CalculoIndicadores.margem(rentabilidade, frete));
     }
 

@@ -49,27 +49,37 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             @Param("motoristaIds") Collection<UUID> motoristaIds);
 
     /**
+     * Viagem com receita e custo conhecidos. So ela entra nas somas financeiras;
+     * as demais continuam contando como viagem e dia em operacao.
+     */
+    String APURAVEL = "v.valorFretes > 0 and v.valeFrete > 0";
+
+    /**
      * Somas por motorista no mes; as formulas ficam em CalculoIndicadores.
      *
-     * PENDENTE (cliente): frete = valor_frete e custo = total_despesas sao
-     * provisorios. O CSV tambem traz valor_fretes, e viagem_custos mistura custo
-     * com desconto, adiantamento e retencao - somar tudo daria numero errado.
+     * Receita = valor_fretes (frete dos CT-e cobrado do cliente). Custo =
+     * vale_frete (total pago ao agregado: Valor Frete + Pedagio + Adicionais).
+     * valor_frete, no singular, e so o frete-base do agregado, ou seja, um
+     * componente do custo. Leitura conferida nos CSVs reais, ainda sem
+     * confirmacao do cliente.
      */
     @Query("select v.idMotorista as motoristaId, "
             + "count(v) as numeroViagens, "
             + "count(distinct v.dataViagem) as diasOperacao, "
-            + "sum(v.valorFrete) as valorFrete, "
-            + "sum(v.totalDespesas) as custoTotal "
+            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
             + "from Viagem v "
             + "where v.mesReferencia = :mesReferencia "
             + "group by v.idMotorista")
     List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
 
+    /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "
             + "count(v) as numeroViagens, "
             + "count(distinct v.dataViagem) as diasOperacao, "
-            + "sum(v.valorFrete) as valorFrete, "
-            + "sum(v.totalDespesas) as custoTotal "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
             + "from Viagem v "
             + "where v.mesReferencia = :mesReferencia "
             + "group by v.idVeiculo")
@@ -93,6 +103,9 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
         Long getNumeroViagens();
 
         Long getDiasOperacao();
+
+        /** Viagens que entraram em valorFrete e custoTotal (ver {@link #APURAVEL}). */
+        Long getViagensApuradas();
 
         BigDecimal getValorFrete();
 

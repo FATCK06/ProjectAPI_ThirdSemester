@@ -8,6 +8,8 @@ public record IndicadoresMotorista(
         UUID motoristaId,
         String nome,
         long numeroViagens,
+        /** Viagens com receita e custo conhecidos; base da rentabilidade media. */
+        long viagensApuradas,
         long diasOperacao,
         long diasDisponiveis,
         BigDecimal utilizacao,
