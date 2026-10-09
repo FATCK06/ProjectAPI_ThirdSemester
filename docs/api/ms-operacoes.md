@@ -19,6 +19,7 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
 | `GET` | `/api/dashboard/ranking-motoristas` | Top N motoristas por número de viagens |
+| `GET` | `/api/ranking/mensal` | Ranking mensal completo dos motoristas, com ordenação por coluna |
 | `GET` | `/api/dashboard/motoristas/situacao` | Situação (disponível/indisponível) de cada motorista no mês |
 
 ---

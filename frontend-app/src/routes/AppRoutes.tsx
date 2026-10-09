@@ -7,6 +7,7 @@ import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
 import { StatusServicos } from '../pages/Status';
 import { Motoristas } from '../pages/Motoristas';
 import { PrivateRoute } from './PrivateRoute';
+import { Ranking } from '../pages/Ranking';
 
 export function AppRoutes() {
   const token = localStorage.getItem('@Logistica:token');
@@ -20,6 +21,7 @@ export function AppRoutes() {
       <Route element={<PrivateRoute />}>
         <Route element={<DefaultLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/ranking" element={<Ranking />} />
           <Route path="/motoristas" element={<Motoristas />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/usuarios/novo" element={<CadastroUsuario />} />
