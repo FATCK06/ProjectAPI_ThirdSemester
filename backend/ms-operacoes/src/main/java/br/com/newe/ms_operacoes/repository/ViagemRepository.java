@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,6 +40,26 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.idMotorista "
             + "order by count(v) desc, v.idMotorista asc")
     List<RankingMotoristaView> rankingMotoristas(@Param("mesReferencia") String mesReferencia, Pageable pageable);
+
+    /**
+     * Agrega viagens por motorista e veículo e deixa o banco paginar os grupos.
+     * A countQuery conta motoristas distintos para que totalElements não conte
+     * viagens nem dependa da paginação.
+     */
+    @Query(value = "select v.idMotorista as motoristaId, "
+            + "v.idVeiculo as veiculoId, "
+            + "count(v) as viagensNoMes, "
+            + "count(distinct v.dataViagem) as diasEmOperacao, "
+            + "avg(v.percentualEfetividade) as avaliacaoMedia "
+            + "from Viagem v "
+            + "where v.mesReferencia = :mesReferencia "
+            + "group by v.idMotorista, v.idVeiculo",
+            countQuery = "select count(distinct v.idMotorista) "
+                    + "from Viagem v "
+                    + "where v.mesReferencia = :mesReferencia")
+    Page<MotoristaMesView> motoristasPorMes(
+            @Param("mesReferencia") String mesReferencia,
+            Pageable pageable);
 
     @Query("select v.idMotorista as motoristaId, v.idVeiculo as veiculoId, v.kmSaida as kmSaida, v.kmChegada as kmChegada "
             + "from Viagem v "
@@ -103,6 +124,18 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
         UUID getMotoristaId();
 
         Long getTotalViagens();
+    }
+
+    interface MotoristaMesView {
+        UUID getMotoristaId();
+
+        UUID getVeiculoId();
+
+        Long getViagensNoMes();
+
+        Long getDiasEmOperacao();
+
+        BigDecimal getAvaliacaoMedia();
     }
 
     interface ViagemKmView {
