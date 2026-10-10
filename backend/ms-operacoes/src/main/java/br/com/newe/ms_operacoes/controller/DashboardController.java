@@ -8,7 +8,10 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,12 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
+import br.com.newe.ms_operacoes.dto.MotoristaMesDTO;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
+import br.com.newe.ms_operacoes.service.indicadores.MotoristasMesService;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -30,12 +35,37 @@ public class DashboardController {
     private final ViagemRepository repository;
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
+    private final MotoristasMesService motoristasMesService;
 
     public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService) {
+            IndicadoresService indicadoresService, MotoristasMesService motoristasMesService) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
+        this.motoristasMesService = motoristasMesService;
+    }
+
+    /**
+     * Lista os indicadores mensais dos motoristas. Pageable permite que o Spring
+     * converta page, size e sort da query string para paginação no repositório.
+     */
+    @GetMapping("/motoristas")
+    public ResponseEntity<Page<MotoristaMesDTO>> motoristasMes(
+            @RequestParam("mesReferencia") String mesReferencia,
+            Pageable pageable) {
+        // O mês é obrigatório e a página/ordenação são limitadas para evitar
+        // consultas inválidas ou páginas excessivamente grandes.
+        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")
+                || pageable.getPageSize() > 100
+                || !ordenacaoMensalValida(pageable.getSort())) {
+            return ResponseEntity.badRequest().<Page<MotoristaMesDTO>>build();
+        }
+
+        // Uma ordenação determinística evita mudanças arbitrárias entre páginas.
+        Pageable pagina = pageable.getSort().isUnsorted()
+                ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("motoristaId"))
+                : pageable;
+        return ResponseEntity.ok(motoristasMesService.listar(mesReferencia, pagina));
     }
 
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
@@ -119,5 +149,13 @@ public class DashboardController {
             return ResponseEntity.badRequest().build();
         }
         return ResponseEntity.ok(indicadoresService.calcularPorModelo(mesReferencia));
+    }
+
+    /** Restringe sort aos campos da projeção agregada aceitos pela consulta. */
+    private static boolean ordenacaoMensalValida(Sort sort) {
+        return sort.stream().allMatch(order -> switch (order.getProperty()) {
+            case "motoristaId", "veiculoId", "viagensNoMes", "diasEmOperacao" -> true;
+            default -> false;
+        });
     }
 }

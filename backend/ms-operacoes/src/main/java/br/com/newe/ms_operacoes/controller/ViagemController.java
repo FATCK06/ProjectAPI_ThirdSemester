@@ -21,7 +21,7 @@ public class ViagemController {
         this.repository = repository;
     }
 
-    @GetMapping // "/api/viagens?mesReferencia=2026-09"
+    @GetMapping // "/api/viagens?mesReferencia=2026-06"
     public ResponseEntity<List<Viagem>> listarPorMesReferencia(@RequestParam("mesReferencia") String mesReferencia) {
         if (!mesReferencia.matches("\\d{4}-\\d{2}")) {
             return ResponseEntity.badRequest().build();
