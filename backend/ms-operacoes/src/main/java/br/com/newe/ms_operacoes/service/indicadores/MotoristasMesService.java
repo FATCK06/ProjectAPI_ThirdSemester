@@ -67,6 +67,7 @@ public class MotoristasMesService {
             MotoristaResumo motorista = motoristas.get(linha.getMotoristaId());
             return new MotoristaMesDTO(
                     linha.getMotoristaId(),
+                    linha.getVeiculoId(),
                     motorista != null && motorista.nome() != null ? motorista.nome() : NAO_INFORMADO,
                     placas.getOrDefault(linha.getVeiculoId(), NAO_INFORMADO),
                     tipos.getOrDefault(linha.getVeiculoId(), NAO_INFORMADO),

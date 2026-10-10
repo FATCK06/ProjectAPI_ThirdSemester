@@ -10,6 +10,7 @@ import java.util.UUID;
  */
 public record MotoristaMesDTO(
         UUID motoristaId,
+        UUID veiculoId,
         String nomeMotorista,
         String placa,
         String tipoVeiculo,

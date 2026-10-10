@@ -34,6 +34,13 @@ public class MotoristaController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Motorista> buscarPorId(@PathVariable UUID id) {
+        return service.buscarPorId(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     /** Nome e CPF por id, em lote. Usado pelo dashboard do ms-operacoes. */
     @PostMapping("/resumos")
     public ResponseEntity<List<MotoristaResumo>> buscarResumos(@RequestBody List<UUID> ids) {

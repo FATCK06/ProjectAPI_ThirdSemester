@@ -6,6 +6,7 @@ import { ManifestosImport } from '../pages/Importacoes/Manifestos';
 import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
 import { StatusServicos } from '../pages/Status';
 import { Motoristas } from '../pages/Motoristas';
+import { FichaMotorista } from '../pages/Motoristas/FichaMotorista';
 import { PrivateRoute } from './PrivateRoute';
 
 export function AppRoutes() {
@@ -21,6 +22,7 @@ export function AppRoutes() {
         <Route element={<DefaultLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/motoristas" element={<Motoristas />} />
+          <Route path="/motoristas/:motoristaId" element={<FichaMotorista />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/usuarios/novo" element={<CadastroUsuario />} />
           <Route path="/status" element={<StatusServicos />} />  
