@@ -63,14 +63,14 @@ public class DashboardController {
 
         List<UUID> motoristaIds = linhas.stream().map(ViagemRepository.RankingMotoristaView::getMotoristaId).toList();
 
-        // Viagem mais longa por motorista (kmChegada - kmSaida); em empate, fica a mais
-        // recente
+        // Viagem mais longa por motorista; em empate, fica a mais recente.
+        // No manifesto, "Km saida" ja e a distancia da rota, nao o hodometro: bate com o
+        // km escrito nas observacoes em 96% dos casos, e "Km chegada" vem sempre 0.
+        // Zero ali significa nao informado.
         Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
         Map<UUID, Integer> maiorDistancia = new HashMap<>();
         for (ViagemRepository.ViagemKmView v : repository.kmViagensPorMotoristas(mesReferencia, motoristaIds)) {
-            Integer distancia = (v.getKmSaida() != null && v.getKmChegada() != null)
-                    ? v.getKmChegada() - v.getKmSaida()
-                    : null;
+            Integer distancia = (v.getKmSaida() != null && v.getKmSaida() > 0) ? v.getKmSaida() : null;
 
             if (!maisLonga.containsKey(v.getMotoristaId())) {
                 maisLonga.put(v.getMotoristaId(), v);
