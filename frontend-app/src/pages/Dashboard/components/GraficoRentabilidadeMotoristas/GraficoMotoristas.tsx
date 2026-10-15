@@ -21,12 +21,19 @@ function montarDados(motoristas: IndicadoresMotorista[]): ChartData<"bar"> {
       {
         label: "Rentabilidade (R$)",
         data: motoristas.map((m) => m.rentabilidade),
-        backgroundColor: "rgba(29, 78, 216, 0.85)",
-        borderColor: "#1d4ed8",
-        borderWidth: 2,
-        borderRadius: 8,
-        barPercentage: 0.8,
-        categoryPercentage: 0.8,
+        backgroundColor: "rgba(37, 99, 235, 0.85)",
+        hoverBackgroundColor: "rgba(29, 78, 216, 1)",
+        borderColor: "#2563eb",
+        borderWidth: 0,
+        borderRadius: {
+          topLeft: 6,
+          topRight: 6,
+          bottomLeft: 0,
+          bottomRight: 0,
+        },
+        borderSkipped: false,
+        barPercentage: 0.65,
+        categoryPercentage: 0.75,
       },
     ],
   };
@@ -39,11 +46,24 @@ function montarOpcoes(motoristas: IndicadoresMotorista[]): ChartOptions<"bar"> {
     plugins: {
       legend: { display: false },
       tooltip: {
+        backgroundColor: "rgba(15, 23, 42, 0.9)", 
+        titleFont: { size: 13, family: "Inter, sans-serif", weight: "bold" },
+        bodyFont: { size: 12, family: "Inter, sans-serif" },
+        padding: 12,
+        cornerRadius: 8,
+        boxPadding: 6,
+        usePointStyle: true,
+       
         callbacks: {
-          title: (items) => motoristas[items[0]?.dataIndex]?.nome ?? "Sem nome",
+          title: (items) => {
+            const index = items[0]?.dataIndex;
+            return motoristas[index]?.nome ?? "Sem nome";
+          },
           label: (context) => {
             const valor = context.parsed.y ?? 0;
-            return `R$ ${valor.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}`;
+            return ` Rentabilidade: R$ ${valor.toLocaleString("pt-BR", {
+              minimumFractionDigits: 2,
+            })}`;
           },
         },
       },
@@ -51,15 +71,29 @@ function montarOpcoes(motoristas: IndicadoresMotorista[]): ChartOptions<"bar"> {
     scales: {
       y: {
         beginAtZero: true,
-        ticks: { stepSize: 5000, precision: 0 },
+        grid: {
+          color: "rgba(226, 232, 240, 0.6)", 
+        },
+        ticks: {
+          stepSize: 5000,
+          font: { size: 11, family: "Inter, sans-serif" },
+          color: "#64748b", 
+          callback: (value) => `R$ ${Number(value).toLocaleString("pt-BR", { notation: "compact" })}`,
+        },
+        border: { display: false },
       },
       x: {
+        grid: {
+          display: false, 
+        },
         ticks: {
-          font: { size: 9 },
-          maxRotation: 60,
-          minRotation: 45,
+          font: { size: 10, family: "Inter, sans-serif" },
+          color: "#64748b",
+          maxRotation: 30, 
+          minRotation: 0,
           autoSkip: false,
         },
+        border: { display: false },
       },
     },
   };
@@ -69,8 +103,8 @@ export function GraficoMotoristas({ motoristas }: PropsGraficoMotoristas) {
   const top = motoristas.slice(0, 10);
 
   return (
-    <Card titulo="Rentabilidade por motorista" subtitulo="Top 10 do mês">
-      <div className="ui-card-chart">
+    <Card titulo="Rentabilidade por Motorista" subtitulo="Top 10 do mês">
+      <div className="ui-card-chart" style={{ width: "100%", height: "320px" }}>
         <Bar data={montarDados(top)} options={montarOpcoes(top)} />
       </div>
     </Card>

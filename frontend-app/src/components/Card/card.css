@@ -35,3 +35,11 @@
   position: relative;
   height: 260px;
 }
+
+.ui-card-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+}

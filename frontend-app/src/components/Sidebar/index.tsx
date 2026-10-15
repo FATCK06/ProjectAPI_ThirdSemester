@@ -88,6 +88,32 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
               </div>
             </div>
           )}
+
+          {!isMinimized && (
+            <div className={`accordion-content ${isImportOpen ? 'aberto' : ''}`} inert={!isImportOpen}>
+              <div className="accordion-itens">
+                <NavLink
+                  to="/importacoes/veiculos"
+                  className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
+                >
+                  <span>Veículos</span>
+                </NavLink>
+              </div>
+            </div>
+          )}
+
+          {!isMinimized && (
+            <div className={`accordion-content ${isImportOpen ? 'aberto' : ''}`} inert={!isImportOpen}>
+              <div className="accordion-itens">
+                <NavLink
+                  to="/importacoes/historico"
+                  className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
+                >
+                  <span>Histórico de Importações</span>
+                </NavLink>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Itens de administração. Esconder é só conveniência visual — quem

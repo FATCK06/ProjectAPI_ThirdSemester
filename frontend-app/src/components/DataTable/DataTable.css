@@ -3,7 +3,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   scrollbar-width: thin;
-  scrollbar-color: #4bc0c0 #e2e8f0;
+  scrollbar-color: rgba(37, 99, 235, 0.85) #e2e8f0;
 }
 
 .data-table-wrap::-webkit-scrollbar {
@@ -17,7 +17,7 @@
 }
 
 .data-table-wrap::-webkit-scrollbar-thumb {
-  background: #4bc0c0;
+  background: rgba(37, 99, 235, 0.85);
   border-radius: 999px;
 }
 

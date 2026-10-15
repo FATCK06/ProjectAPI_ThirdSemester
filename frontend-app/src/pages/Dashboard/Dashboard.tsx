@@ -1,11 +1,33 @@
 import { useState } from "react";
 import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
 import { RankingMotoristas } from "./components/RankingMotoristas/RankingMotoristas";
-import IndicadoresCard from "./components/IndicadoresCard/IndicadoresCard";
+import IndicadoresCard, {
+  type ComparativoIndicador,
+  type IndicadorId,
+} from "./components/IndicadoresCard/IndicadoresCard";
 import GraficoMotoristas from "./components/GraficoRentabilidadeMotoristas/GraficoMotoristas";
-import GraficoModelos from "./components/GraficoModelos/GraficoModelos.tsx";
+import GraficoModelos from "./components/GraficoModelos/GraficoModelos";
 import { useDashboard } from "./useDashboard";
 import "./dashboard.css";
+
+// TEMPORÁRIO: dados falsos só para conferir o visual. Apagar quando o backend fornecer o histórico.
+const COMPARATIVO_TESTE: Partial<Record<IndicadorId, ComparativoIndicador>> = {
+  numeroViagens: {
+    variacaoPercentual: 12.4,
+    rotuloAnterior: "vs. Maio/2026 (430)",
+    serie: [390, 410, 400, 430, 460, 483],
+  },
+  diasDisponiveis: {
+    variacaoPercentual: 5.7,
+    rotuloAnterior: "vs. Maio/2026 (28)",
+    serie: [26, 27, 26, 28, 29, 30],
+  },
+  utilizacaoMedia: {
+    variacaoPercentual: -2.8,
+    rotuloAnterior: "vs. Maio/2026 (16,78%)",
+    serie: [17.2, 16.9, 17.1, 16.78, 16.5, 16.31],
+  },
+};
 
 export function Dashboard() {
   const [mesReferencia] = useState("2026-06");
@@ -18,8 +40,13 @@ export function Dashboard() {
       ) : (
         <div className="dashboard-charts">
           <div className="dashboard-indicators">
-            <CardSkeleton isLoading={isLoading} altura={180}>
-              {dados && <IndicadoresCard indicadores={dados.indicadores} />}
+            <CardSkeleton isLoading={isLoading} altura={260}>
+              {dados && (
+                <IndicadoresCard
+                  indicadores={dados.indicadores}
+                  comparativo={COMPARATIVO_TESTE}
+                />
+              )}
             </CardSkeleton>
           </div>
 

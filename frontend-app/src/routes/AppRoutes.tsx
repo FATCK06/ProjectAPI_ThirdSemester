@@ -3,6 +3,8 @@ import { Login } from '../pages/Login';
 import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { DefaultLayout } from '../layouts/DefaultLayout';
 import { ManifestosImport } from '../pages/Importacoes/Manifestos';
+import { VeiculosImport } from '../pages/Importacoes/Veiculos';
+import { HistoricoImport } from '../pages/Importacoes/HistoricoImportacoes';
 import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
 import { StatusServicos } from '../pages/Status';
 import { Motoristas } from '../pages/Motoristas';
@@ -22,6 +24,8 @@ export function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/motoristas" element={<Motoristas />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
+          <Route path="/importacoes/veiculos" element={<VeiculosImport />} />
+          <Route path="/importacoes/historico" element={<HistoricoImport />} />
           <Route path="/usuarios/novo" element={<CadastroUsuario />} />
           <Route path="/status" element={<StatusServicos />} />  
         </Route>

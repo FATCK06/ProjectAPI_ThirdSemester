@@ -141,7 +141,7 @@ export function RankingMotoristas() {
         type="month"
         value={mes}
         onChange={(e) => {
-          if (!e.target.value) return; // campo apagado: mantém o mês atual
+          if (!e.target.value) return; 
           setStatus("loading");
           setMes(e.target.value);
         }}
