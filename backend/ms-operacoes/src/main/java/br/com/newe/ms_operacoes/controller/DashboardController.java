@@ -56,12 +56,13 @@ public class DashboardController {
     private IndicadoresMes semValoresFinanceiros(IndicadoresMes indicadores) {
         List<br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista> motoristas = indicadores.motoristas().stream()
                 .map(m -> new br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista(
-                        m.motoristaId(), m.nome(), m.numeroViagens(), m.diasOperacao(), m.diasDisponiveis(),
-                        m.utilizacao(), m.disponibilidade(), null, null, null, null, null))
+                        m.motoristaId(), m.nome(), m.numeroViagens(), m.viagensApuradas(), m.diasOperacao(),
+                        m.diasDisponiveis(), m.utilizacao(), m.disponibilidade(), null, null, null, null, null))
                 .toList();
         IndicadoresMes.Totais totais = indicadores.totais();
         IndicadoresMes.Totais totaisSemValores = new IndicadoresMes.Totais(
-                totais.motoristas(), totais.numeroViagens(), totais.utilizacaoMedia(), null, null, null, null, null);
+                totais.motoristas(), totais.numeroViagens(), totais.viagensApuradas(), totais.utilizacaoMedia(),
+                null, null, null, null, null);
         return new IndicadoresMes(indicadores.mesReferencia(), indicadores.diasNoMes(), indicadores.diasDisponiveis(),
                 totaisSemValores, motoristas);
     }
