@@ -29,5 +29,17 @@ public record IndicadoresMes(
             BigDecimal rentabilidadeMediaViagem,
             BigDecimal margem
     ) {
+        /** Copia sem os campos financeiros (viram null e somem do JSON). */
+        public Totais semValoresFinanceiros() {
+            return new Totais(motoristas, numeroViagens, viagensApuradas, utilizacaoMedia,
+                    null, null, null, null, null);
+        }
+    }
+
+    /** Copia sem valores financeiros, nos totais e em cada motorista. */
+    public IndicadoresMes semValoresFinanceiros() {
+        return new IndicadoresMes(mesReferencia, diasNoMes, diasDisponiveis,
+                totais.semValoresFinanceiros(),
+                motoristas.stream().map(IndicadoresMotorista::semValoresFinanceiros).toList());
     }
 }

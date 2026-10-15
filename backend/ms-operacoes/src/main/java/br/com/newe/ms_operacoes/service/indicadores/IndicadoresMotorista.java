@@ -22,4 +22,10 @@ public record IndicadoresMotorista(
         BigDecimal rentabilidadeMediaViagem,
         BigDecimal margem
 ) {
+    /** Copia sem os campos financeiros (viram null e somem do JSON). */
+    public IndicadoresMotorista semValoresFinanceiros() {
+        return new IndicadoresMotorista(motoristaId, nome, numeroViagens, viagensApuradas,
+                diasOperacao, diasDisponiveis, utilizacao, disponibilidade,
+                null, null, null, null, null);
+    }
 }
