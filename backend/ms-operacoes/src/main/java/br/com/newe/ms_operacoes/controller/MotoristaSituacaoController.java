@@ -1,6 +1,7 @@
 package br.com.newe.ms_operacoes.controller;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +41,8 @@ public class MotoristaSituacaoController {
         SituacaoMotorista filtro = null;
         if (situacao != null && !situacao.isBlank()) {
             try {
-                filtro = SituacaoMotorista.valueOf(situacao.trim());
+                // Sem diferenciar caixa: "disponivel" vale o mesmo que "DISPONIVEL".
+                filtro = SituacaoMotorista.valueOf(situacao.trim().toUpperCase(Locale.ROOT));
             } catch (IllegalArgumentException e) {
                 return ResponseEntity.badRequest().build();
             }

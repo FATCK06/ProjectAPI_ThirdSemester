@@ -395,7 +395,7 @@ Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
 
 Situação de cada motorista no mês, a partir da tabela `controle_disponibilidade`. A importação (fim do `/executar`) grava os **dias disponíveis e em operação** de cada motorista; a consulta só lê essa tabela, sem tocar em `viagens`.
 
-A tabela não tem colunas para utilização, faixa e situação (o schema do Supabase é fixo), então esses três campos são **calculados na consulta** a partir dos dias gravados. Por isso, mudar os cortes vale na hora, sem reimportar.
+A tabela não tem colunas para utilização, faixa e situação (o schema do Supabase é fixo), então esses três campos são **calculados na consulta** a partir dos dias gravados. Por isso, para mudar os cortes basta reiniciar o ms-operacoes, sem reimportar.
 
 **Escopo:** só motoristas com viagem no mês. Quem não rodou nenhum dia não aparece.
 
@@ -434,12 +434,12 @@ Ordem: `DISPONIVEL` primeiro, depois menor utilização, depois nome. Sem result
 | Utilização | dias em operação ÷ dias disponíveis × 100, 2 casas (HALF_UP). Pode passar de 100 |
 | Dias em operação | dias distintos com viagem no mês, somando todas as importações |
 | Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês — PENDENTE do cliente) |
-| `BAIXA` | utilização < corte baixo → `DISPONIVEL` |
-| `INTERMEDIARIA` | corte baixo ≤ utilização < corte alto → `DISPONIVEL` |
-| `ALTA` | utilização ≥ corte alto → `INDISPONIVEL` |
+| `BAIXA` | utilização < 50 → `DISPONIVEL` |
+| `INTERMEDIARIA` | 50 ≤ utilização < 80 → `DISPONIVEL` |
+| `ALTA` | utilização ≥ 80 → `INDISPONIVEL` |
 | Dias disponíveis ≤ 0 | sem faixa, `utilizacao: null`, situação `SEM_DIAS_DISPONIVEIS` e `aviso: "Motorista sem dias disponíveis registrados no período."` |
 
-Os cortes ficam em `application.properties` (`situacao.utilizacao.corte-baixa=40` e `situacao.utilizacao.corte-alta=70`) e são **provisórios — PENDENTE (Newe)**.
+Os cortes ficam em `src/main/resources/situacao-utilizacao.properties` (`situacao.utilizacao.corte-baixa=50` e `situacao.utilizacao.corte-alta=80`). Exatamente 50 é `INTERMEDIARIA`; exatamente 80 é `ALTA`. Variável de ambiente sobrescreve o arquivo (`SITUACAO_UTILIZACAO_CORTEBAIXA`, `SITUACAO_UTILIZACAO_CORTEALTA`). Valor ausente, negativo ou corte baixo maior que o alto impede a subida do ms-operacoes, com o nome da propriedade na mensagem.
 
 A cada importação, os dias dos meses presentes no arquivo são recalculados a partir de todas as viagens do mês no banco. Se o recálculo falhar, a importação continua `CONCLUIDO` (as viagens já foram gravadas) e o erro fica no log; a próxima importação do mês recalcula.
 
