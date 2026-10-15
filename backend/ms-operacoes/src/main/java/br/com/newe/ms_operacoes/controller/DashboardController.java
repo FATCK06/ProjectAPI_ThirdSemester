@@ -19,10 +19,10 @@ import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
-import br.com.newe.ms_operacoes.security.PerfilResolver;
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -43,27 +43,16 @@ public class DashboardController {
     }
 
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
-    public ResponseEntity<IndicadoresMes> indicadores(@RequestParam("mesReferencia") String mesReferencia,
+    public ResponseEntity<IndicadoresMes> indicadores(
+            @RequestParam("mesReferencia") String mesReferencia,
             @RequestParam(value = "ranking", defaultValue = "false") boolean ranking,
             HttpServletRequest request) {
         if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
             return ResponseEntity.badRequest().build();
         }
         IndicadoresMes indicadores = indicadoresService.calcular(mesReferencia);
-        return ResponseEntity.ok(ranking && perfilResolver.isOperador(request) ? semValoresFinanceiros(indicadores) : indicadores);
-    }
-
-    private IndicadoresMes semValoresFinanceiros(IndicadoresMes indicadores) {
-        List<br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista> motoristas = indicadores.motoristas().stream()
-                .map(m -> new br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista(
-                        m.motoristaId(), m.nome(), m.numeroViagens(), m.diasOperacao(), m.diasDisponiveis(),
-                        m.utilizacao(), m.disponibilidade(), null, null, null, null, null))
-                .toList();
-        IndicadoresMes.Totais totais = indicadores.totais();
-        IndicadoresMes.Totais totaisSemValores = new IndicadoresMes.Totais(
-                totais.motoristas(), totais.numeroViagens(), totais.utilizacaoMedia(), null, null, null, null, null);
-        return new IndicadoresMes(indicadores.mesReferencia(), indicadores.diasNoMes(), indicadores.diasDisponiveis(),
-                totaisSemValores, motoristas);
+        boolean ocultarValores = ranking && perfilResolver.isOperador(request);
+        return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);
     }
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
