@@ -15,6 +15,8 @@ import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository.ContagemPorStatus;
 
+import br.com.newe.ms_operacoes.dto.ImportacaoResumoDTO;
+
 /**
  * Ciclo de vida da importacao. Nao parseia nem grava viagens - so guarda o
  * arquivo e acompanha o estado enquanto ele passa pelas etapas da tela.
@@ -46,6 +48,11 @@ public class ImportacaoService {
 
     public List<Importacao> listar() {
         return repository.findAllByOrderByDataImportacaoDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ImportacaoResumoDTO> listarResumo() {
+        return repository.listarResumo();
     }
 
     /** Registra o que o parse encontrou. Continua sem gravar viagem nenhuma. */

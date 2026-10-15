@@ -32,6 +32,7 @@ import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoServic
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
+import br.com.newe.ms_operacoes.dto.ImportacaoResumoDTO;
 
 /**
  * Importacao em etapas.
@@ -161,6 +162,12 @@ public class ImportacaoController {
     @GetMapping
     public ResponseEntity<List<Importacao>> listar() {
         return ResponseEntity.ok(service.listar());
+    }
+
+    /** Lista leve para a tela de histórico: sem o conteúdo do arquivo. */
+    @GetMapping("/historico")
+    public ResponseEntity<List<ImportacaoResumoDTO>> historico() {
+        return ResponseEntity.ok(service.listarResumo());
     }
 
     @GetMapping("/resumo")

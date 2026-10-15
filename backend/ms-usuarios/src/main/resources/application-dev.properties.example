@@ -10,3 +10,11 @@ spring.jpa.show-sql=true
 
 # Chave secreta do JWT (Adicione esta linha!)
 api.security.token.secret=
+
+spring.datasource.hikari.maximum-pool-size=3
+spring.datasource.hikari.minimum-idle=1
+spring.datasource.hikari.connection-timeout=10000
+
+spring.datasource.hikari.max-lifetime=240000
+spring.datasource.hikari.idle-timeout=120000
+spring.datasource.hikari.keepalive-time=60000
