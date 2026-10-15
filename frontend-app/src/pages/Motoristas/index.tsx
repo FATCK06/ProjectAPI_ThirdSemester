@@ -32,6 +32,14 @@ function paginaDaUrl(valor: string | null) {
     : 1;
 }
 
+function normalizarBusca(valor: string) {
+  return valor
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
 function valoresMotorista(motorista: MotoristaMes) {
   return [
     { rotulo: "Veículo", valor: motorista.tipoVeiculo },
@@ -53,6 +61,7 @@ export function Motoristas() {
     : mesAtual();
   const paginaParametro = searchParams.get("page");
   const pagina = paginaDaUrl(paginaParametro);
+  const [busca, setBusca] = useState("");
   const [resultado, setResultado] = useState<ResultadoBusca | null>(null);
   const [tentativa, setTentativa] = useState(0);
   const chaveConsulta = `${mes}|${pagina}|${tentativa}`;
@@ -62,6 +71,13 @@ export function Motoristas() {
   const dados = resultado?.chave === chaveConsulta && resultado.status === "success"
     ? resultado.dados
     : null;
+  const termo = normalizarBusca(busca);
+  const placaTermo = termo.replace(/[^a-z0-9]/g, "");
+  const motoristasFiltrados = dados?.content.filter((motorista) => {
+    const nome = normalizarBusca(motorista.nomeMotorista);
+    const placa = motorista.placa.toLocaleLowerCase("pt-BR").replace(/[^a-z0-9]/g, "");
+    return nome.includes(termo) || (placaTermo !== "" && placa.includes(placaTermo));
+  }) ?? [];
 
   useEffect(() => {
     if (mesParametro !== mes || paginaParametro !== String(pagina)) {
@@ -119,16 +135,28 @@ export function Motoristas() {
           </p>
         </div>
 
-        <div className="motoristas-filtro">
-          <label htmlFor="motoristas-mes">Mês</label>
-          <input
-            id="motoristas-mes"
-            type="month"
-            value={mes}
-            onChange={(event) => {
-              if (event.target.value) atualizarConsulta(event.target.value, 1);
-            }}
-          />
+        <div className="motoristas-filtros">
+          <div className="motoristas-filtro">
+            <label htmlFor="motoristas-busca">Buscar motorista ou placa</label>
+            <input
+              id="motoristas-busca"
+              type="search"
+              placeholder="Nome ou placa"
+              value={busca}
+              onChange={(event) => setBusca(event.target.value)}
+            />
+          </div>
+          <div className="motoristas-filtro">
+            <label htmlFor="motoristas-mes">Mês</label>
+            <input
+              id="motoristas-mes"
+              type="month"
+              value={mes}
+              onChange={(event) => {
+                if (event.target.value) atualizarConsulta(event.target.value, 1);
+              }}
+            />
+          </div>
         </div>
       </div>
 
@@ -154,76 +182,86 @@ export function Motoristas() {
 
       {status === "success" && dados && dados.content.length > 0 && (
         <>
-          <div className="motoristas-table-wrap">
-            <table className="motoristas-table">
-              <thead>
-                <tr>
-                  <th scope="col">Motorista</th>
-                  <th scope="col">Veículo</th>
-                  <th scope="col">Placa</th>
-                  <th scope="col">Viagens</th>
-                  <th scope="col">Dias em operação</th>
-                  <th scope="col">Disponibilidade</th>
-                  <th scope="col">Utilização</th>
-                  <th scope="col">Efetividade</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dados.content.map((motorista) => {
-                  const destino = `/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`;
-                  return (
-                    <tr
-                      key={`${motorista.motoristaId}-${motorista.veiculoId}`}
-                      className="motoristas-table-row"
-                      onClick={() => navigate(destino)}
-                    >
-                      <td className="motoristas-nome">
-                        <Link
-                          to={destino}
-                          className="motoristas-profile-link"
-                          onClick={(event) => event.stopPropagation()}
-                        >
-                          {motorista.nomeMotorista}
-                        </Link>
-                      </td>
-                      {valoresMotorista(motorista).map((campo) => (
-                        <td key={campo.rotulo} data-label={campo.rotulo}>
-                          {campo.valor}
-                        </td>
-                      ))}
+          {motoristasFiltrados.length === 0 ? (
+            <div className="motoristas-feedback" role="status">
+              <p>Nenhum motorista ou veículo corresponde a “{busca}”.</p>
+            </div>
+          ) : (
+            <>
+              <div className="motoristas-table-wrap">
+                <table className="motoristas-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Motorista</th>
+                      <th scope="col">Veículo</th>
+                      <th scope="col">Placa</th>
+                      <th scope="col">Viagens</th>
+                      <th scope="col">Dias em operação</th>
+                      <th scope="col">Disponibilidade</th>
+                      <th scope="col">Utilização</th>
+                      <th scope="col">Efetividade</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  </thead>
+                  <tbody>
+                    {motoristasFiltrados.map((motorista) => {
+                      const destino = `/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`;
+                      return (
+                        <tr
+                          key={`${motorista.motoristaId}-${motorista.veiculoId}`}
+                          className="motoristas-table-row"
+                          onClick={() => navigate(destino)}
+                        >
+                          <td className="motoristas-nome">
+                            <Link
+                              to={destino}
+                              className="motoristas-profile-link"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              {motorista.nomeMotorista}
+                            </Link>
+                          </td>
+                          {valoresMotorista(motorista).map((campo) => (
+                            <td key={campo.rotulo} data-label={campo.rotulo}>
+                              {campo.valor}
+                            </td>
+                          ))}
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
-          <div className="motoristas-mobile-cards">
-            {dados.content.map((motorista) => (
-              <Link
-                key={`${motorista.motoristaId}-${motorista.veiculoId}`}
-                to={`/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
-                className="motorista-mobile-card"
-              >
-                <span className="motorista-mobile-name">
-                  {motorista.nomeMotorista}
-                  <span aria-hidden="true">›</span>
-                </span>
-                <span className="motorista-mobile-fields">
-                  {valoresMotorista(motorista).map((campo) => (
-                    <span className="motorista-mobile-field" key={campo.rotulo}>
-                      <span>{campo.rotulo}</span>
-                      <strong>{campo.valor}</strong>
+              <div className="motoristas-mobile-cards">
+                {motoristasFiltrados.map((motorista) => (
+                  <Link
+                    key={`${motorista.motoristaId}-${motorista.veiculoId}`}
+                    to={`/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
+                    className="motorista-mobile-card"
+                  >
+                    <span className="motorista-mobile-name">
+                      {motorista.nomeMotorista}
+                      <span aria-hidden="true">›</span>
                     </span>
-                  ))}
-                </span>
-              </Link>
-            ))}
-          </div>
+                    <span className="motorista-mobile-fields">
+                      {valoresMotorista(motorista).map((campo) => (
+                        <span className="motorista-mobile-field" key={campo.rotulo}>
+                          <span>{campo.rotulo}</span>
+                          <strong>{campo.valor}</strong>
+                        </span>
+                      ))}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
 
           <nav className="motoristas-paginacao" aria-label="Paginação de motoristas">
             <span className="motoristas-contagem">
-              {dados.totalElements.toLocaleString("pt-BR")} motoristas
+              {termo
+                ? `${motoristasFiltrados.length} de ${dados.content.length} nesta página`
+                : `${dados.totalElements.toLocaleString("pt-BR")} motoristas`}
             </span>
             <div className="motoristas-paginacao-controles">
               <button

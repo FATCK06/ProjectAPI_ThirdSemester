@@ -30,12 +30,23 @@
   color: #64748b;
 }
 
+.motoristas-filtros {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
 .motoristas-filtro {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 13px;
   color: #475569;
+}
+
+.motoristas-filtro input[type="search"] {
+  min-width: 220px;
 }
 
 .motoristas-filtro input {
@@ -293,6 +304,12 @@
 
   .motoristas-header {
     flex-direction: column;
+  }
+
+  .motoristas-filtros {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
   }
 
   .motoristas-filtro {
