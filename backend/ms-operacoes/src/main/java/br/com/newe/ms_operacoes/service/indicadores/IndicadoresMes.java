@@ -2,6 +2,7 @@ package br.com.newe.ms_operacoes.service.indicadores;
 
 import java.math.BigDecimal;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Resposta de /api/dashboard/indicadores: totais do mes (cards e grafico de
@@ -16,6 +17,7 @@ public record IndicadoresMes(
 ) {
 
     /** utilizacaoMedia: dias em operacao somados / (dias disponiveis x motoristas). */
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Totais(
             long motoristas,
             long numeroViagens,

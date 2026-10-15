@@ -2,8 +2,10 @@ package br.com.newe.ms_operacoes.service.indicadores;
 
 import java.math.BigDecimal;
 import java.util.UUID;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /** Uma linha do ranking gerencial: um motorista em um mes. Percentuais de 0 a 100. */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record IndicadoresMotorista(
         UUID motoristaId,
         String nome,
