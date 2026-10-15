@@ -147,6 +147,7 @@ public class ManifestoBatchWriter {
 
         viagem.setValorFrete(linha.valorFrete());
         viagem.setValorFretes(linha.valorFretes());
+        viagem.setValeFrete(linha.valeFrete());
         viagem.setValorNf(linha.valorNf());
         viagem.setTotalDespesas(linha.totalDespesas());
         viagem.setSaldoDespesas(linha.saldoDespesas());
