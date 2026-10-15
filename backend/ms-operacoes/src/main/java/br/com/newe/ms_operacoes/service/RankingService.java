@@ -30,10 +30,11 @@ public class RankingService {
     public static boolean colunaValida(String coluna) { return COLUNAS.contains(coluna); }
     public static boolean direcaoValida(String direcao) { return direcao.equalsIgnoreCase("asc") || direcao.equalsIgnoreCase("desc"); }
 
-    public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao) {
+    public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao, boolean operador) {
         List<IndicadoresMotorista> indicadores = indicadoresService.calcular(mes).motoristas();
         Map<UUID, String> tipos = tiposVeiculoMaisLongo(mes, indicadores.stream().map(IndicadoresMotorista::motoristaId).toList());
-        return indicadores.stream().map(i -> new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipos.get(i.motoristaId()), i.numeroViagens(), i.disponibilidade(), i.utilizacao(), i.valorFrete(), i.custoTotal(), i.rentabilidade(), i.rentabilidadeMediaViagem())).sorted(comparador(ordenarPor, direcao)).toList();
+        String colunaOrdenacao = operador && List.of("valorFretes", "custos", "rentabilidade", "rentabilidadeMediaViagem").contains(ordenarPor) ? "viagens" : ordenarPor;
+        return indicadores.stream().map(i -> new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipos.get(i.motoristaId()), i.numeroViagens(), i.disponibilidade(), i.utilizacao(), operador ? null : i.valorFrete(), operador ? null : i.custoTotal(), operador ? null : i.rentabilidade(), operador ? null : i.rentabilidadeMediaViagem())).sorted(comparador(colunaOrdenacao, direcao)).toList();
     }
 
     private Map<UUID, String> tiposVeiculoMaisLongo(String mes, List<UUID> motoristaIds) {

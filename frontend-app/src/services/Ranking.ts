@@ -7,10 +7,10 @@ export interface RankingMensalMotorista {
   viagens: number;
   disponibilidade: number;
   utilizacao: number;
-  valorFretes: number;
-  custos: number;
-  rentabilidade: number;
-  rentabilidadeMediaViagem: number;
+  valorFretes?: number;
+  custos?: number;
+  rentabilidade?: number;
+  rentabilidadeMediaViagem?: number;
 }
 
 export async function buscarRankingMensal(mesReferencia: string) {

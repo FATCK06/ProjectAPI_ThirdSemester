@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { buscarRankingMensal, type RankingMensalMotorista } from '../../services/Ranking';
 import { CardSkeleton } from '../../components/SkeletonLoader/CardSkeleton';
+import { usuarioLogado } from '../../services/auth';
 import './ranking.css';
 
 type Coluna = keyof Pick<RankingMensalMotorista, 'motorista' | 'tipoVeiculo' | 'viagens' | 'disponibilidade' | 'utilizacao' | 'valorFretes' | 'custos' | 'rentabilidade' | 'rentabilidadeMediaViagem'>;
@@ -19,9 +20,10 @@ function percentual(valor: number) {
 }
 
 export function Ranking() {
+  const operador = usuarioLogado()?.perfil.toLowerCase() === 'operador';
   const [mes, setMes] = useState(mesAtual);
   const [linhas, setLinhas] = useState<RankingMensalMotorista[]>([]);
-  const [coluna, setColuna] = useState<Coluna>('rentabilidade');
+  const [coluna, setColuna] = useState<Coluna>(operador ? 'viagens' : 'rentabilidade');
   const [direcao, setDirecao] = useState<'asc' | 'desc'>('desc');
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -71,12 +73,12 @@ export function Ranking() {
       {!carregando && !erro && ordenadas.length > 0 && (
         <div className="ranking-page-table-wrap"><table className="ranking-page-table"><thead><tr>
           {cabecalho('Motorista', 'motorista')}{cabecalho('Tipo de veículo', 'tipoVeiculo')}{cabecalho('Viagens', 'viagens')}
-          {cabecalho('Disponibilidade', 'disponibilidade')}{cabecalho('Utilização', 'utilizacao')}{cabecalho('Valor dos fretes', 'valorFretes')}
-          {cabecalho('Custos', 'custos')}{cabecalho('Rentabilidade', 'rentabilidade')}{cabecalho('Rentabilidade média', 'rentabilidadeMediaViagem')}
+          {cabecalho('Disponibilidade', 'disponibilidade')}{cabecalho('Utilização', 'utilizacao')}
+          {!operador && <>{cabecalho('Valor dos fretes', 'valorFretes')}{cabecalho('Custos', 'custos')}{cabecalho('Rentabilidade', 'rentabilidade')}{cabecalho('Rentabilidade média', 'rentabilidadeMediaViagem')}</>}
         </tr></thead><tbody>{ordenadas.map((linha) => <tr key={linha.motoristaId}>
           <td className="ranking-page-name">{linha.motorista || '—'}</td><td>{linha.tipoVeiculo || '—'}</td><td>{linha.viagens}</td>
-          <td>{percentual(linha.disponibilidade)}</td><td>{percentual(linha.utilizacao)}</td><td>{moeda(linha.valorFretes)}</td>
-          <td>{moeda(linha.custos)}</td><td>{moeda(linha.rentabilidade)}</td><td>{moeda(linha.rentabilidadeMediaViagem)}</td>
+          <td>{percentual(linha.disponibilidade)}</td><td>{percentual(linha.utilizacao)}</td>
+          {!operador && <><td>{moeda(linha.valorFretes ?? 0)}</td><td>{moeda(linha.custos ?? 0)}</td><td>{moeda(linha.rentabilidade ?? 0)}</td><td>{moeda(linha.rentabilidadeMediaViagem ?? 0)}</td></>}
         </tr>)}</tbody></table></div>
       )}
     </div>
