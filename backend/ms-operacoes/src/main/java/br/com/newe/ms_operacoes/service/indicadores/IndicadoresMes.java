@@ -21,6 +21,7 @@ public record IndicadoresMes(
     public record Totais(
             long motoristas,
             long numeroViagens,
+            long viagensApuradas,
             BigDecimal utilizacaoMedia,
             BigDecimal valorFrete,
             BigDecimal custoTotal,
