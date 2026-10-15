@@ -135,6 +135,6 @@
 }
 
 /* Botao que grava: verde, para nao ser confundido com o Continuar azul */
-.btn-continuar.btn-gravar { background: #16a34a; }
+.btn-continuar.btn-gravar { background: #2563eb; }
 
-.btn-continuar.btn-gravar:hover:not(:disabled) { background: #15803d; }
+.btn-continuar.btn-gravar:hover:not(:disabled) { background: #2563eb; }
