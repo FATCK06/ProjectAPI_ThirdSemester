@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { TableSkeleton } from "../../components/SkeletonLoader/TableSkeleton";
 import {
   buscarMotoristasMes,
+  buscarTiposVeiculo,
   type MotoristasMesPage,
   type MotoristaMes,
+  type TipoVeiculo,
 } from "../../services/Motoristas";
 import "./motoristas.css";
 
@@ -12,6 +15,35 @@ type Status = "loading" | "success" | "error";
 type ResultadoBusca =
   | { chave: string; status: "success"; dados: MotoristasMesPage }
   | { chave: string; status: "error" };
+type EstadoTiposVeiculo =
+  | { status: "loading" }
+  | { status: "success"; tipos: TipoVeiculo[] | null }
+  | { status: "error" };
+type ColunaOrdenacao = keyof Pick<
+  MotoristaMes,
+  | "nomeMotorista"
+  | "tipoVeiculo"
+  | "modelo"
+  | "placa"
+  | "viagensNoMes"
+  | "diasUtilizados"
+  | "disponibilidade"
+  | "utilizacao"
+  | "percentualEfetividade"
+>;
+type DirecaoOrdenacao = "asc" | "desc";
+
+const COLUNAS_ORDENACAO: { chave: ColunaOrdenacao; rotulo: string }[] = [
+  { chave: "nomeMotorista", rotulo: "Motorista" },
+  { chave: "tipoVeiculo", rotulo: "Tipo de veículo" },
+  { chave: "modelo", rotulo: "Modelo" },
+  { chave: "placa", rotulo: "Placa" },
+  { chave: "viagensNoMes", rotulo: "Viagens" },
+  { chave: "diasUtilizados", rotulo: "Dias em operação" },
+  { chave: "disponibilidade", rotulo: "Disponibilidade" },
+  { chave: "utilizacao", rotulo: "Utilização" },
+  { chave: "percentualEfetividade", rotulo: "Efetividade" },
+];
 
 function mesAtual() {
   const hoje = new Date();
@@ -40,9 +72,30 @@ function normalizarBusca(valor: string) {
     .trim();
 }
 
+function compararMotoristas(
+  primeiro: MotoristaMes,
+  segundo: MotoristaMes,
+  coluna: ColunaOrdenacao,
+  direcao: DirecaoOrdenacao,
+) {
+  const valorA = primeiro[coluna];
+  const valorB = segundo[coluna];
+  if (valorA === null) return valorB === null ? 0 : 1;
+  if (valorB === null) return -1;
+
+  const comparacao = typeof valorA === "number" && typeof valorB === "number"
+    ? valorA - valorB
+    : String(valorA).localeCompare(String(valorB), "pt-BR", {
+      numeric: true,
+      sensitivity: "base",
+    });
+  return direcao === "asc" ? comparacao : -comparacao;
+}
+
 function valoresMotorista(motorista: MotoristaMes) {
   return [
-    { rotulo: "Veículo", valor: motorista.tipoVeiculo },
+    { rotulo: "Tipo de veículo", valor: motorista.tipoVeiculo },
+    { rotulo: "Modelo", valor: motorista.modelo?.trim() || "Não informado" },
     { rotulo: "Placa", valor: motorista.placa },
     { rotulo: "Viagens no mês", valor: String(motorista.viagensNoMes) },
     { rotulo: "Dias em operação", valor: String(motorista.diasUtilizados) },
@@ -62,6 +115,13 @@ export function Motoristas() {
   const paginaParametro = searchParams.get("page");
   const pagina = paginaDaUrl(paginaParametro);
   const [busca, setBusca] = useState("");
+  const [tipoVeiculo, setTipoVeiculo] = useState("");
+  const [estadoTiposVeiculo, setEstadoTiposVeiculo] =
+    useState<EstadoTiposVeiculo>({ status: "loading" });
+  const [ordenacao, setOrdenacao] = useState<{
+    coluna: ColunaOrdenacao;
+    direcao: DirecaoOrdenacao;
+  } | null>(null);
   const [resultado, setResultado] = useState<ResultadoBusca | null>(null);
   const [tentativa, setTentativa] = useState(0);
   const chaveConsulta = `${mes}|${pagina}|${tentativa}`;
@@ -73,11 +133,36 @@ export function Motoristas() {
     : null;
   const termo = normalizarBusca(busca);
   const placaTermo = termo.replace(/[^a-z0-9]/g, "");
+  const tiposVeiculo = estadoTiposVeiculo.status === "success"
+    ? Array.from(
+      new Map((estadoTiposVeiculo.tipos ?? []).map((tipo) => [tipo.descricao, tipo])).values(),
+    )
+    : [];
+  const semTiposVeiculo = estadoTiposVeiculo.status === "success" && tiposVeiculo.length === 0;
   const motoristasFiltrados = dados?.content.filter((motorista) => {
     const nome = normalizarBusca(motorista.nomeMotorista);
     const placa = motorista.placa.toLocaleLowerCase("pt-BR").replace(/[^a-z0-9]/g, "");
-    return nome.includes(termo) || (placaTermo !== "" && placa.includes(placaTermo));
+    const correspondeBusca = nome.includes(termo) || (placaTermo !== "" && placa.includes(placaTermo));
+    return correspondeBusca && (!tipoVeiculo || motorista.tipoVeiculo === tipoVeiculo);
   }) ?? [];
+  const motoristasOrdenados = ordenacao
+    ? [...motoristasFiltrados].sort((a, b) =>
+      compararMotoristas(a, b, ordenacao.coluna, ordenacao.direcao))
+    : motoristasFiltrados;
+
+  function alternarOrdenacao(coluna: ColunaOrdenacao) {
+    setOrdenacao((atual) => ({
+      coluna,
+      direcao: atual?.coluna === coluna && atual.direcao === "asc" ? "desc" : "asc",
+    }));
+  }
+
+  function iconeOrdenacao(coluna: ColunaOrdenacao) {
+    if (ordenacao?.coluna !== coluna) return <ArrowUpDown size={14} aria-hidden="true" />;
+    return ordenacao.direcao === "asc"
+      ? <ArrowUp size={14} aria-hidden="true" />
+      : <ArrowDown size={14} aria-hidden="true" />;
+  }
 
   useEffect(() => {
     if (mesParametro !== mes || paginaParametro !== String(pagina)) {
@@ -116,6 +201,22 @@ export function Motoristas() {
     };
   }, [chaveConsulta, mes, pagina, setSearchParams]);
 
+  useEffect(() => {
+    let cancelado = false;
+
+    buscarTiposVeiculo()
+      .then((tipos) => {
+        if (!cancelado) setEstadoTiposVeiculo({ status: "success", tipos });
+      })
+      .catch(() => {
+        if (!cancelado) setEstadoTiposVeiculo({ status: "error" });
+      });
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
+
   function atualizarConsulta(proximaMes: string, proximaPagina: number) {
     setSearchParams((atual) => {
       const parametros = new URLSearchParams(atual);
@@ -145,6 +246,28 @@ export function Motoristas() {
               value={busca}
               onChange={(event) => setBusca(event.target.value)}
             />
+          </div>
+          <div className="motoristas-filtro">
+            <label htmlFor="motoristas-tipo-veiculo">Tipo de veículo</label>
+            <select
+              id="motoristas-tipo-veiculo"
+              value={tipoVeiculo}
+              disabled={estadoTiposVeiculo.status !== "success" || semTiposVeiculo}
+              onChange={(event) => setTipoVeiculo(event.target.value)}
+            >
+              {semTiposVeiculo ? (
+                <option value="" disabled>Nenhum veículo cadastrado</option>
+              ) : (
+                <option value="">
+                  {estadoTiposVeiculo.status === "loading"
+                    ? "Carregando tipos..."
+                    : estadoTiposVeiculo.status === "error" ? "Tipos indisponíveis" : "Todos"}
+                </option>
+              )}
+              {tiposVeiculo.map((tipo) => (
+                <option key={tipo.idTipo} value={tipo.descricao}>{tipo.descricao}</option>
+              ))}
+            </select>
           </div>
           <div className="motoristas-filtro">
             <label htmlFor="motoristas-mes">Mês</label>
@@ -184,7 +307,11 @@ export function Motoristas() {
         <>
           {motoristasFiltrados.length === 0 ? (
             <div className="motoristas-feedback" role="status">
-              <p>Nenhum motorista ou veículo corresponde a “{busca}”.</p>
+              <p>
+                Nenhum motorista corresponde aos filtros aplicados
+                {busca.trim() ? ` para “${busca}”` : ""}
+                {tipoVeiculo ? ` e ao tipo “${tipoVeiculo}”` : ""}.
+              </p>
             </div>
           ) : (
             <>
@@ -192,18 +319,33 @@ export function Motoristas() {
                 <table className="motoristas-table">
                   <thead>
                     <tr>
-                      <th scope="col">Motorista</th>
-                      <th scope="col">Veículo</th>
-                      <th scope="col">Placa</th>
-                      <th scope="col">Viagens</th>
-                      <th scope="col">Dias em operação</th>
-                      <th scope="col">Disponibilidade</th>
-                      <th scope="col">Utilização</th>
-                      <th scope="col">Efetividade</th>
+                      {COLUNAS_ORDENACAO.map(({ chave, rotulo }) => (
+                        <th
+                          key={chave}
+                          scope="col"
+                          aria-sort={ordenacao?.coluna === chave
+                            ? ordenacao.direcao === "asc" ? "ascending" : "descending"
+                            : "none"}
+                        >
+                          <button
+                            type="button"
+                            className="motoristas-ordenar"
+                            onClick={() => alternarOrdenacao(chave)}
+                            aria-label={`Ordenar por ${rotulo}${
+                              ordenacao?.coluna === chave
+                                ? ordenacao.direcao === "asc" ? ", crescente" : ", decrescente"
+                                : ""
+                            }`}
+                          >
+                            {rotulo}
+                            {iconeOrdenacao(chave)}
+                          </button>
+                        </th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {motoristasFiltrados.map((motorista) => {
+                    {motoristasOrdenados.map((motorista) => {
                       const destino = `/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`;
                       return (
                         <tr
@@ -233,7 +375,7 @@ export function Motoristas() {
               </div>
 
               <div className="motoristas-mobile-cards">
-                {motoristasFiltrados.map((motorista) => (
+                {motoristasOrdenados.map((motorista) => (
                   <Link
                     key={`${motorista.motoristaId}-${motorista.veiculoId}`}
                     to={`/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
@@ -259,7 +401,7 @@ export function Motoristas() {
 
           <nav className="motoristas-paginacao" aria-label="Paginação de motoristas">
             <span className="motoristas-contagem">
-              {termo
+              {termo || tipoVeiculo
                 ? `${motoristasFiltrados.length} de ${dados.content.length} nesta página`
                 : `${dados.totalElements.toLocaleString("pt-BR")} motoristas`}
             </span>

@@ -6,6 +6,7 @@ export interface MotoristaMes {
   nomeMotorista: string;
   placa: string;
   tipoVeiculo: string;
+  modelo: string;
   viagensNoMes: number;
   diasUtilizados: number;
   diasDisponiveis: number;
@@ -22,6 +23,11 @@ export interface MotoristasMesPage {
   totalPages: number;
   first: boolean;
   last: boolean;
+}
+
+export interface TipoVeiculo {
+  idTipo: number;
+  descricao: string;
 }
 
 export interface MotoristaFicha {
@@ -46,6 +52,11 @@ export async function buscarMotoristasMes(
     params: { mesReferencia, page: pagina - 1, size: 20 },
   });
   return data;
+}
+
+export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {
+  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/tipos");
+  return data ?? null;
 }
 
 export async function buscarFichaMotorista(id: string): Promise<MotoristaFicha> {

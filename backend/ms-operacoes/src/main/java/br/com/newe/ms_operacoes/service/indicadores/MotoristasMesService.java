@@ -57,6 +57,7 @@ public class MotoristasMesService {
                 .collect(Collectors.toMap(motorista -> motorista.id(), motorista -> motorista));
         Map<UUID, String> placas = frotaClient.buscarPlacas(veiculoIds);
         Map<UUID, String> tipos = frotaClient.buscarTiposVeiculo(veiculoIds);
+        Map<UUID, String> modelos = frotaClient.buscarModelos(veiculoIds);
         YearMonth mes = YearMonth.parse(mesReferencia);
         long diasNoMes = mes.lengthOfMonth();
         // Regra provisória compartilhada com os indicadores: todos os dias do mês
@@ -71,6 +72,7 @@ public class MotoristasMesService {
                     motorista != null && motorista.nome() != null ? motorista.nome() : NAO_INFORMADO,
                     placas.getOrDefault(linha.getVeiculoId(), NAO_INFORMADO),
                     tipos.getOrDefault(linha.getVeiculoId(), NAO_INFORMADO),
+                    modelos.getOrDefault(linha.getVeiculoId(), NAO_INFORMADO),
                     linha.getViagensNoMes(),
                     linha.getDiasEmOperacao(),
                     diasDisponiveis,

@@ -49,7 +49,8 @@
   min-width: 220px;
 }
 
-.motoristas-filtro input {
+.motoristas-filtro input,
+.motoristas-filtro select {
   min-height: 36px;
   font-family: inherit;
   font-size: 13px;
@@ -58,6 +59,10 @@
   border-radius: 8px;
   color: #334155;
   background: #ffffff;
+}
+
+.motoristas-filtro select {
+  min-width: 150px;
 }
 
 .motoristas-table-wrap {
@@ -74,7 +79,7 @@
 
 .motoristas-table th {
   text-align: left;
-  padding: 10px 12px;
+  padding: 0;
   background: #f1f5f9;
   color: #475569;
   font-size: 11px;
@@ -82,6 +87,33 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   white-space: nowrap;
+}
+
+.motoristas-ordenar {
+  display: inline-flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.motoristas-ordenar:hover,
+.motoristas-ordenar:focus-visible {
+  background: #e2e8f0;
+  color: #1d4ed8;
+}
+
+.motoristas-ordenar:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
 }
 
 .motoristas-table td {

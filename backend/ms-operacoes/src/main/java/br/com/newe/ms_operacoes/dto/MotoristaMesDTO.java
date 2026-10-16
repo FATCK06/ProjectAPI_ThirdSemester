@@ -14,6 +14,7 @@ public record MotoristaMesDTO(
         String nomeMotorista,
         String placa,
         String tipoVeiculo,
+        String modelo,
         long viagensNoMes,
         long diasUtilizados,
         long diasDisponiveis,
