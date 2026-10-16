@@ -8,7 +8,6 @@ import java.util.function.Function;
  */
 public enum CustoDoManifesto {
 
-    VALE_FRETE("Vale frete", LinhaManifesto::valeFrete),
     COMBUSTIVEL("Combustível", LinhaManifesto::combustivel),
     PEDAGIO("Pedágio", LinhaManifesto::pedagio),
     DIARIA("Diária", LinhaManifesto::diaria),

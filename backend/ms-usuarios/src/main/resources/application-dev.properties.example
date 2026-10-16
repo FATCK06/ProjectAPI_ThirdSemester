@@ -1,0 +1,20 @@
+# Acesso direto e à prova de falhas de diretório
+spring.datasource.url=jdbc:postgresql://...
+spring.datasource.username=username_postgres
+spring.datasource.password=sua_senha_postgres
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+spring.jpa.show-sql=true
+
+# Chave secreta do JWT (Adicione esta linha!)
+api.security.token.secret=
+
+spring.datasource.hikari.maximum-pool-size=3
+spring.datasource.hikari.minimum-idle=1
+spring.datasource.hikari.connection-timeout=10000
+
+spring.datasource.hikari.max-lifetime=240000
+spring.datasource.hikari.idle-timeout=120000
+spring.datasource.hikari.keepalive-time=60000

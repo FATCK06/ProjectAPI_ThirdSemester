@@ -1,0 +1,20 @@
+.ranking-page { display: flex; flex-direction: column; gap: 24px; width: 100%; min-width: 0; }
+.ranking-page-skeleton { height: 420px; width: 100%; }
+.ranking-page-header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.ranking-page-header h1 { font-size: 24px; color: #1e293b; }
+.ranking-page-header p { margin-top: 4px; font-size: 14px; color: #64748b; }
+.ranking-page-header label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; }
+.ranking-page-header input { font: inherit; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; background: #fff; }
+.ranking-page-table-wrap { overflow: auto; max-width: 100%; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; }
+.ranking-page-table { width: 100%; min-width: 1100px; border-collapse: collapse; font-size: 13px; }
+.ranking-page-table th { position: sticky; top: 0; z-index: 1; padding: 0; background: #f1f5f9; color: #64748b; text-align: left; white-space: nowrap; }
+.ranking-page-table th button { width: 100%; padding: 12px; border: 0; background: transparent; color: inherit; font: inherit; font-size: 11px; font-weight: 600; text-align: left; text-transform: uppercase; letter-spacing: .04em; cursor: pointer; }
+.ranking-page-table th button:hover, .ranking-page-table th button span { color: #1d4ed8; }
+.ranking-page-table td { height: 48px; padding: 0 12px; border-top: 1px solid #e2e8f0; color: #334155; white-space: nowrap; }
+.ranking-page-table th:first-child, .ranking-page-table td:first-child { position: sticky; left: 0; box-shadow: 1px 0 #e2e8f0; }
+.ranking-page-table th:first-child { z-index: 2; }
+.ranking-page-table td:first-child { z-index: 1; background: #fff; }
+.ranking-page-name { color: #1e293b !important; font-weight: 700; }
+.ranking-page-feedback { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; color: #64748b; }
+.ranking-page-feedback button { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; cursor: pointer; }
+@media (max-width: 640px) { .ranking-page-header { align-items: flex-start; flex-direction: column; } }

@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
+import br.com.newe.ms_operacoes.service.indicadores.SituacaoMotoristaService;
 
 /**
  * As duas operacoes do fluxo em etapas.
@@ -40,17 +44,20 @@ public class ImportacaoProcessamentoService {
     private final ResolvedorFrota resolvedorFrota;
     private final ManifestoBatchWriter batchWriter;
     private final ImportacaoService importacaoService;
+    private final SituacaoMotoristaService situacaoMotoristaService;
 
     public ImportacaoProcessamentoService(
             CsvManifestoParser parser,
             ResolvedorFrota resolvedorFrota,
             ManifestoBatchWriter batchWriter,
-            ImportacaoService importacaoService
+            ImportacaoService importacaoService,
+            SituacaoMotoristaService situacaoMotoristaService
     ) {
         this.parser = parser;
         this.resolvedorFrota = resolvedorFrota;
         this.batchWriter = batchWriter;
         this.importacaoService = importacaoService;
+        this.situacaoMotoristaService = situacaoMotoristaService;
     }
 
     /**
@@ -62,6 +69,8 @@ public class ImportacaoProcessamentoService {
     public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho, Severidade severidade)
             throws IOException {
         byte[] conteudo = importacao.getArquivoConteudo();
+        // Arquivos guardados antes da checagem no upload tambem passam por aqui.
+        parser.verificarEstrutura(conteudo);
 
         ResultadoParse resultado = parser.parse(conteudo);
         List<String> colunas = parser.lerColunas(conteudo);
@@ -136,6 +145,7 @@ public class ImportacaoProcessamentoService {
         Long id = importacao.getId();
 
         try {
+            parser.verificarEstrutura(importacao.getArquivoConteudo());
             ResultadoParse resultado = parser.parse(importacao.getArquivoConteudo());
 
             if (resultado.temErro()) {
@@ -155,9 +165,11 @@ public class ImportacaoProcessamentoService {
             int gravadas = batchWriter.gravarEmLote(id, resultado.linhas(), referencias);
             importacaoService.marcarConcluido(id, gravadas);
 
+            recalcularSituacao(id, resultado.linhas());
+
             return gravadas;
 
-        } catch (ArquivoComErroException e) {
+        } catch (ArquivoComErroException | ArquivoInvalidoException e) {
             // Nao e falha da importacao: o arquivo so precisa ser corrigido e reenviado.
             // Manter o status permite ao usuario voltar, conferir os erros e tentar de novo.
             throw e;
@@ -166,6 +178,24 @@ public class ImportacaoProcessamentoService {
             log.error("Falha ao executar importacao {}", id, e);
             importacaoService.marcarErro(id);
             throw new ImportacaoFalhouException(e);
+        }
+    }
+
+    /**
+     * Dias de cada motorista (controle_disponibilidade) nos meses tocados pelo
+     * arquivo, base da situacao exibida na tela. Roda com as viagens ja
+     * commitadas: se falhar, a importacao continua CONCLUIDO e nada e desfeito -
+     * a proxima importacao do mes recalcula.
+     */
+    private void recalcularSituacao(Long id, List<LinhaManifesto> linhas) {
+        Set<String> meses = linhas.stream()
+                .map(LinhaManifesto::mesReferencia)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(TreeSet::new));
+        try {
+            situacaoMotoristaService.recalcularMeses(meses);
+        } catch (Exception e) {
+            log.error("Importacao {}: falha ao recalcular controle_disponibilidade nos meses {}", id, meses, e);
         }
     }
 

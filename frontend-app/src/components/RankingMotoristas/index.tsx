@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../services/api';
+import { usuarioLogado } from '../../services/auth';
 import '../SkeletonLoader/skeleton.css';
 import './ranking.css';
 
@@ -9,7 +10,7 @@ interface RankingItem {
   nome: string | null;
   cpf: string | null;
   totalViagens: number;
-  veiculo: string | null;
+  tipoVeiculo: string | null;
   distanciaMaximaKm: number | null;
 }
 
@@ -46,6 +47,7 @@ function formatarPercentual(valor: number | undefined) {
 }
 
 export function RankingMotoristas() {
+  const operador = usuarioLogado()?.perfil.toLowerCase() === 'operador';
   const [mes, setMes] = useState(mesAtual());
   const [itens, setItens] = useState<LinhaRanking[]>([]);
   const [status, setStatus] = useState<Status>('loading');
@@ -62,7 +64,7 @@ export function RankingMotoristas() {
         params: { mesReferencia: mes, limite: 5 },
       }),
       api.get<IndicadoresMes>('/dashboard/indicadores', {
-        params: { mesReferencia: mes },
+        params: { mesReferencia: mes, ranking: true },
       }),
     ])
       .then(([ranking, indicadores]) => {
@@ -136,24 +138,18 @@ export function RankingMotoristas() {
                 <th>Nº de viagens</th>
                 <th>Disponibilidade</th>
                 <th>Utilização</th>
-                <th>Valor dos fretes</th>
-                <th>Custos</th>
-                <th>Rentabilidade</th>
-                <th>Rentab. média por viagem</th>
+                {!operador && <><th>Valor dos fretes</th><th>Custos</th><th>Rentabilidade</th><th>Rentab. média por viagem</th></>}
               </tr>
             </thead>
             <tbody>
               {itens.map((item) => (
                 <tr key={item.motoristaId}>
                   <td className="ranking-name">{item.nome ? item.nome.toLowerCase() : '—'}</td>
-                  <td>{item.veiculo || '—'}</td>
+                  <td>{item.tipoVeiculo || '—'}</td>
                   <td>{item.totalViagens}</td>
                   <td>{formatarPercentual(item.indicadores?.disponibilidade)}</td>
                   <td>{formatarPercentual(item.indicadores?.utilizacao)}</td>
-                  <td>{formatarMoeda(item.indicadores?.valorFrete)}</td>
-                  <td>{formatarMoeda(item.indicadores?.custoTotal)}</td>
-                  <td>{formatarMoeda(item.indicadores?.rentabilidade)}</td>
-                  <td>{formatarMoeda(item.indicadores?.rentabilidadeMediaViagem)}</td>
+                  {!operador && <><td>{formatarMoeda(item.indicadores?.valorFrete)}</td><td>{formatarMoeda(item.indicadores?.custoTotal)}</td><td>{formatarMoeda(item.indicadores?.rentabilidade)}</td><td>{formatarMoeda(item.indicadores?.rentabilidadeMediaViagem)}</td></>}
                 </tr>
               ))}
             </tbody>

@@ -155,6 +155,20 @@ public class FrotaClient {
         return resposta != null ? resposta : Map.of();
     }
 
+    public Map<UUID, String> buscarTiposVeiculo(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<UUID, String> resposta = restClient.post()
+                .uri("/api/veiculos/tipos")
+                .body(ids)
+                .retrieve()
+                .body(MAPA_ID_MODELO);
+
+        return resposta != null ? resposta : Map.of();
+    }
+
     private static final ParameterizedTypeReference<Map<UUID, String>> MAPA_ID_MODELO = new ParameterizedTypeReference<>() {
     };
 }
