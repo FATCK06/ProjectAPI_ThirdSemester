@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { CheckCircle2, AlertCircle, AlertTriangle, ChevronLeft, ChevronRight, FileSpreadsheet } from 'lucide-react';
 import {
     linhaBloqueia,
@@ -18,6 +19,8 @@ interface PropsPasso3 {
     filtro: FiltroProblemas;
     aoConsultar: (pagina: number, filtro: FiltroProblemas) => void;
 }
+
+const COLUNA_ERRO_GERAL = 'Erro de validação';
 
 type Tom = 'neutro' | 'ok' | 'aviso' | 'erro';
 
@@ -94,51 +97,13 @@ function BarraSaude({ ok, aviso, erro }: { ok: number; aviso: number; erro: numb
     );
 }
 
-function DetalheProblema({ problema }: { problema: ProblemaCelula }) {
-    return (
-        <li>
-            <p className="erro-card-mensagem">{problema.mensagem}</p>
-            {problema.coluna && (
-                <dl className="erro-card-detalhe">
-                    <dt>Valor encontrado</dt>
-                    <dd className="erro-card-valor">
-                        {problema.valorEncontrado?.trim() ? problema.valorEncontrado : '(vazio)'}
-                    </dd>
-                    {problema.valorEsperado && (
-                        <>
-                            <dt>Esperado</dt>
-                            <dd>{problema.valorEsperado}</dd>
-                        </>
-                    )}
-                </dl>
-            )}
-        </li>
-    );
-}
-
-/** Vermelho quando a linha bloqueia a importação; amarelo quando é só pendência. */
-function CardLinha({ linha }: { linha: LinhaComProblema }) {
-    const bloqueia = linhaBloqueia(linha);
-    // Numa linha que bloqueia, as pendências dela iriam só poluir o card.
-    const exibidos = bloqueia ? linha.problemas.filter((p) => p.severidade === 'ERRO') : linha.problemas;
-
-    return (
-        <div className={`erro-card ${bloqueia ? '' : 'pendencia'}`}>
-            <div className="erro-card-titulo">
-                {bloqueia ? <AlertCircle size={18} /> : <AlertTriangle size={18} />}
-                <span>Linha {linha.numeroLinha}</span>
-                {!bloqueia && <span className="erro-card-selo">aviso — não impede a importação</span>}
-            </div>
-            <ul className="erro-card-lista">
-                {exibidos.map((problema, i) => (
-                    <DetalheProblema key={i} problema={problema} />
-                ))}
-            </ul>
-        </div>
-    );
+function problemasExibidos(linha: LinhaComProblema): ProblemaCelula[] {
+    return linhaBloqueia(linha) ? linha.problemas.filter((p) => p.severidade === 'ERRO') : linha.problemas;
 }
 
 export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: PropsPasso3) {
+    const [linhaSelecionadaNumero, setLinhaSelecionadaNumero] = useState<number | null>(null);
+
     if (!validacao) {
         return <Loading texto="Conferindo os dados" />;
     }
@@ -159,6 +124,7 @@ export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: P
 
     // O backend já ordena (erros antes de pendências), filtra e pagina: aqui é só exibir.
     const linhas = validacao.problemas;
+    const linhaSelecionada = linhas.find((linha) => linha.numeroLinha === linhaSelecionadaNumero) ?? null;
     const { numero, tamanho, totalElementos } = validacao.pagina;
     const totalPaginas = Math.ceil(totalElementos / tamanho);
     const primeira = numero * tamanho + 1;
@@ -269,10 +235,84 @@ export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: P
                 )}
 
                 {linhas.length > 0 && (
-                    <div className="erro-linhas-rolagem">
-                        {linhas.map((linha) => (
-                            <CardLinha key={linha.numeroLinha} linha={linha} />
-                        ))}
+                    <div className="erro-resultados">
+                        <ul className="erro-linhas-lista">
+                            {linhas.map((linha) => {
+                                const problemas = problemasExibidos(linha);
+                                const colunas = Array.from(
+                                    new Set(problemas.map((problema) => problema.coluna ?? COLUNA_ERRO_GERAL)),
+                                );
+                                const selecionada = linhaSelecionadaNumero === linha.numeroLinha;
+                                return (
+                                    <li key={linha.numeroLinha}>
+                                        <button
+                                            type="button"
+                                            className={`erro-linha-item ${selecionada ? 'selecionada' : ''}`}
+                                            aria-pressed={selecionada}
+                                            title={`Mostrar erros e avisos do manifesto ${linha.valores.Manifesto?.trim() || 'sem número'}`}
+                                            onClick={() => setLinhaSelecionadaNumero(linha.numeroLinha)}
+                                        >
+                                            <span className="erro-linha-identificacao">
+                                                <strong>Manifesto {linha.valores.Manifesto?.trim() || '—'}</strong>
+                                                <strong>Linha {linha.numeroLinha}</strong>
+                                            </span>
+                                            <span className="erro-linha-colunas">
+                                                <strong>
+                                                    {linhaBloqueia(linha) ? 'Colunas com erro:' : 'Colunas com aviso:'}
+                                                </strong>{' '}
+                                                {colunas.join(', ')}
+                                            </span>
+                                        </button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                        <aside className="erro-detalhes-card" aria-live="polite">
+                            {linhaSelecionada ? (
+                                <>
+                                    <h4>Erros da linha {linhaSelecionada.numeroLinha}</h4>
+                                    <p className="erro-detalhes-identificacao">
+                                        Manifesto {linhaSelecionada.valores.Manifesto?.trim() || '—'} ·{' '}
+                                        {linhaSelecionada.valores.Motorista?.trim() || 'Motorista não informado'}
+                                    </p>
+                                    <ul className="erro-detalhes-lista">
+                                        {linhaSelecionada.problemas.map((problema, indice) => (
+                                            <li
+                                                key={`${problema.campo ?? 'geral'}-${indice}`}
+                                                className={`erro-detalhe-item ${problema.severidade.toLowerCase()}`}
+                                            >
+                                                <strong>
+                                                    {problema.coluna ?? COLUNA_ERRO_GERAL}
+                                                    <span>{problema.severidade === 'ERRO' ? 'Erro' : 'Aviso'}</span>
+                                                </strong>
+                                                <p>{problema.mensagem}</p>
+                                                {problema.coluna && (
+                                                    <dl>
+                                                        <dt>Valor encontrado</dt>
+                                                        <dd>
+                                                            {problema.valorEncontrado?.trim()
+                                                                ? problema.valorEncontrado
+                                                                : '(vazio)'}
+                                                        </dd>
+                                                        {problema.valorEsperado && (
+                                                            <>
+                                                                <dt>Esperado</dt>
+                                                                <dd>{problema.valorEsperado}</dd>
+                                                            </>
+                                                        )}
+                                                    </dl>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            ) : (
+                                <>
+                                    <h4>Detalhes da linha</h4>
+                                    <p>Selecione um manifesto na lista para ver todos os erros e avisos da linha.</p>
+                                </>
+                            )}
+                        </aside>
                     </div>
                 )}
             </div>
