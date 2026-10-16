@@ -60,16 +60,17 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
      *                  TODO fechar assim que existir um: hoje qualquer um cria
      *                  usuario com perfil Administrador.
      */
-    private static final List<String> PREFIXOS_PUBLICOS = List.of("/api/auth/", "/api/usuarios");
 
     private final JWTVerifier verificador;
 
     public JwtAutenticacaoFilter(@Value("${api.security.token.secret}") String secret) {
-        // Falha na subida se a chave nao estiver configurada, em vez de aceitar
-        // tudo silenciosamente.
+        if (secret == null || secret.length() < 32){
+            throw new IllegalStateException(
+                "api.security.token.secret ausente ou curto demais (minimo 32 caracteres)");
+        }
         this.verificador = JWT.require(Algorithm.HMAC256(secret))
-                .withIssuer(EMISSOR)
-                .build();
+            .withIssuer(EMISSOR)
+            .build();
     }
 
     @Override
@@ -92,6 +93,10 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
         try {
             jwt = verificador.verify(token);
         } catch (JWTVerificationException e) {
+            recusar(response, "Token invalido ou expirado");
+            return;
+        }
+        if (jwt.getExpiresAt() == null) {
             recusar(response, "Token invalido ou expirado");
             return;
         }
@@ -124,7 +129,14 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
 
     private boolean ehPublica(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return PREFIXOS_PUBLICOS.stream().anyMatch(uri::startsWith);
+
+        if (uri.startsWith("/api/auth/")) {
+            return true;
+        }
+
+        // Só o cadastro (POST) fica aberto. Listar, editar e excluir exigem token.
+        boolean ehCadastro = uri.equals("/api/usuarios") || uri.equals("/api/usuarios/");
+        return ehCadastro && HttpMethod.POST.matches(request.getMethod());
     }
 
     /** Rota publica tambem precisa ter os headers limpos: ninguem entra com perfil forjado. */

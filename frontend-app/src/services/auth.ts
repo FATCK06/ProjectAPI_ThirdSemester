@@ -9,8 +9,37 @@ export interface UsuarioLogado {
     perfil: string;
 }
 
+/**
+ * Lê o payload do JWT (a parte do meio, entre os dois pontos).
+ * O JWT usa Base64URL, que troca + por - e / por _. O atob só entende o
+ * Base64 comum, então revertemos a troca antes de decodificar.
+ */
+function lerPayload(token: string): { exp?: number } | null {
+    try {
+        const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = decodeURIComponent(
+            atob(base64)
+                .split('')
+                .map((c) => '%' + c.charCodeAt(0).toString(16).padStart(2, '0'))
+                .join(''),
+        );
+        return JSON.parse(json);
+    } catch {
+        return null;
+    }
+}
+
+/**
+ * Único lugar que decide se existe uma sessão válida: o token existe, é legível
+ * e ainda não expirou. Só serve para a interface; quem valida de verdade é o gateway.
+ */
+
 export function estaLogado(): boolean {
-    return localStorage.getItem(CHAVE_TOKEN) !== null;
+    const token = localStorage.getItem(CHAVE_TOKEN);
+    if (!token) return false;
+
+    const payload = lerPayload(token);
+    return payload?.exp !== undefined && payload.exp > Date.now() / 1000;
 }
 
 export function usuarioLogado(): UsuarioLogado | null {

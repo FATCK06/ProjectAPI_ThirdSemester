@@ -34,6 +34,6 @@ public class RankingController {
                 || !RankingService.colunaValida(ordenarPor) || !RankingService.direcaoValida(direcao)) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(rankingService.rankingMensal(mesReferencia, ordenarPor, direcao, perfilResolver.isOperador(request)));
+        return ResponseEntity.ok(rankingService.rankingMensal(mesReferencia, ordenarPor, direcao, !perfilResolver.podeVerDadosFinanceiros(request)));
     }
 }
