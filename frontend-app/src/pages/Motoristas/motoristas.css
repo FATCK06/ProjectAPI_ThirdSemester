@@ -2,11 +2,11 @@
 
 .motoristas-card {
   /* Cores dos indicadores. Texto sempre ao lado: a cor e so apoio visual. */
-  --faixa-alta: #dc2626;
+  --faixa-alta: #16a34a;
   --faixa-intermediaria: #d97706;
-  --faixa-baixa: #16a34a;
-  --situacao-disponivel: #16a34a;
-  --situacao-indisponivel: #dc2626;
+  --faixa-baixa: #dc2626;
+  --situacao-disponivel: #2563eb;
+  --situacao-indisponivel: #475569;
   --situacao-sem-dias: #64748b;
 
   background: #ffffff;
