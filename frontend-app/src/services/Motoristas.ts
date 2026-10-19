@@ -1,5 +1,69 @@
 import api from "./api";
 
+export interface MotoristaMes {
+  motoristaId: string;
+  veiculoId: string;
+  nomeMotorista: string;
+  placa: string;
+  tipoVeiculo: string;
+  modelo: string;
+  viagensNoMes: number;
+  diasUtilizados: number;
+  diasDisponiveis: number;
+  disponibilidade: number;
+  utilizacao: number;
+  percentualEfetividade: number | null;
+}
+
+export interface MotoristasMesPage {
+  content: MotoristaMes[];
+  number: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface TipoVeiculo {
+  idTipo: number;
+  descricao: string;
+}
+
+export interface MotoristaFicha {
+  idMotorista: string;
+  nome: string;
+  cpf: string;
+  pis: string | null;
+  dataNascimento: string | null;
+  cep: string | null;
+  logradouro: string | null;
+  numero: string | null;
+  bairro: string | null;
+  idCidade: number | null;
+  criadoEm: string | null;
+}
+
+export async function buscarMotoristasMes(
+  mesReferencia: string,
+  pagina: number,
+): Promise<MotoristasMesPage> {
+  const { data } = await api.get<MotoristasMesPage>("/dashboard/motoristas", {
+    params: { mesReferencia, page: pagina - 1, size: 20 },
+  });
+  return data;
+}
+
+export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {
+  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/tipos");
+  return data ?? null;
+}
+
+export async function buscarFichaMotorista(id: string): Promise<MotoristaFicha> {
+  const { data } = await api.get<MotoristaFicha>(`/motoristas/id/${id}`);
+  return data;
+}
+
 export type FaixaUtilizacao = "ALTA" | "INTERMEDIARIA" | "BAIXA";
 
 export type SituacaoMotorista =
