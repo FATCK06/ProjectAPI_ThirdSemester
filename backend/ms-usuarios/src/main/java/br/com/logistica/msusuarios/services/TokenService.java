@@ -10,19 +10,24 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
-@Service 
+@Service
 public class TokenService {
-    
-    // CORREÇÃO 1: Faltava o '}' no final da chave
-    @Value("${api.security.token.secret}")
-    private String secret;
 
-    public String gerarToken(Usuario usuario){
+    private final String secret;
+
+    public TokenService(@Value("${api.security.token.secret}") String secret) {
+        if (secret == null || secret.length() < 32) {
+            throw new IllegalStateException(
+                    "api.security.token.secret ausente ou curto demais (minimo 32 caracteres)");
+        }
+        this.secret = secret;
+    }
+
+    public String gerarToken(Usuario usuario) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(secret); // algoritmo de criptografia
+            Algorithm algorithm = Algorithm.HMAC256(secret);
 
             return JWT.create()
                 .withIssuer("ms-usuarios")
@@ -36,20 +41,21 @@ public class TokenService {
         }
     }
 
-    private Instant gerarDataExpiracao(){
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    // Instant.now() é absoluto: não depende do fuso do servidor.
+    private Instant gerarDataExpiracao() {
+        return Instant.now().plus(2, ChronoUnit.HOURS);
     }
 
-    public String validarToken(String token){
+    public String validarToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             return JWT.require(algorithm)
                     .withIssuer("ms-usuarios")
                     .build()
                     .verify(token)
-                    .getSubject(); // Devolve o e-mail do dono do token
-        } catch (JWTVerificationException exception){
-            return ""; // Se o token for falso, alterado ou estiver vencido, devolve vazio
+                    .getSubject();
+        } catch (JWTVerificationException exception) {
+            return "";
         }
     }
 }
