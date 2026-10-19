@@ -19,9 +19,11 @@ import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -30,20 +32,27 @@ public class DashboardController {
     private final ViagemRepository repository;
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
+    private final PerfilResolver perfilResolver;
 
     public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService) {
+            IndicadoresService indicadoresService, PerfilResolver perfilResolver) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
+        this.perfilResolver = perfilResolver;
     }
 
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
-    public ResponseEntity<IndicadoresMes> indicadores(@RequestParam("mesReferencia") String mesReferencia) {
+    public ResponseEntity<IndicadoresMes> indicadores(
+            @RequestParam("mesReferencia") String mesReferencia,
+            @RequestParam(value = "ranking", defaultValue = "false") boolean ranking,
+            HttpServletRequest request) {
         if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(indicadoresService.calcular(mesReferencia));
+        IndicadoresMes indicadores = indicadoresService.calcular(mesReferencia);
+        boolean ocultarValores = ranking && perfilResolver.isOperador(request);
+        return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);
     }
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
@@ -63,14 +72,14 @@ public class DashboardController {
 
         List<UUID> motoristaIds = linhas.stream().map(ViagemRepository.RankingMotoristaView::getMotoristaId).toList();
 
-        // Viagem mais longa por motorista (kmChegada - kmSaida); em empate, fica a mais
-        // recente
+        // Viagem mais longa por motorista; em empate, fica a mais recente.
+        // No manifesto, "Km saida" ja e a distancia da rota, nao o hodometro: bate com o
+        // km escrito nas observacoes em 96% dos casos, e "Km chegada" vem sempre 0.
+        // Zero ali significa nao informado.
         Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
         Map<UUID, Integer> maiorDistancia = new HashMap<>();
         for (ViagemRepository.ViagemKmView v : repository.kmViagensPorMotoristas(mesReferencia, motoristaIds)) {
-            Integer distancia = (v.getKmSaida() != null && v.getKmChegada() != null)
-                    ? v.getKmChegada() - v.getKmSaida()
-                    : null;
+            Integer distancia = (v.getKmSaida() != null && v.getKmSaida() > 0) ? v.getKmSaida() : null;
 
             if (!maisLonga.containsKey(v.getMotoristaId())) {
                 maisLonga.put(v.getMotoristaId(), v);
@@ -85,14 +94,14 @@ public class DashboardController {
             }
         }
 
-        // Nome, CPF e placa pertencem ao ms-frota: uma chamada em lote para cada
+        // Nome, CPF e modelo pertencem ao ms-frota: uma chamada em lote para cada
         Map<UUID, MotoristaResumo> motoristas = frotaClient.buscarMotoristas(motoristaIds).stream()
                 .collect(Collectors.toMap(MotoristaResumo::id, Function.identity()));
         List<UUID> veiculoIds = maisLonga.values().stream()
                 .map(ViagemRepository.ViagemKmView::getVeiculoId)
                 .distinct()
                 .toList();
-        Map<UUID, String> placas = frotaClient.buscarPlacas(veiculoIds);
+        Map<UUID, String> tiposVeiculo = frotaClient.buscarTiposVeiculo(veiculoIds);
 
         List<RankingMotoristaDTO> ranking = new ArrayList<>();
         for (int i = 0; i < linhas.size(); i++) {
@@ -105,7 +114,7 @@ public class DashboardController {
                     motorista != null ? motorista.nome() : null,
                     motorista != null ? motorista.cpf() : null,
                     linha.getTotalViagens(),
-                    viagem != null ? placas.get(viagem.getVeiculoId()) : null,
+                    viagem != null ? tiposVeiculo.getOrDefault(viagem.getVeiculoId(), "Não informado") : null,
                     maiorDistancia.get(linha.getMotoristaId())));
         }
 

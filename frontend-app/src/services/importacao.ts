@@ -170,6 +170,20 @@ export async function validarImportacao(
     return data;
 }
 
+/** Importação gravando agora. O backend aceita uma por vez. */
+export interface ImportacaoEmAndamento {
+    id: number;
+    arquivoNome: string;
+    usuarioResponsavel: string | null;
+    processamentoIniciadoEm: string | null;
+}
+
+/** null quando nenhuma importação está gravando (204). */
+export async function buscarImportacaoEmAndamento(): Promise<ImportacaoEmAndamento | null> {
+    const resposta = await api.get<ImportacaoEmAndamento>('/importacao/arquivos/em-andamento');
+    return resposta.status === 204 ? null : resposta.data;
+}
+
 /** Grava as viagens. Única chamada do fluxo que escreve no banco. */
 export async function executarImportacao(
     id: number,
@@ -193,7 +207,7 @@ export function mensagemDeErro(erro: unknown): string {
 
     if (resposta?.data?.erro) return resposta.data.erro;
     if (resposta?.status === 401) return 'Sua sessão expirou. Faça login novamente.';
-    if (resposta?.status === 409) return 'Esta importação já foi executada.';
+    if (resposta?.status === 409) return 'Esta importação já foi executada ou há outra sendo gravada.';
     if (resposta?.status === 413) return 'Arquivo maior que o limite aceito pelo servidor.';
     if (resposta?.status) return `Falha na operação (erro ${resposta.status}).`;
 

@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,14 +22,19 @@ import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.models.ResumoImportacao;
 import br.com.newe.ms_operacoes.models.Viagem;
 import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_operacoes.repository.ImportacaoRepository.EmAndamentoView;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
+import br.com.newe.ms_operacoes.service.importacao.ArquivoInvalidoException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
+import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
+import br.com.newe.ms_operacoes.dto.ImportacaoResumoDTO;
 
 /**
  * Importacao em etapas.
@@ -47,17 +53,20 @@ public class ImportacaoController {
     private final PerfilResolver perfilResolver;
     private final ImportacaoProcessamentoService processamentoService;
     private final ViagemRepository viagemRepository;
+    private final CsvManifestoParser parser;
 
     public ImportacaoController(
             ImportacaoService service,
             PerfilResolver perfilResolver,
             ImportacaoProcessamentoService processamentoService,
-            ViagemRepository viagemRepository
+            ViagemRepository viagemRepository,
+            CsvManifestoParser parser
     ) {
         this.service = service;
         this.perfilResolver = perfilResolver;
         this.processamentoService = processamentoService;
         this.viagemRepository = viagemRepository;
+        this.parser = parser;
     }
 
     // ── Etapa 1: receber ─────────────────────────────────────────────────────
@@ -83,8 +92,12 @@ public class ImportacaoController {
             return erro(HttpStatus.BAD_REQUEST, "Formato nao aceito. Envie um arquivo .csv");
         }
 
+        byte[] conteudo = arquivo.getBytes();
+        // Vazio, sem cabecalho ou so com cabecalho: recusa ja aqui, antes de guardar.
+        parser.verificarEstrutura(conteudo);
+
         Importacao importacao = service.receber(
-                nome, arquivo.getBytes(), perfilResolver.resolverUsuario(request));
+                nome, conteudo, perfilResolver.resolverUsuario(request));
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", importacao.getId(),
@@ -141,6 +154,10 @@ public class ImportacaoController {
             int gravadas = processamentoService.executar(importacao);
             return ResponseEntity.ok(Map.of("id", id, "status", "CONCLUIDO", "linhasGravadas", gravadas));
 
+        } catch (ExecucaoRecusadaException e) {
+            // Outra importacao gravando (ou esta ja executada): nada foi tocado.
+            return erro(HttpStatus.CONFLICT, e.getMessage());
+
         } catch (RuntimeException e) {
             return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
@@ -153,9 +170,26 @@ public class ImportacaoController {
         return ResponseEntity.ok(service.listar());
     }
 
+    /** Lista leve para a tela de histórico: sem o conteúdo do arquivo. */
+    @GetMapping("/historico")
+    public ResponseEntity<List<ImportacaoResumoDTO>> historico() {
+        return ResponseEntity.ok(service.listarResumo());
+    }
+
     @GetMapping("/resumo")
     public ResponseEntity<ResumoImportacao> resumo() {
         return ResponseEntity.ok(service.gerarResumo());
+    }
+
+    /**
+     * A importacao gravando agora, para a tela avisar antes de o usuario tentar
+     * outra. 204 quando nenhuma esta em andamento.
+     */
+    @GetMapping("/em-andamento")
+    public ResponseEntity<EmAndamentoView> emAndamento() {
+        return service.emAndamento()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}")
@@ -196,6 +230,12 @@ public class ImportacaoController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(viagemRepository.buscarIdsMotoristasPorArquivo(id));
+    }
+
+    /** Arquivo que nao tem como ser importado: o motivo vai para a tela, nao um 500. */
+    @ExceptionHandler(ArquivoInvalidoException.class)
+    public ResponseEntity<Map<String, String>> arquivoInvalido(ArquivoInvalidoException e) {
+        return erro(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     private ResponseEntity<Map<String, String>> erro(HttpStatus status, String mensagem) {
