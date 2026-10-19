@@ -12,6 +12,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.newe.ms_frota.dto.TipoVeiculoDTO;
 import br.com.newe.ms_frota.dto.VeiculoLoteItem;
 import br.com.newe.ms_frota.models.Veiculo;
 import br.com.newe.ms_frota.repository.VeiculoRepository;
@@ -118,5 +119,11 @@ public class VeiculoService {
             tipos.put(veiculo.getId(), veiculo.getDescricao() != null ? veiculo.getDescricao() : "Não informado");
         }
         return tipos;
+    }
+
+    public List<TipoVeiculoDTO> buscarTodosTipos() {
+        return repository.buscarTodosTipos().stream()
+                .map(tipo -> new TipoVeiculoDTO(tipo.getIdTipo(), tipo.getDescricao()))
+                .toList();
     }
 }

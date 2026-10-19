@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.newe.ms_frota.dto.TipoVeiculoDTO;
 import br.com.newe.ms_frota.dto.VeiculoLoteItem;
 import br.com.newe.ms_frota.models.Veiculo;
 import br.com.newe.ms_frota.service.VeiculoService;
@@ -31,6 +32,11 @@ public class VeiculoController {
         return service.buscarPorPlaca(placa)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/tipos")
+    public ResponseEntity<List<TipoVeiculoDTO>> buscarTodosTipos() {
+        return ResponseEntity.ok(service.buscarTodosTipos());
     }
 
     /** Placa por id, em lote. Usado pelo dashboard do ms-operacoes. */

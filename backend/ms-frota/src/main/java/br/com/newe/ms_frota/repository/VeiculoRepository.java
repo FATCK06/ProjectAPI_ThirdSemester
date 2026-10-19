@@ -23,6 +23,10 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
             + "where v.id_veiculo in :ids", nativeQuery = true)
     List<VeiculoTipoView> buscarTiposPorIds(@Param("ids") Collection<UUID> ids);
 
+    @Query(value = "select id_tipo as \"idTipo\", descricao "
+            + "from tipo_veiculos order by descricao", nativeQuery = true)
+    List<TipoVeiculoView> buscarTodosTipos();
+
     interface VeiculoPlacaId {
         String getPlaca();
         UUID getId();
@@ -30,6 +34,11 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
 
     interface VeiculoTipoView {
         UUID getId();
+        String getDescricao();
+    }
+
+    interface TipoVeiculoView {
+        Integer getIdTipo();
         String getDescricao();
     }
 }
