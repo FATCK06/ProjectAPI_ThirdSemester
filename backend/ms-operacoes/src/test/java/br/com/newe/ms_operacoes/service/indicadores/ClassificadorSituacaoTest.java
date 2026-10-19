@@ -13,9 +13,9 @@ import br.com.newe.ms_operacoes.service.indicadores.ClassificadorSituacao.Classi
 
 class ClassificadorSituacaoTest {
 
-    // Mesmos cortes provisorios do application.properties.
+    // Mesmos cortes de situacao-utilizacao.properties.
     private final ClassificadorSituacao classificador = new ClassificadorSituacao(
-            new BigDecimal("40"), new BigDecimal("70"));
+            new BigDecimal("50"), new BigDecimal("80"));
 
     @Test
     void utilizacaoBaixaFicaDisponivel() {
@@ -28,9 +28,9 @@ class ClassificadorSituacaoTest {
 
     @Test
     void utilizacaoIntermediariaFicaDisponivel() {
-        Classificacao c = classificador.classificar(5, 10);
+        Classificacao c = classificador.classificar(6, 10);
 
-        assertThat(c.utilizacao()).isEqualByComparingTo("50.00");
+        assertThat(c.utilizacao()).isEqualByComparingTo("60.00");
         assertThat(c.faixa()).isEqualTo(FaixaUtilizacao.INTERMEDIARIA);
         assertThat(c.situacao()).isEqualTo(SituacaoMotorista.DISPONIVEL);
     }
@@ -46,28 +46,30 @@ class ClassificadorSituacaoTest {
 
     @Test
     void exatamenteNoCorteBaixoEIntermediaria() {
-        Classificacao c = classificador.classificar(4, 10);
+        Classificacao c = classificador.classificar(5, 10);
 
-        assertThat(c.utilizacao()).isEqualByComparingTo("40.00");
+        assertThat(c.utilizacao()).isEqualByComparingTo("50.00");
         assertThat(c.faixa()).isEqualTo(FaixaUtilizacao.INTERMEDIARIA);
+        assertThat(c.situacao()).isEqualTo(SituacaoMotorista.DISPONIVEL);
     }
 
     @Test
     void exatamenteNoCorteAltoEAlta() {
-        Classificacao c = classificador.classificar(7, 10);
+        Classificacao c = classificador.classificar(8, 10);
 
-        assertThat(c.utilizacao()).isEqualByComparingTo("70.00");
+        assertThat(c.utilizacao()).isEqualByComparingTo("80.00");
         assertThat(c.faixa()).isEqualTo(FaixaUtilizacao.ALTA);
+        assertThat(c.situacao()).isEqualTo(SituacaoMotorista.INDISPONIVEL);
     }
 
     @Test
     void logoAbaixoDoCorteBaixoEBaixa() {
-        assertThat(classificador.faixaDa(new BigDecimal("39.99"))).isEqualTo(FaixaUtilizacao.BAIXA);
+        assertThat(classificador.faixaDa(new BigDecimal("49.99"))).isEqualTo(FaixaUtilizacao.BAIXA);
     }
 
     @Test
     void logoAbaixoDoCorteAltoEIntermediaria() {
-        assertThat(classificador.faixaDa(new BigDecimal("69.99"))).isEqualTo(FaixaUtilizacao.INTERMEDIARIA);
+        assertThat(classificador.faixaDa(new BigDecimal("79.99"))).isEqualTo(FaixaUtilizacao.INTERMEDIARIA);
     }
 
     // 2 casas, HALF_UP: 2/3 = 66.666... -> 66.67.
@@ -119,7 +121,7 @@ class ClassificadorSituacaoTest {
 
     @Test
     void cortesForaDeOrdemSaoRecusados() {
-        assertThatThrownBy(() -> new ClassificadorSituacao(new BigDecimal("70"), new BigDecimal("40")))
+        assertThatThrownBy(() -> new ClassificadorSituacao(new BigDecimal("80"), new BigDecimal("50")))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

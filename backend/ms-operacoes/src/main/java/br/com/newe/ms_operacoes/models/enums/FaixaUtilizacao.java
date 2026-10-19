@@ -2,7 +2,7 @@ package br.com.newe.ms_operacoes.models.enums;
 
 /**
  * Faixa da utilizacao do motorista no mes. Os cortes ficam em
- * application.properties (situacao.utilizacao.*).
+ * situacao-utilizacao.properties (situacao.utilizacao.*).
  */
 public enum FaixaUtilizacao {
 

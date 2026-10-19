@@ -6,9 +6,12 @@ import { Eye, EyeOff } from 'lucide-react';
 import api from '../../services/api';
 import { useToast } from '../../components/Toast';
 
-//criando interface que reflete o contrato com o backend
+// Contrato de POST /auth/login (AuthController do ms-usuarios, que devolve um
+// Map; o LoginResponseDTO de la nao e usado). nome e perfil podem vir nulos.
 interface LoginResponse {
-  token: string
+  token: string;
+  nome?: string | null;
+  perfil?: string | null;
 }
 
 export function Login() {
@@ -22,7 +25,7 @@ export function Login() {
     e.preventDefault();
 
     try {
-      const resposta = await api.post('/auth/login', {
+      const resposta = await api.post<LoginResponse>('/auth/login', {
         email,
         senha
       });

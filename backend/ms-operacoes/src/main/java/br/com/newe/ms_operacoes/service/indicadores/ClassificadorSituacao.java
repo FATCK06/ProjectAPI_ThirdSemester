@@ -9,7 +9,7 @@ import br.com.newe.ms_operacoes.models.enums.SituacaoMotorista;
 /**
  * Classifica a utilizacao do motorista no mes em faixa e situacao. Sem Spring e
  * sem banco, para ser testado isolado; os cortes chegam de fora
- * (situacao.utilizacao.* em application.properties).
+ * (situacao.utilizacao.* em situacao-utilizacao.properties).
  *
  * Faixas:
  *   BAIXA          utilizacao < corteBaixa

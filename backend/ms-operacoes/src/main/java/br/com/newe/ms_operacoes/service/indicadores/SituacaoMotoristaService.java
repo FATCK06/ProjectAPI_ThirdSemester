@@ -1,6 +1,5 @@
 package br.com.newe.ms_operacoes.service.indicadores;
 
-import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,12 +11,12 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
+import br.com.newe.ms_operacoes.config.CortesUtilizacao;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.SituacaoMotoristaDTO;
 import br.com.newe.ms_operacoes.models.ControleDisponibilidade;
@@ -34,7 +33,8 @@ import br.com.newe.ms_operacoes.service.indicadores.ClassificadorSituacao.Classi
  * mes; a consulta so le a tabela, sem tocar em viagens. A tabela existente nao
  * tem coluna para utilizacao, faixa ou situacao e nao pode ser alterada, entao a
  * classificacao e feita na consulta, sobre os dias gravados. Efeito colateral:
- * trocar os cortes no application.properties vale na hora, sem reimportar.
+ * para trocar os cortes (situacao-utilizacao.properties) basta reiniciar o
+ * ms-operacoes, sem reimportar.
  *
  * Escopo: so motoristas com viagem no mes. Quem nao rodou nenhum dia nao
  * aparece em viagens, e o cadastro completo de motoristas e do ms-frota.
@@ -53,12 +53,11 @@ public class SituacaoMotoristaService {
             ViagemRepository viagemRepository,
             ControleDisponibilidadeRepository controleRepository,
             FrotaClient frotaClient,
-            @Value("${situacao.utilizacao.corte-baixa}") BigDecimal corteBaixa,
-            @Value("${situacao.utilizacao.corte-alta}") BigDecimal corteAlta) {
+            CortesUtilizacao cortes) {
         this.viagemRepository = viagemRepository;
         this.controleRepository = controleRepository;
         this.frotaClient = frotaClient;
-        this.classificador = new ClassificadorSituacao(corteBaixa, corteAlta);
+        this.classificador = new ClassificadorSituacao(cortes.corteBaixa(), cortes.corteAlta());
     }
 
     /**
