@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logout } from './auth';
 
 // Aponta para o API Gateway, que roteia para cada microsserviço:
 //   /api/auth/**        -> ms-usuarios   :8081
@@ -21,6 +22,22 @@ api.interceptors.request.use(
         return config;
     },
     (error) => Promise.reject(error),
+);
+
+// Se o gateway responder 401 (token expirado ou inválido), limpa a sessão e
+// volta para o login. O login em si é ignorado: senha errada também dá 401.
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        const ehLogin = error.config?.url?.includes('/auth/login');
+
+        if (error.response?.status === 401 && !ehLogin) {
+            logout();
+            window.location.href = '/login';
+        }
+
+        return Promise.reject(error);
+    },
 );
 
 export default api;

@@ -11,6 +11,10 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import br.com.logistica.msusuarios.entities.Usuario;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -32,17 +36,25 @@ public class SecurityFilter extends OncePerRequestFilter {
             var email = tokenService.validarToken(token);
 
             if(!email.isEmpty()){
-                var usuarioOp = usuarioRepository.findByEmail(email);
-
-                if(usuarioOp.isPresent()){
-                    var authentication = new UsernamePasswordAuthenticationToken(usuarioOp.get(), null, Collections.emptyList());
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+                usuarioRepository.findByEmail(email)
+                .filter(u -> u.getStatusAtivo() == null || u.getStatusAtivo()) // mesma regra do login
+                .ifPresent(usuario -> {
+                    var authentication = new UsernamePasswordAuthenticationToken(
+                        usuario, null, autoridadesDe(usuario));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);    
+                }); 
             }
         }
 
         filterChain.doFilter(request, response);
     }
+
+    private List<GrantedAuthority> autoridadesDe(Usuario usuario) {
+        String perfil = usuario.getPerfilAcesso();
+        if (perfil == null) return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.toUpperCase())); 
+    }
+
 
     private String recuperarToken(HttpServletRequest request){
         var authHeader = request.getHeader("Authorization");

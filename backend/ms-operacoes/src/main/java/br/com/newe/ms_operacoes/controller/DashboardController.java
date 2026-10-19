@@ -87,7 +87,7 @@ public class DashboardController {
             return ResponseEntity.badRequest().build();
         }
         IndicadoresMes indicadores = indicadoresService.calcular(mesReferencia);
-        boolean ocultarValores = ranking && perfilResolver.isOperador(request);
+        boolean ocultarValores = !perfilResolver.podeVerDadosFinanceiros(request);
         return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);
     }
 

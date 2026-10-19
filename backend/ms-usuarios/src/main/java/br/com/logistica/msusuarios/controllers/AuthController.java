@@ -1,8 +1,11 @@
 package br.com.logistica.msusuarios.controllers;
 
+import br.com.logistica.msusuarios.dtos.LoginRequestDTO;
 import br.com.logistica.msusuarios.dtos.LoginResponseDTO;
 import br.com.logistica.msusuarios.entities.Usuario;
 import br.com.logistica.msusuarios.repositories.UsuarioRepository;
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import br.com.logistica.msusuarios.dtos.LoginRequestDTO;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -26,9 +32,9 @@ public class AuthController {
     private br.com.logistica.msusuarios.services.TokenService tokenService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
-        String email = credentials.get("email");
-        String senha = credentials.get("senha");
+    public ResponseEntity<Map<String, Object>> login(@Valid @RequestBody LoginRequestDTO credentials) {
+        String email = credentials.email();
+        String senha = credentials.senha();
 
         Optional<Usuario> usuarioOp = usuarioRepository.findByEmail(email);
 
