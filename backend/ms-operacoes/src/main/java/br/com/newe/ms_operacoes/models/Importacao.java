@@ -65,6 +65,10 @@ public class Importacao {
     @Column(name = "linhas_gravadas")
     private Integer linhasGravadas;
 
+    /** Quando entrou em EM_PROCESSAMENTO. Base para liberar uma reserva abandonada. */
+    @Column(name = "processamento_iniciado_em")
+    private LocalDateTime processamentoIniciadoEm;
+
     public Importacao() {
     }
 
@@ -146,6 +150,14 @@ public class Importacao {
 
     public void setLinhasGravadas(Integer linhasGravadas) {
         this.linhasGravadas = linhasGravadas;
+    }
+
+    public LocalDateTime getProcessamentoIniciadoEm() {
+        return processamentoIniciadoEm;
+    }
+
+    public void setProcessamentoIniciadoEm(LocalDateTime processamentoIniciadoEm) {
+        this.processamentoIniciadoEm = processamentoIniciadoEm;
     }
 
 }

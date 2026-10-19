@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Users } from 'lucide-react';
+import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Users, TrendingUp } from 'lucide-react';
 import neweLogo from '../../assets/image 3.png';
 import './sidebar.css';
 import { useState } from 'react';
@@ -59,6 +59,11 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
           {!isMinimized && <span>Motoristas</span>}
         </NavLink>
 
+        <NavLink to="/ranking" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} title="Ranking mensal">
+          <TrendingUp size={20} />
+          {!isMinimized && <span>Ranking mensal</span>}
+        </NavLink>
+
         <div className="nav-accordion">
           <button
             className="nav-item btn-accordion"
@@ -84,6 +89,32 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
                   className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
                 >
                   <span>Manifestos</span>
+                </NavLink>
+              </div>
+            </div>
+          )}
+
+          {!isMinimized && (
+            <div className={`accordion-content ${isImportOpen ? 'aberto' : ''}`} inert={!isImportOpen}>
+              <div className="accordion-itens">
+                <NavLink
+                  to="/importacoes/veiculos"
+                  className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
+                >
+                  <span>Veículos</span>
+                </NavLink>
+              </div>
+            </div>
+          )}
+
+          {!isMinimized && (
+            <div className={`accordion-content ${isImportOpen ? 'aberto' : ''}`} inert={!isImportOpen}>
+              <div className="accordion-itens">
+                <NavLink
+                  to="/importacoes/historico"
+                  className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
+                >
+                  <span>Histórico de Importações</span>
                 </NavLink>
               </div>
             </div>

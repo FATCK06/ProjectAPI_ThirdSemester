@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
+import br.com.newe.ms_operacoes.config.CortesUtilizacao;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.SituacaoMotoristaDTO;
 import br.com.newe.ms_operacoes.models.ControleDisponibilidade;
@@ -61,7 +62,7 @@ class SituacaoMotoristaServiceTest {
         });
 
         service = new SituacaoMotoristaService(viagemRepository, controleRepository, frotaClient,
-                new BigDecimal("40"), new BigDecimal("70"));
+                new CortesUtilizacao(new BigDecimal("50"), new BigDecimal("80")));
     }
 
     @Test
@@ -161,6 +162,27 @@ class SituacaoMotoristaServiceTest {
         });
     }
 
+    // 3 de 30 = 10% (disponivel), 27 de 30 = 90% (indisponivel), 0 dias disponiveis (sem dias).
+    @Test
+    void cadaFiltroDevolveSoAsLinhasDaSituacao() {
+        UUID disponivel = UUID.randomUUID();
+        UUID indisponivel = UUID.randomUUID();
+        UUID semDias = UUID.randomUUID();
+        tabela.addAll(List.of(
+                controle(disponivel, 3, 30),
+                controle(indisponivel, 27, 30),
+                controle(semDias, 5, 0)));
+        when(frotaClient.buscarMotoristas(anyCollection())).thenReturn(List.of());
+
+        assertThat(service.listar(MES, SituacaoMotorista.DISPONIVEL))
+                .extracting(SituacaoMotoristaDTO::motoristaId).containsExactly(disponivel);
+        assertThat(service.listar(MES, SituacaoMotorista.INDISPONIVEL))
+                .extracting(SituacaoMotoristaDTO::motoristaId).containsExactly(indisponivel);
+        assertThat(service.listar(MES, SituacaoMotorista.SEM_DIAS_DISPONIVEIS))
+                .extracting(SituacaoMotoristaDTO::motoristaId).containsExactly(semDias);
+        assertThat(service.listar(MES, null)).hasSize(3);
+    }
+
     @Test
     void mesSemLinhasNaoChamaOMsFrota() {
         assertThat(service.listar(MES, null)).isEmpty();
@@ -181,6 +203,7 @@ class SituacaoMotoristaServiceTest {
             public UUID getMotoristaId() { return id; }
             public Long getNumeroViagens() { return diasOperacao; }
             public Long getDiasOperacao() { return diasOperacao; }
+            public Long getViagensApuradas() { return 0L; }
             public BigDecimal getValorFrete() { return null; }
             public BigDecimal getCustoTotal() { return null; }
         };

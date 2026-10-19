@@ -10,6 +10,14 @@ import "./step5.css";
 /** Tempo que o check fica visível antes de avançar, só para o usuário ver que deu certo. */
 const PAUSA_APOS_SUCESSO_MS = 1200;
 
+/** "45 s", "3 min 07 s". */
+function formatarDecorrido(segundos: number): string {
+  if (segundos < 60) return `${segundos} s`;
+  const min = Math.floor(segundos / 60);
+  const seg = String(segundos % 60).padStart(2, "0");
+  return `${min} min ${seg} s`;
+}
+
 type Situacao = "enviando" | "sucesso" | "erro";
 
 interface PropsPasso5 {
@@ -25,6 +33,9 @@ export function Step5Execucao({
 }: PropsPasso5) {
   const [situacao, setSituacao] = useState<Situacao>("enviando");
   const [erro, setErro] = useState<string | null>(null);
+  // A gravação leva minutos (jul-ago: ~9 min). Sem algo andando na tela, parece
+  // travada e o usuário reenvia o arquivo.
+  const [decorrido, setDecorrido] = useState(0);
   // StrictMode monta o componente duas vezes em desenvolvimento; sem esta trava
   // a importação seria disparada em duplicidade.
   const jaDisparou = useRef(false);
@@ -50,8 +61,22 @@ export function Step5Execucao({
     })();
   }, [importacaoId, aoConcluir, aoFalhar]);
 
+  useEffect(() => {
+    if (situacao !== "enviando") return;
+    const inicio = Date.now();
+    const relogio = setInterval(() => {
+      setDecorrido(Math.floor((Date.now() - inicio) / 1000));
+    }, 1000);
+    return () => clearInterval(relogio);
+  }, [situacao]);
+
   if (situacao === "enviando") {
-    return <Loading texto="Enviando para o banco" detalhe="Não feche esta janela." />;
+    return (
+      <Loading
+        texto="Enviando para o banco"
+        detalhe={`Arquivos grandes levam alguns minutos. Não feche esta janela nem envie o arquivo de novo. Tempo decorrido: ${formatarDecorrido(decorrido)}`}
+      />
+    );
   }
 
   return (

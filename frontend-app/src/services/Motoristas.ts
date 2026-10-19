@@ -71,8 +71,8 @@ export type SituacaoMotorista =
   | "INDISPONIVEL"
   | "SEM_DIAS_DISPONIVEIS";
 
-// Linha de /dashboard/motoristas/situacao. A situacao e gravada no backend
-// durante a importacao; aqui so exibimos. utilizacao e faixaUtilizacao vem
+// Linha de /dashboard/motoristas/situacao. A situacao e calculada no backend
+// na consulta; aqui so exibimos. utilizacao e faixaUtilizacao vem
 // nulas quando o mes nao tem dias disponiveis (e entao aviso vem preenchido).
 export interface SituacaoMotoristaItem {
   motoristaId: string;

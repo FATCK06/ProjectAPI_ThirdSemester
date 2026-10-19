@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.indicadores.SituacaoMotoristaService;
 
@@ -155,9 +156,9 @@ public class ImportacaoProcessamentoService {
                 throw new IllegalStateException("Nenhuma linha para importar");
             }
 
-            // So marca processando depois de passar na conferencia: arquivo recusado
-            // continua VALIDADO, e nao preso em EM_PROCESSAMENTO.
-            importacaoService.marcarProcessando(id);
+            // So reserva depois de passar na conferencia: arquivo recusado continua
+            // VALIDADO, e nao preso em EM_PROCESSAMENTO. Recusa se outra estiver gravando.
+            importacaoService.reservarProcessamento(id);
 
             // Fora de transacao: chamada HTTP ao ms-frota nao pode segurar conexao do banco.
             ReferenciasFrota referencias = resolvedorFrota.resolver(resultado.linhas());
@@ -169,9 +170,9 @@ public class ImportacaoProcessamentoService {
 
             return gravadas;
 
-        } catch (ArquivoComErroException | ArquivoInvalidoException e) {
-            // Nao e falha da importacao: o arquivo so precisa ser corrigido e reenviado.
-            // Manter o status permite ao usuario voltar, conferir os erros e tentar de novo.
+        } catch (ArquivoComErroException | ArquivoInvalidoException | ExecucaoRecusadaException e) {
+            // Nao e falha da importacao: o arquivo precisa ser corrigido, ou a vez e de
+            // outra. Manter o status permite ao usuario voltar e tentar de novo.
             throw e;
 
         } catch (Exception e) {

@@ -24,6 +24,7 @@ export function PrivateRoute(){
         localStorage.removeItem('@Logistica:token');
         localStorage.removeItem('@Logistica:nome');
         localStorage.removeItem('@Logistica:perfil');
+        return <Navigate to="/login" replace />;
 }
 
     return <Outlet />;
