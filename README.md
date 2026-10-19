@@ -71,9 +71,9 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | User Story | Estimativa |
 | :--: | :--------- | :--------: |
-| 1 | Como operador, quero uma interface para visualizar a quantidade de viagens realizadas por cada motorista e acompanhar a produtividade. | 6 |
-| 2 | Como operador, quero que uma planilha XML seja tratada pelo sistema e apresentada em um resumo visual. | 8 |
-| 3 | Como operador, desejo importar a planilha de controle para carregar os dados dos motoristas no sistema. | 6 |
+| 1 | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações. | 4 |
+| 2 | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações. | 8 |
+| 3 | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação. | 6 |
 
 ### Definition of Ready (DoR)
 
@@ -101,9 +101,11 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | Prioridade | User Story | Estimativa |
 | :--: | :--------: | :--------- | :--------: |
-| 4 | Alta | Como operador, quero filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos. | 6 |
-| 5 | Média | Como gestor, quero um painel para visualizar a lista de motoristas agregados da frota. | 6 |
-| 6 | Média | Como gestor, quero consultar a ficha de desempenho de um motorista para visualizar seu desempenho. | 5 |
+| 4 | Alta | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota. | 6 |
+| 5 | Alta | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações. | 5 |
+| 6 | Alta | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram. | 6 |
+| 7 | Alta | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados. | 4 |
+
 
 ### Definition of Ready (DoR)
 
@@ -116,11 +118,156 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 ### Definition of Done (DoD)
 
-- O código passou por revisão (Code Review).
+- O código passou por Code Review.
 - O Pull Request para a branch principal foi aprovado por dois membros da equipe.
-- Foram realizados testes de regressão para verificar que outras funcionalidades não foram afetadas.
+- Foram realizados testes de regressão para garantir que outras funcionalidades não foram afetadas.
 - O manual do usuário foi atualizado.
 - O manual de instalação foi atualizado.
+
+
+### Histórias e verificações do DoR e DoD
+
+
+#### - **História 4: Filtro dos motoristas**
+
+Como operador, quero poder filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- Não podem haver dados incongruentes (viagens finalizadas no futuro).
+- Um motorista tem que estar ligado a um veículo existente.
+
+
+Critérios de validação do DoD
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Só podem ser exibidos motoristas que se enquadram no filtro selecionado.
+- Um motorista tem que estar ligado a um veículo existente.
+
+#### - **História 5: Lista de motoristas**
+
+Como gestor, quero um painel para poder visualizar a lista de motoristas agregados da frota.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Um motorista não pode ter idade inferior a 18 anos.
+
+
+Critérios de validação do DoD
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Os dados do motorista estão corretos.
+- Um motorista tem que estar ligado a um veículo existente.
+
+#### - **História 6: Ficha de desempenho dos motoristas**
+
+Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Um motorista não pode ter idade inferior a 18 anos.
+- Um motorista tem que estar ligado a um veículo existente.
+
+
+Critérios de validação do DoD
+
+- Os dados do motorista estão corretos.
+- O motorista está ligado a um veículo existente.
+- O motorista possui um status.
+- A contagem de viagens só pode contabilizar viagens “Finalizadas”.
+
+
+#### - **História 7: Níveis de acesso**
+
+Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados.
+
+
+
+Critérios de validação do DoR
+
+- Um operador não pode ter o mesmo login que um gestor.
+- As informações restritas ao gestor não devem ser exibidas ao operador.
+- O mesmo perfil não pode ter dois níveis de acesso diferentes.
+
+
+Critérios de validação do DoD
+
+- Os dados financeiros não devem ser exibidos ao operador.
+- Um operador não pode possuir nível de gestor.
+- Dois usuários não podem ter o mesmo login.
+
+</details>
+
+<details>
+<summary><strong>Backlog da Sprint 3, DoR e DoD</strong></summary>
+
+### Backlog da Sprint 3
+
+| Rank | Prioridade | User Story | Estimativa |
+| :--: | :--------: | :--------- | :--------: |
+| 8 | Média | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema. | 6 |
+| 9 | Baixa | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo. | 6 |
+
+### Definition of Ready (DoR)
+
+- O valor da história está definido.
+- Os cenários de teste estão estabelecidos.
+- As regras de negócio estão documentadas.
+- As dependências externas estão identificadas.
+- Os mockups ou fluxos de UX estão disponíveis.
+- Os fluxos principais estão definidos.
+
+### Definition of Done (DoD)
+
+- O código passou por Code Review.
+- O Pull Request para a branch principal foi aprovado por dois membros da equipe.
+- Foram realizados testes de regressão para garantir que outras funcionalidades não foram afetadas.
+- O manual do usuário foi atualizado.
+- O manual de instalação foi atualizado.
+
+### Histórias e verificações do DoR e DoD
+
+#### - **História 8: Exportação**
+
+Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- Não podem haver dados incongruentes (viagens finalizadas no futuro).
+- Um motorista tem que estar ligado a um veículo existente.
+
+**Critérios de validação do DoD**
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Um motorista tem que estar ligado a um veículo existente.
+- O documento exportado tem que possuir as mesmas informações que o usuário selecionou.
+
+#### - **História 9: Comparação mensal**
+
+Como gestor, quero comparar os meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Não podem haver linhas duplicadas (viagens duplicadas).
+
+**Critérios de validação do DoD**
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Um motorista tem que estar ligado a um veículo existente.
+- Viagens inconclusas não podem ser contabilizadas na comparação.
 
 </details>
 

@@ -8,6 +8,7 @@ import { HistoricoImport } from '../pages/Importacoes/HistoricoImportacoes';
 import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
 import { StatusServicos } from '../pages/Status';
 import { Motoristas } from '../pages/Motoristas';
+import { FichaMotorista } from '../pages/Motoristas/FichaMotorista';
 import { PrivateRoute } from './PrivateRoute';
 import { Ranking } from '../pages/Ranking';
 
@@ -25,6 +26,7 @@ export function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/motoristas" element={<Motoristas />} />
+          <Route path="/motoristas/:motoristaId" element={<FichaMotorista />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/importacoes/veiculos" element={<VeiculosImport />} />
           <Route path="/importacoes/historico" element={<HistoricoImport />} />
