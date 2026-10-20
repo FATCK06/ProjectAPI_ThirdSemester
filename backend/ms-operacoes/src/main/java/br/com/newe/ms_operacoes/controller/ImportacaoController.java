@@ -31,6 +31,7 @@ import br.com.newe.ms_operacoes.service.importacao.ArquivoInvalidoException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
+import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService.ArquivoComErroException;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -158,9 +159,12 @@ public class ImportacaoController {
             // Outra importacao gravando (ou esta ja executada): nada foi tocado.
             return erro(HttpStatus.CONFLICT, e.getMessage());
 
-        } catch (RuntimeException e) {
+        } catch (ArquivoComErroException e) {
+            // Quantas linhas estao invalidas: o usuario precisa saber para corrigir.
             return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
+        // Falha na gravacao (ImportacaoFalhouException) carrega o erro do banco na
+        // mensagem: segue para o ErroHandlerGlobal, que responde 500 sem detalhe.
     }
 
     // ── Consultas ────────────────────────────────────────────────────────────
