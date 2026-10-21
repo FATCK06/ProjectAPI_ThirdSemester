@@ -54,19 +54,26 @@ public class RankingService {
         return maisLonga.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> tipos.getOrDefault(e.getValue().getVeiculoId(), "Não informado")));
     }
 
-    private static java.util.Comparator<RankingMensalMotoristaDTO> comparador(String coluna, String direcao) {
-        java.util.Comparator<RankingMensalMotoristaDTO> c = switch (coluna) {
-            case "motorista" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::motorista, java.util.Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-            case "tipoVeiculo" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::tipoVeiculo, java.util.Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER));
-            case "viagens" -> java.util.Comparator.comparingLong(RankingMensalMotoristaDTO::viagens);
-            case "disponibilidade" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::disponibilidade);
-            case "utilizacao" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::utilizacao);
-            case "valorFretes" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::valorFretes);
-            case "custos" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::custos);
-            case "rentabilidade" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::rentabilidade);
-            case "rentabilidadeMediaViagem" -> java.util.Comparator.comparing(RankingMensalMotoristaDTO::rentabilidadeMediaViagem);
+    // Nulo (ex.: media sem viagem apuravel) fica no fim nas duas direcoes: inverter
+    // o comparador inteiro com reversed() o levaria para o topo no "desc".
+    static java.util.Comparator<RankingMensalMotoristaDTO> comparador(String coluna, String direcao) {
+        boolean desc = "desc".equalsIgnoreCase(direcao);
+        return switch (coluna) {
+            case "motorista" -> porCampo(RankingMensalMotoristaDTO::motorista, String.CASE_INSENSITIVE_ORDER, desc);
+            case "tipoVeiculo" -> porCampo(RankingMensalMotoristaDTO::tipoVeiculo, String.CASE_INSENSITIVE_ORDER, desc);
+            case "viagens" -> porCampo(RankingMensalMotoristaDTO::viagens, java.util.Comparator.<Long>naturalOrder(), desc);
+            case "disponibilidade" -> porCampo(RankingMensalMotoristaDTO::disponibilidade, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "utilizacao" -> porCampo(RankingMensalMotoristaDTO::utilizacao, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "valorFretes" -> porCampo(RankingMensalMotoristaDTO::valorFretes, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "custos" -> porCampo(RankingMensalMotoristaDTO::custos, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "rentabilidade" -> porCampo(RankingMensalMotoristaDTO::rentabilidade, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "rentabilidadeMediaViagem" -> porCampo(RankingMensalMotoristaDTO::rentabilidadeMediaViagem, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
             default -> throw new IllegalArgumentException("Coluna inválida");
         };
-        return "desc".equalsIgnoreCase(direcao) ? c.reversed() : c;
+    }
+
+    private static <T> java.util.Comparator<RankingMensalMotoristaDTO> porCampo(
+            java.util.function.Function<RankingMensalMotoristaDTO, T> campo, java.util.Comparator<T> ordem, boolean desc) {
+        return java.util.Comparator.comparing(campo, java.util.Comparator.nullsLast(desc ? ordem.reversed() : ordem));
     }
 }
