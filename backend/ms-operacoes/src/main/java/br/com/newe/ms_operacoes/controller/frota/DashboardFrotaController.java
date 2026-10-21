@@ -23,9 +23,11 @@ import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.frota.MotoristaMesDTO;
 import br.com.newe.ms_operacoes.dto.frota.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -35,13 +37,16 @@ public class DashboardFrotaController {
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
     private final MotoristasMesService motoristasMesService;
+    private final PerfilResolver perfilResolver;
 
     public DashboardFrotaController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService, MotoristasMesService motoristasMesService) {
+            IndicadoresService indicadoresService, MotoristasMesService motoristasMesService,
+            PerfilResolver perfilResolver) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
         this.motoristasMesService = motoristasMesService;
+        this.perfilResolver = perfilResolver;
     }
 
     /**
@@ -135,11 +140,16 @@ public class DashboardFrotaController {
 
     @GetMapping("/indicadores-por-modelo")
     public ResponseEntity<List<IndicadoresPorModelo>> indicadoresPorModelo(
-            @RequestParam("mesReferencia") String mesReferencia) {
+            @RequestParam("mesReferencia") String mesReferencia,
+            HttpServletRequest request) {
         if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(indicadoresService.calcularPorModelo(mesReferencia));
+        List<IndicadoresPorModelo> porModelo = indicadoresService.calcularPorModelo(mesReferencia);
+        if (!perfilResolver.podeVerDadosFinanceiros(request)) {
+            porModelo = porModelo.stream().map(IndicadoresPorModelo::semValoresFinanceiros).toList();
+        }
+        return ResponseEntity.ok(porModelo);
     }
 
     /** Restringe sort aos campos da projeção agregada aceitos pela consulta. */
