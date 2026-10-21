@@ -30,12 +30,12 @@ class RankingServiceTest {
     private static List<String> ordenar(String direcao) {
         return LINHAS.stream()
                 .sorted(RankingService.comparador("rentabilidadeMediaViagem", direcao))
-                .map(RankingMensalMotoristaDTO::motorista)
+                .map(RankingMensalMotoristaDTO::nome)
                 .toList();
     }
 
-    private static RankingMensalMotoristaDTO linha(String motorista, String media) {
-        return new RankingMensalMotoristaDTO(UUID.randomUUID(), motorista, null, 1,
+    private static RankingMensalMotoristaDTO linha(String nome, String media) {
+        return new RankingMensalMotoristaDTO(UUID.randomUUID(), nome, null, 1,
                 BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
                 media == null ? null : new BigDecimal(media));
     }

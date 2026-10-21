@@ -9,6 +9,8 @@ import {
   type MotoristaMes,
   type TipoVeiculo,
 } from "../../../services/Motoristas";
+import { mesAtual } from "../../../utils/datas";
+import { formatarPercentual } from "../../../utils/formatacao";
 import "./motoristas.css";
 
 type Status = "loading" | "success" | "error";
@@ -44,17 +46,6 @@ const COLUNAS_ORDENACAO: { chave: ColunaOrdenacao; rotulo: string }[] = [
   { chave: "utilizacao", rotulo: "Utilização" },
   { chave: "percentualEfetividade", rotulo: "Efetividade" },
 ];
-
-function mesAtual() {
-  const hoje = new Date();
-  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function percentual(valor: number | null) {
-  return valor === null
-    ? "—"
-    : `${valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
-}
 
 function paginaDaUrl(valor: string | null) {
   if (!valor || !/^\d+$/.test(valor)) return 1;
@@ -99,9 +90,9 @@ function valoresMotorista(motorista: MotoristaMes) {
     { rotulo: "Placa", valor: motorista.placa },
     { rotulo: "Viagens no mês", valor: String(motorista.viagensNoMes) },
     { rotulo: "Dias em operação", valor: String(motorista.diasUtilizados) },
-    { rotulo: "Disponibilidade", valor: percentual(motorista.disponibilidade) },
-    { rotulo: "Utilização", valor: percentual(motorista.utilizacao) },
-    { rotulo: "Efetividade", valor: percentual(motorista.percentualEfetividade) },
+    { rotulo: "Disponibilidade", valor: formatarPercentual(motorista.disponibilidade) },
+    { rotulo: "Utilização", valor: formatarPercentual(motorista.utilizacao) },
+    { rotulo: "Efetividade", valor: formatarPercentual(motorista.percentualEfetividade) },
   ];
 }
 

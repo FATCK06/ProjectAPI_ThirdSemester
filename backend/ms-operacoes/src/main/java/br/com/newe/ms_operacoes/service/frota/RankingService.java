@@ -1,8 +1,11 @@
 package br.com.newe.ms_operacoes.service.frota;
 
+import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
 
@@ -13,7 +16,8 @@ import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisL
 
 @Service
 public class RankingService {
-    private static final List<String> COLUNAS = List.of("motorista", "tipoVeiculo", "viagens", "disponibilidade", "utilizacao", "valorFretes", "custos", "rentabilidade", "rentabilidadeMediaViagem");
+    private static final List<String> COLUNAS_FINANCEIRAS = List.of("valorFrete", "custoTotal", "rentabilidade", "rentabilidadeMediaViagem");
+    private static final List<String> COLUNAS = List.of("nome", "tipoVeiculo", "numeroViagens", "disponibilidade", "utilizacao", "valorFrete", "custoTotal", "rentabilidade", "rentabilidadeMediaViagem");
     private final IndicadoresService indicadoresService;
     private final ViagemMaisLongaService viagemMaisLongaService;
 
@@ -28,8 +32,12 @@ public class RankingService {
     public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao, boolean operador) {
         List<IndicadoresMotorista> indicadores = indicadoresService.calcular(mes).motoristas();
         Map<UUID, ViagemMaisLonga> maisLonga = viagemMaisLongaService.porMotorista(mes, indicadores.stream().map(IndicadoresMotorista::motoristaId).toList());
-        String colunaOrdenacao = operador && List.of("valorFretes", "custos", "rentabilidade", "rentabilidadeMediaViagem").contains(ordenarPor) ? "viagens" : ordenarPor;
-        return indicadores.stream().map(i -> new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipoVeiculo(maisLonga.get(i.motoristaId())), i.numeroViagens(), i.disponibilidade(), i.utilizacao(), operador ? null : i.valorFrete(), operador ? null : i.custoTotal(), operador ? null : i.rentabilidade(), operador ? null : i.rentabilidadeMediaViagem())).sorted(comparador(colunaOrdenacao, direcao)).toList();
+        // Operador nao recebe os valores, entao ordenar por eles vazaria a ordem: cai em viagens.
+        String colunaOrdenacao = operador && COLUNAS_FINANCEIRAS.contains(ordenarPor) ? "numeroViagens" : ordenarPor;
+        return indicadores.stream()
+                .map(i -> RankingMensalMotoristaDTO.de(operador ? i.semValoresFinanceiros() : i, tipoVeiculo(maisLonga.get(i.motoristaId()))))
+                .sorted(comparador(colunaOrdenacao, direcao))
+                .toList();
     }
 
     private static String tipoVeiculo(ViagemMaisLonga viagem) {
@@ -38,24 +46,27 @@ public class RankingService {
 
     // Nulo (ex.: media sem viagem apuravel) fica no fim nas duas direcoes: inverter
     // o comparador inteiro com reversed() o levaria para o topo no "desc".
-    static java.util.Comparator<RankingMensalMotoristaDTO> comparador(String coluna, String direcao) {
+    static Comparator<RankingMensalMotoristaDTO> comparador(String coluna, String direcao) {
         boolean desc = "desc".equalsIgnoreCase(direcao);
         return switch (coluna) {
-            case "motorista" -> porCampo(RankingMensalMotoristaDTO::motorista, String.CASE_INSENSITIVE_ORDER, desc);
+            case "nome" -> porCampo(RankingMensalMotoristaDTO::nome, String.CASE_INSENSITIVE_ORDER, desc);
             case "tipoVeiculo" -> porCampo(RankingMensalMotoristaDTO::tipoVeiculo, String.CASE_INSENSITIVE_ORDER, desc);
-            case "viagens" -> porCampo(RankingMensalMotoristaDTO::viagens, java.util.Comparator.<Long>naturalOrder(), desc);
-            case "disponibilidade" -> porCampo(RankingMensalMotoristaDTO::disponibilidade, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
-            case "utilizacao" -> porCampo(RankingMensalMotoristaDTO::utilizacao, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
-            case "valorFretes" -> porCampo(RankingMensalMotoristaDTO::valorFretes, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
-            case "custos" -> porCampo(RankingMensalMotoristaDTO::custos, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
-            case "rentabilidade" -> porCampo(RankingMensalMotoristaDTO::rentabilidade, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
-            case "rentabilidadeMediaViagem" -> porCampo(RankingMensalMotoristaDTO::rentabilidadeMediaViagem, java.util.Comparator.<java.math.BigDecimal>naturalOrder(), desc);
+            case "numeroViagens" -> porCampo(RankingMensalMotoristaDTO::numeroViagens, Comparator.<Long>naturalOrder(), desc);
+            case "disponibilidade" -> porValor(RankingMensalMotoristaDTO::disponibilidade, desc);
+            case "utilizacao" -> porValor(RankingMensalMotoristaDTO::utilizacao, desc);
+            case "valorFrete" -> porValor(RankingMensalMotoristaDTO::valorFrete, desc);
+            case "custoTotal" -> porValor(RankingMensalMotoristaDTO::custoTotal, desc);
+            case "rentabilidade" -> porValor(RankingMensalMotoristaDTO::rentabilidade, desc);
+            case "rentabilidadeMediaViagem" -> porValor(RankingMensalMotoristaDTO::rentabilidadeMediaViagem, desc);
             default -> throw new IllegalArgumentException("Coluna inválida");
         };
     }
 
-    private static <T> java.util.Comparator<RankingMensalMotoristaDTO> porCampo(
-            java.util.function.Function<RankingMensalMotoristaDTO, T> campo, java.util.Comparator<T> ordem, boolean desc) {
-        return java.util.Comparator.comparing(campo, java.util.Comparator.nullsLast(desc ? ordem.reversed() : ordem));
+    private static Comparator<RankingMensalMotoristaDTO> porValor(Function<RankingMensalMotoristaDTO, BigDecimal> campo, boolean desc) {
+        return porCampo(campo, Comparator.<BigDecimal>naturalOrder(), desc);
+    }
+
+    private static <T> Comparator<RankingMensalMotoristaDTO> porCampo(Function<RankingMensalMotoristaDTO, T> campo, Comparator<T> ordem, boolean desc) {
+        return Comparator.comparing(campo, Comparator.nullsLast(desc ? ordem.reversed() : ordem));
     }
 }

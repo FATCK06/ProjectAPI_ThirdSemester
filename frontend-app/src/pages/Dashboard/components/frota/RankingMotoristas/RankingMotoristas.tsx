@@ -1,55 +1,22 @@
 import { useEffect, useState } from "react";
-import api from "../../../../../services/api";
 import { Card } from "../../../../../components/Card/Card";
 import { CardSkeleton } from "../../../../../components/SkeletonLoader/CardSkeleton";
 import { DataTable, type ColunaTabela } from "../../../../../components/DataTable/DataTable";
+import { AVISO_SEM_VIAGENS_MEDIA } from "../../../../../components/Aviso/Aviso";
+import {
+  buscarIndicadores,
+  buscarRankingMotoristas,
+  type IndicadoresMotorista,
+  type RankingMotorista,
+} from "../../../../../services/Dashboard";
+import { mesAtual } from "../../../../../utils/datas";
+import { formatarMoeda, formatarPercentual, SEM_VALOR } from "../../../../../utils/formatacao";
 import "./ranking.css";
 
-interface RankingItem {
-  posicao: number;
-  motoristaId: string;
-  nome: string | null;
-  cpf: string | null;
-  totalViagens: number;
-  veiculo: string | null;
-  distanciaMaximaKm: number | null;
-}
-
-// Linha de /dashboard/indicadores; valores em R$ e percentuais de 0 a 100
-interface IndicadoresMotorista {
-  motoristaId: string;
-  utilizacao: number;
-  disponibilidade: number;
-  valorFrete: number;
-  custoTotal: number;
-  rentabilidade: number;
-  rentabilidadeMediaViagem: number;
-}
-
-interface IndicadoresMes {
-  motoristas: IndicadoresMotorista[];
-}
-
-type LinhaRanking = RankingItem & { indicadores?: IndicadoresMotorista };
+// A ordem vem do top N por viagens; os indicadores do mês completam cada linha.
+type LinhaRanking = RankingMotorista & { indicadores?: IndicadoresMotorista };
 
 type Status = "loading" | "success" | "error";
-
-function mesAtual() {
-  const hoje = new Date();
-  return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
-}
-
-function formatarMoeda(valor: number | undefined) {
-  return valor === undefined
-    ? "—"
-    : valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-}
-
-function formatarPercentual(valor: number | undefined) {
-  return valor === undefined
-    ? "—"
-    : `${valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
-}
 
 // Fora do componente: a definição das colunas não muda entre renders
 const COLUNAS: ColunaTabela<LinhaRanking>[] = [
@@ -57,10 +24,10 @@ const COLUNAS: ColunaTabela<LinhaRanking>[] = [
     chave: "nome",
     titulo: "Motorista",
     className: "ranking-name",
-    render: (l) => (l.nome ? l.nome.toLowerCase() : "—"),
+    render: (l) => (l.nome ? l.nome.toLowerCase() : SEM_VALOR),
   },
-  { chave: "veiculo", titulo: "Tipo de veículo", render: (l) => l.veiculo || "—" },
-  { chave: "viagens", titulo: "Nº de viagens", render: (l) => l.totalViagens },
+  { chave: "tipoVeiculo", titulo: "Tipo de veículo", render: (l) => l.tipoVeiculo || SEM_VALOR },
+  { chave: "numeroViagens", titulo: "Nº de viagens", render: (l) => l.numeroViagens },
   {
     chave: "disponibilidade",
     titulo: "Disponibilidade",
@@ -72,12 +39,12 @@ const COLUNAS: ColunaTabela<LinhaRanking>[] = [
     render: (l) => formatarPercentual(l.indicadores?.utilizacao),
   },
   {
-    chave: "frete",
+    chave: "valorFrete",
     titulo: "Valor dos fretes",
     render: (l) => formatarMoeda(l.indicadores?.valorFrete),
   },
   {
-    chave: "custos",
+    chave: "custoTotal",
     titulo: "Custos",
     render: (l) => formatarMoeda(l.indicadores?.custoTotal),
   },
@@ -87,9 +54,14 @@ const COLUNAS: ColunaTabela<LinhaRanking>[] = [
     render: (l) => formatarMoeda(l.indicadores?.rentabilidade),
   },
   {
-    chave: "rentabilidadeMedia",
+    chave: "rentabilidadeMediaViagem",
     titulo: "Rentab. média por viagem",
-    render: (l) => formatarMoeda(l.indicadores?.rentabilidadeMediaViagem),
+    render: (l) =>
+      l.indicadores && l.indicadores.rentabilidadeMediaViagem === undefined ? (
+        <span title={AVISO_SEM_VIAGENS_MEDIA} aria-label={AVISO_SEM_VIAGENS_MEDIA}>{SEM_VALOR}</span>
+      ) : (
+        formatarMoeda(l.indicadores?.rentabilidadeMediaViagem)
+      ),
   },
 ];
 
@@ -102,22 +74,14 @@ export function RankingMotoristas() {
   useEffect(() => {
     let cancelado = false;
 
-    // A ordem vem do ranking (top 5 por viagens); os indicadores completam cada linha
-    Promise.all([
-      api.get<RankingItem[]>("/dashboard/ranking-motoristas", {
-        params: { mesReferencia: mes, limite: 5 },
-      }),
-      api.get<IndicadoresMes>("/dashboard/indicadores", {
-        params: { mesReferencia: mes },
-      }),
-    ])
+    Promise.all([buscarRankingMotoristas(mes, 5), buscarIndicadores(mes)])
       .then(([ranking, indicadores]) => {
         if (cancelado) return;
         const porMotorista = new Map(
-          indicadores.data.motoristas.map((m) => [m.motoristaId, m]),
+          indicadores.motoristas.map((m) => [m.motoristaId, m]),
         );
         setItens(
-          ranking.data.map((item) => ({
+          ranking.map((item) => ({
             ...item,
             indicadores: porMotorista.get(item.motoristaId),
           })),
