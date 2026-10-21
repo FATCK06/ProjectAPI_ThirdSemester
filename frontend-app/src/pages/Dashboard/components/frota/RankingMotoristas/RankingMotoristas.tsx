@@ -3,6 +3,7 @@ import { Card } from "../../../../../components/Card/Card";
 import { CardSkeleton } from "../../../../../components/SkeletonLoader/CardSkeleton";
 import { DataTable, type ColunaTabela } from "../../../../../components/DataTable/DataTable";
 import { AVISO_SEM_VIAGENS_MEDIA } from "../../../../../components/Aviso/Aviso";
+import { podeVerDadosFinanceiros } from "../../../../../services/auth";
 import {
   buscarIndicadores,
   buscarRankingMotoristas,
@@ -64,6 +65,8 @@ const COLUNAS: ColunaTabela<LinhaRanking>[] = [
       ),
   },
 ];
+
+const COLUNAS_FINANCEIRAS = ["valorFrete", "custoTotal", "rentabilidade", "rentabilidadeMediaViagem"];
 
 export function RankingMotoristas() {
   const [mes, setMes] = useState(mesAtual());
@@ -144,7 +147,11 @@ export function RankingMotoristas() {
 
       {status === "success" && itens.length > 0 && (
         <DataTable
-          colunas={COLUNAS}
+          colunas={
+            podeVerDadosFinanceiros()
+              ? COLUNAS
+              : COLUNAS.filter((c) => !COLUNAS_FINANCEIRAS.includes(c.chave))
+          }
           linhas={itens}
           chaveLinha={(l) => l.motoristaId}
           alturaMaxima={232}

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Card } from "../../../../components/Card/Card";
 import { type IndicadoresMes } from "../../../../services/Dashboard";
+import { podeVerDadosFinanceiros } from "../../../../services/auth";
 import { formatarMoeda, formatarPercentual } from "../../../../utils/formatacao";
 import { Sparkline } from "./Sparkline";
 import "./IndicadoresCard.css";
@@ -199,6 +200,11 @@ export function IndicadoresCard({
   indicadores,
   comparativo,
 }: PropsIndicadoresCard) {
+  // Quem não é gestor nem vê a categoria financeira no filtro: a API não manda os valores.
+  const categorias = podeVerDadosFinanceiros()
+    ? CATEGORIAS
+    : CATEGORIAS.filter((c) => c !== "financeiro");
+  const definicoes = DEFINICOES.filter((d) => categorias.includes(d.categoria));
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const [selecionados, setSelecionados] =
     useState<IndicadorId[]>(SELECAO_INICIAL);
@@ -235,7 +241,7 @@ export function IndicadoresCard({
     );
   }
 
-  const indicadoresVisiveis = DEFINICOES.filter((d) =>
+  const indicadoresVisiveis = definicoes.filter((d) =>
     selecionados.includes(d.id),
   );
 
@@ -255,13 +261,13 @@ export function IndicadoresCard({
       {mostrarFiltro && (
         <div className="indicadores-menu">
           <div className="indicadores-menu-lista">
-            {CATEGORIAS.map((categoria) => (
+            {categorias.map((categoria) => (
               <div key={categoria}>
                 <div className="indicadores-menu-categoria">
                   {LABEL_CATEGORIA[categoria]}
                 </div>
 
-                {DEFINICOES.filter((d) => d.categoria === categoria).map(
+                {definicoes.filter((d) => d.categoria === categoria).map(
                   (d) => (
                     <label key={d.id} className="indicadores-menu-item">
                       <input
@@ -283,7 +289,7 @@ export function IndicadoresCard({
             </button>
             <button
               type="button"
-              onClick={() => setSelecionados(DEFINICOES.map((d) => d.id))}
+              onClick={() => setSelecionados(definicoes.map((d) => d.id))}
             >
               Selecionar todos
             </button>
