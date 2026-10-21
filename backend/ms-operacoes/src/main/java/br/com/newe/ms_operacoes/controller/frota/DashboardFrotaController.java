@@ -1,7 +1,6 @@
 package br.com.newe.ms_operacoes.controller.frota;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,6 +24,8 @@ import br.com.newe.ms_operacoes.dto.frota.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
+import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService;
+import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisLonga;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,15 +38,17 @@ public class DashboardFrotaController {
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
     private final MotoristasMesService motoristasMesService;
+    private final ViagemMaisLongaService viagemMaisLongaService;
     private final PerfilResolver perfilResolver;
 
     public DashboardFrotaController(ViagemRepository repository, FrotaClient frotaClient,
             IndicadoresService indicadoresService, MotoristasMesService motoristasMesService,
-            PerfilResolver perfilResolver) {
+            ViagemMaisLongaService viagemMaisLongaService, PerfilResolver perfilResolver) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
         this.motoristasMesService = motoristasMesService;
+        this.viagemMaisLongaService = viagemMaisLongaService;
         this.perfilResolver = perfilResolver;
     }
 
@@ -89,50 +92,26 @@ public class DashboardFrotaController {
 
         List<UUID> motoristaIds = linhas.stream().map(ViagemRepository.RankingMotoristaView::getMotoristaId).toList();
 
-        // Viagem mais longa por motorista; em empate, fica a mais recente.
-        // No manifesto, "Km saida" ja e a distancia da rota, nao o hodometro: bate com o
-        // km escrito nas observacoes em 96% dos casos, e "Km chegada" vem sempre 0.
-        // Zero ali significa nao informado.
-        Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
-        Map<UUID, Integer> maiorDistancia = new HashMap<>();
-        for (ViagemRepository.ViagemKmView v : repository.kmViagensPorMotoristas(mesReferencia, motoristaIds)) {
-            Integer distancia = (v.getKmSaida() != null && v.getKmSaida() > 0) ? v.getKmSaida() : null;
+        // Mesma regra do ranking mensal: ver ViagemMaisLongaService.
+        Map<UUID, ViagemMaisLonga> maisLonga = viagemMaisLongaService.porMotorista(mesReferencia, motoristaIds);
 
-            if (!maisLonga.containsKey(v.getMotoristaId())) {
-                maisLonga.put(v.getMotoristaId(), v);
-                maiorDistancia.put(v.getMotoristaId(), distancia);
-                continue;
-            }
-
-            Integer atual = maiorDistancia.get(v.getMotoristaId());
-            if (distancia != null && (atual == null || distancia > atual)) {
-                maisLonga.put(v.getMotoristaId(), v);
-                maiorDistancia.put(v.getMotoristaId(), distancia);
-            }
-        }
-
-        // Nome, CPF e modelo pertencem ao ms-frota: uma chamada em lote para cada
+        // Nome e CPF pertencem ao ms-frota: uma chamada em lote.
         Map<UUID, MotoristaResumo> motoristas = frotaClient.buscarMotoristas(motoristaIds).stream()
                 .collect(Collectors.toMap(MotoristaResumo::id, Function.identity()));
-        List<UUID> veiculoIds = maisLonga.values().stream()
-                .map(ViagemRepository.ViagemKmView::getVeiculoId)
-                .distinct()
-                .toList();
-        Map<UUID, String> tiposVeiculo = frotaClient.buscarTiposVeiculo(veiculoIds);
 
         List<RankingMotoristaDTO> ranking = new ArrayList<>();
         for (int i = 0; i < linhas.size(); i++) {
             ViagemRepository.RankingMotoristaView linha = linhas.get(i);
             MotoristaResumo motorista = motoristas.get(linha.getMotoristaId());
-            ViagemRepository.ViagemKmView viagem = maisLonga.get(linha.getMotoristaId());
+            ViagemMaisLonga viagem = maisLonga.get(linha.getMotoristaId());
             ranking.add(new RankingMotoristaDTO(
                     i + 1,
                     linha.getMotoristaId(),
                     motorista != null ? motorista.nome() : null,
                     motorista != null ? motorista.cpf() : null,
                     linha.getTotalViagens(),
-                    viagem != null ? tiposVeiculo.getOrDefault(viagem.getVeiculoId(), "Não informado") : null,
-                    maiorDistancia.get(linha.getMotoristaId())));
+                    viagem != null ? viagem.tipoVeiculo() : null,
+                    viagem != null ? viagem.distanciaKm() : null));
         }
 
         return ResponseEntity.ok(ranking);

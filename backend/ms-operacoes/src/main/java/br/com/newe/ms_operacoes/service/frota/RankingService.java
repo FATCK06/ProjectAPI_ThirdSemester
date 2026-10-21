@@ -1,30 +1,25 @@
 package br.com.newe.ms_operacoes.service.frota;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.frota.RankingMensalMotoristaDTO;
-import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
+import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisLonga;
 
 @Service
 public class RankingService {
     private static final List<String> COLUNAS = List.of("motorista", "tipoVeiculo", "viagens", "disponibilidade", "utilizacao", "valorFretes", "custos", "rentabilidade", "rentabilidadeMediaViagem");
-    private final ViagemRepository repository;
-    private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
+    private final ViagemMaisLongaService viagemMaisLongaService;
 
-    public RankingService(ViagemRepository repository, FrotaClient frotaClient, IndicadoresService indicadoresService) {
-        this.repository = repository;
-        this.frotaClient = frotaClient;
+    public RankingService(IndicadoresService indicadoresService, ViagemMaisLongaService viagemMaisLongaService) {
         this.indicadoresService = indicadoresService;
+        this.viagemMaisLongaService = viagemMaisLongaService;
     }
 
     public static boolean colunaValida(String coluna) { return COLUNAS.contains(coluna); }
@@ -32,26 +27,13 @@ public class RankingService {
 
     public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao, boolean operador) {
         List<IndicadoresMotorista> indicadores = indicadoresService.calcular(mes).motoristas();
-        Map<UUID, String> tipos = tiposVeiculoMaisLongo(mes, indicadores.stream().map(IndicadoresMotorista::motoristaId).toList());
+        Map<UUID, ViagemMaisLonga> maisLonga = viagemMaisLongaService.porMotorista(mes, indicadores.stream().map(IndicadoresMotorista::motoristaId).toList());
         String colunaOrdenacao = operador && List.of("valorFretes", "custos", "rentabilidade", "rentabilidadeMediaViagem").contains(ordenarPor) ? "viagens" : ordenarPor;
-        return indicadores.stream().map(i -> new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipos.get(i.motoristaId()), i.numeroViagens(), i.disponibilidade(), i.utilizacao(), operador ? null : i.valorFrete(), operador ? null : i.custoTotal(), operador ? null : i.rentabilidade(), operador ? null : i.rentabilidadeMediaViagem())).sorted(comparador(colunaOrdenacao, direcao)).toList();
+        return indicadores.stream().map(i -> new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipoVeiculo(maisLonga.get(i.motoristaId())), i.numeroViagens(), i.disponibilidade(), i.utilizacao(), operador ? null : i.valorFrete(), operador ? null : i.custoTotal(), operador ? null : i.rentabilidade(), operador ? null : i.rentabilidadeMediaViagem())).sorted(comparador(colunaOrdenacao, direcao)).toList();
     }
 
-    private Map<UUID, String> tiposVeiculoMaisLongo(String mes, List<UUID> motoristaIds) {
-        if (motoristaIds.isEmpty()) return Map.of();
-        Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
-        Map<UUID, Integer> distancias = new HashMap<>();
-        for (ViagemRepository.ViagemKmView viagem : repository.kmViagensPorMotoristas(mes, motoristaIds)) {
-            Integer distancia = viagem.getKmSaida() != null && viagem.getKmChegada() != null ? viagem.getKmChegada() - viagem.getKmSaida() : null;
-            Integer atual = distancias.get(viagem.getMotoristaId());
-            if (!maisLonga.containsKey(viagem.getMotoristaId()) || (distancia != null && (atual == null || distancia > atual))) {
-                maisLonga.put(viagem.getMotoristaId(), viagem);
-                distancias.put(viagem.getMotoristaId(), distancia);
-            }
-        }
-        List<UUID> veiculoIds = maisLonga.values().stream().map(ViagemRepository.ViagemKmView::getVeiculoId).distinct().toList();
-        Map<UUID, String> tipos = frotaClient.buscarTiposVeiculo(veiculoIds);
-        return maisLonga.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> tipos.getOrDefault(e.getValue().getVeiculoId(), "Não informado")));
+    private static String tipoVeiculo(ViagemMaisLonga viagem) {
+        return viagem != null ? viagem.tipoVeiculo() : null;
     }
 
     // Nulo (ex.: media sem viagem apuravel) fica no fim nas duas direcoes: inverter

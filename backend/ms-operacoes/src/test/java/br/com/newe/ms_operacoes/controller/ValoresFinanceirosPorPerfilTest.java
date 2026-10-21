@@ -19,6 +19,7 @@ import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
+import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -72,7 +73,7 @@ class ValoresFinanceirosPorPerfilTest {
 
     private DashboardFrotaController dashboard() {
         return new DashboardFrotaController(repository, mock(FrotaClient.class), indicadoresService,
-                mock(MotoristasMesService.class), perfilResolver);
+                mock(MotoristasMesService.class), mock(ViagemMaisLongaService.class), perfilResolver);
     }
 
     private ViagemController viagens() {
