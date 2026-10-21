@@ -1,2 +1,0 @@
-# Copie para application-dev.properties e use a MESMA chave do ms-usuarios.
-api.security.token.secret=
