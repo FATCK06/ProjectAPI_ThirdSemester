@@ -202,10 +202,28 @@ export async function buscarResumo(): Promise<ResumoImportacao> {
     return data;
 }
 
-export function mensagemDeErro(erro: unknown): string {
-    const resposta = (erro as { response?: { status?: number; data?: { erro?: string } } })?.response;
+type RespostaErroApi = {
+    erro?: string;
+    campos?: Record<string, string>;
+};
 
-    if (resposta?.data?.erro) return resposta.data.erro;
+export function mensagemDeErro(erro: unknown): string {
+    const resposta = (
+        erro as { response?: { status?: number; data?: RespostaErroApi } }
+    )?.response;
+
+    const mensagem = resposta?.data?.erro;
+    const campos = resposta?.data?.campos;
+
+    if (campos && Object.keys(campos).length > 0) {
+        const detalhes = Object.entries(campos)
+            .map(([campo, motivo]) => `${campo}: ${motivo}`)
+            .join('; ');
+
+        return `${mensagem ?? 'Dados inválidos.'} ${detalhes}`;
+    }
+
+    if (mensagem) return mensagem;
     if (resposta?.status === 401) return 'Sua sessão expirou. Faça login novamente.';
     if (resposta?.status === 409) return 'Esta importação já foi executada ou há outra sendo gravada.';
     if (resposta?.status === 413) return 'Arquivo maior que o limite aceito pelo servidor.';

@@ -30,7 +30,9 @@ export async function criarUsuario(dados: CriarUsuarioRequest): Promise<UsuarioR
 }
 
 export function mensagemDeErro(erro: unknown): string {
-    const resposta = (erro as { response?: { status?: number; data?: { erro?: string } } })?.response;
+    const resposta = (
+        erro as { response?: { status?: number; data?: { erro?: string } } }
+    )?.response;
 
     // O backend manda { erro: "..." } em 400 e 409 — usa a mensagem dele quando vier.
     if (resposta?.data?.erro) return resposta.data.erro;
