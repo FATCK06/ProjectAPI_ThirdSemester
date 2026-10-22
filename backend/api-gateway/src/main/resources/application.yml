@@ -39,6 +39,13 @@ spring:
 
 server:
   port: 8080
+  # Erro que escapa do ErroHandlerGlobal (ex.: falha num filtro) cai no /error do
+  # Spring. Estes ja sao os padroes; ficam explicitos para ninguem ligar sem querer.
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
 
 # Mesma chave que o ms-usuarios usa para assinar. O gateway valida e injeta o
 # perfil nos headers; os servicos de tras confiam neles.
