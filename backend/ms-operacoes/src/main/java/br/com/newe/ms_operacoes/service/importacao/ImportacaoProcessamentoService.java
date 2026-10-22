@@ -19,7 +19,7 @@ import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
 import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
-import br.com.newe.ms_operacoes.service.indicadores.SituacaoMotoristaService;
+import br.com.newe.ms_operacoes.service.frota.SituacaoMotoristaService;
 
 /**
  * As duas operacoes do fluxo em etapas.
