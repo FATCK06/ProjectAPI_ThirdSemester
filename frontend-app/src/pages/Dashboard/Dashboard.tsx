@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
-import { RankingMotoristas } from "./components/RankingMotoristas/RankingMotoristas";
+import { RankingMotoristas } from "./components/frota/RankingMotoristas/RankingMotoristas";
 import IndicadoresCard, {
   type ComparativoIndicador,
   type IndicadorId,
 } from "./components/IndicadoresCard/IndicadoresCard";
-import GraficoMotoristas from "./components/GraficoRentabilidadeMotoristas/GraficoMotoristas";
-import GraficoModelos from "./components/GraficoModelos/GraficoModelos";
+import GraficoMotoristas from "./components/frota/GraficoRentabilidadeMotoristas/GraficoMotoristas";
+import GraficoModelos from "./components/frota/GraficoModelos/GraficoModelos";
 import { useDashboard } from "./useDashboard";
 import "./dashboard.css";
 

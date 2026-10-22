@@ -7,10 +7,10 @@ import { VeiculosImport } from '../pages/Importacoes/Veiculos';
 import { HistoricoImport } from '../pages/Importacoes/HistoricoImportacoes';
 import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
 import { StatusServicos } from '../pages/Status';
-import { Motoristas } from '../pages/Motoristas';
-import { FichaMotorista } from '../pages/Motoristas/FichaMotorista';
+import { Motoristas } from '../pages/Frota/Motoristas';
+import { FichaMotorista } from '../pages/Frota/Motoristas/FichaMotorista';
 import { PrivateRoute } from './PrivateRoute';
-import { Ranking } from '../pages/Ranking';
+import { Ranking } from '../pages/Frota/Ranking';
 
 export function AppRoutes() {
   const token = localStorage.getItem('@Logistica:token');
