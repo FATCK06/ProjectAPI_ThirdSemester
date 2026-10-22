@@ -104,16 +104,16 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
   "problemas": [
     {
       "numeroLinha": 17,
-      "valores": { "CPF": "1234567890", "Data": "12/07/2026" },
+      "valores": { "CPF": "11.222.333/0001-81", "Data": "12/07/2026" },
       "problemas": [
         {
           "campo": "CPF",
           "coluna": "CPF",
           "severidade": "ERRO",
           "estado": "NAO_CONVERTE",
-          "valorEncontrado": "1234567890",
-          "valorEsperado": "11 digitos",
-          "mensagem": "A coluna 'CPF' na linha 17 nao esta no formato esperado: Esperado 11 digitos, veio com 10"
+          "valorEncontrado": "11.222.333/0001-81",
+          "valorEsperado": "CPF com 11 digitos e digito verificador valido",
+          "mensagem": "A coluna 'CPF' na linha 17 nao esta no formato esperado: CPF invalido: 14 digitos, parece um CNPJ"
         }
       ]
     }
@@ -125,7 +125,7 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
       "data": "2026-07-01",
       "mesReferencia": "2026-07",
       "motorista": "JOAO DA SILVA",
-      "cpf": "12345678901",
+      "cpf": "12345678909",
       "agregado": "TRANSPORTES EXEMPLO LTDA",
       "veiculo": "ABC1D23",
       "destino": "Campinas",
@@ -144,6 +144,19 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
 | Opcional | aceita | `PENDENCIA` |
 
 Estados possíveis de uma célula: `OK`, `VAZIO`, `NAO_CONVERTE` e `AUSENTE_COMO_ZERO` (colunas em que o CSV usa `0,00` para dizer "não informado").
+
+**Regras de formato dos campos cadastrais:**
+
+| Coluna | Regra (`valorEsperado`) |
+|---|---|
+| `CPF` | 11 dígitos, não todos iguais, dígitos verificadores válidos |
+| `CPF/CNPJ Agregado` | 11 dígitos validados como CPF ou 14 validados como CNPJ |
+| `PIS`, `PIS Agregado` | 11 dígitos com dígito verificador válido |
+| `CEP Motorista` | 8 dígitos |
+| `Veículo`, `Reboque 1`, `Reboque 2`, `Reboque 3` | placa antiga (`AAA9999`) ou Mercosul (`AAA9A99`); aceita hífen e minúsculas |
+| `Estado Motorista` | sigla de uma das 27 UFs |
+
+Nos documentos (CPF, CNPJ, PIS e CEP) a célula só pode ter dígitos e máscara (`.`, `-`, `/`, espaços). Letras ou outros caracteres fazem a célula ser recusada, em vez de serem descartados. A `mensagem` diz o que veio e o que era esperado, por exemplo `CPF invalido: contem letras`, `CPF invalido: 14 digitos, parece um CNPJ`, `CPF invalido: digito verificador nao confere`, `Placa invalida: 'AB12345' fora do padrao AAA9999 ou AAA9A99`.
 
 O arquivo só pode ser gravado quando `linhasInvalidas = 0`, existe ao menos uma linha válida e nenhuma coluna obrigatória está faltando (todo item de `mapeamento` com `obrigatoria: true` tem `encontrada: true`). Linhas só com pendência não bloqueiam.
 
