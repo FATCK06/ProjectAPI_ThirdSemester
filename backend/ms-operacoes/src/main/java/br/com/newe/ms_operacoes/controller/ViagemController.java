@@ -36,12 +36,8 @@ public class ViagemController {
     }
 
     @GetMapping // "/api/viagens?mesReferencia=2026-06"
-    public ResponseEntity<?> listarPorMesReferencia(@RequestParam("mesReferencia") String mesReferencia,
+    public ResponseEntity<?> listarPorMesReferencia(@RequestParam("mesReferencia") @MesReferencia String mesReferencia,
             HttpServletRequest request) {
-        if (!mesReferencia.matches("\\d{4}-\\d{2}")) {
-            return ResponseEntity.badRequest().build();
-        }
-
         List<Viagem> viagens = repository.findByMesReferencia(mesReferencia);
         if (perfilResolver.podeVerDadosFinanceiros(request)) {
             return ResponseEntity.ok(viagens);
