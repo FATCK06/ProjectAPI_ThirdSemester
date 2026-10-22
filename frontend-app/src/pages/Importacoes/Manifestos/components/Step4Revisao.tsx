@@ -1,4 +1,5 @@
 import type { ResultadoValidacao } from '../../../../services/importacao';
+import { formatarMoeda } from '../../../../utils/formatacao';
 import './step4.css';
 
 interface PropsPasso4 {
@@ -6,19 +7,14 @@ interface PropsPasso4 {
 }
 
 function formatarData(iso: string | null): string {
-    if (!iso) return '—';
+    if (!iso) return '-';
     const [ano, mes, dia] = iso.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
-function formatarMoeda(valor: number | null): string {
-    if (valor === null || valor === undefined) return '—';
-    return valor.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-}
-
 /** Mostra só os 3 primeiros dígitos: a tela não precisa do CPF inteiro. */
 function mascararCpf(cpf: string | null): string {
-    if (!cpf) return '—';
+    if (!cpf) return '-';
     return `${cpf.slice(0, 3)}.***.***-**`;
 }
 
@@ -67,14 +63,14 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
                     <tbody>
                         {validacao.amostra.map((linha) => (
                             <tr key={linha.numeroLinha}>
-                                <td className="celula-forte">{linha.manifesto ?? '—'}</td>
+                                <td className="celula-forte">{linha.manifesto ?? '-'}</td>
                                 <td>{formatarData(linha.data)}</td>
-                                <td>{linha.mesReferencia ?? '—'}</td>
-                                <td title={linha.motorista ?? undefined}>{linha.motorista ?? '—'}</td>
+                                <td>{linha.mesReferencia ?? '-'}</td>
+                                <td title={linha.motorista ?? undefined}>{linha.motorista ?? '-'}</td>
                                 <td className="celula-mono">{mascararCpf(linha.cpf)}</td>
-                                <td title={linha.agregado ?? undefined}>{linha.agregado ?? '—'}</td>
-                                <td className="celula-mono">{linha.veiculo ?? '—'}</td>
-                                <td title={linha.destino ?? undefined}>{linha.destino ?? '—'}</td>
+                                <td title={linha.agregado ?? undefined}>{linha.agregado ?? '-'}</td>
+                                <td className="celula-mono">{linha.veiculo ?? '-'}</td>
+                                <td title={linha.destino ?? undefined}>{linha.destino ?? '-'}</td>
                                 <td className="alinhar-direita">{formatarMoeda(linha.valorFrete)}</td>
                             </tr>
                         ))}

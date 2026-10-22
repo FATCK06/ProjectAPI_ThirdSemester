@@ -20,7 +20,7 @@ function montarDados(motoristas: IndicadoresMotorista[]): ChartData<"bar"> {
     datasets: [
       {
         label: "Rentabilidade (R$)",
-        data: motoristas.map((m) => m.rentabilidade),
+        data: motoristas.map((m) => m.rentabilidade ?? null),
         backgroundColor: "rgba(37, 99, 235, 0.85)",
         hoverBackgroundColor: "rgba(29, 78, 216, 1)",
         borderColor: "#2563eb",

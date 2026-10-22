@@ -8,6 +8,8 @@ import IndicadoresCard, {
 import GraficoMotoristas from "./components/frota/GraficoRentabilidadeMotoristas/GraficoMotoristas";
 import GraficoModelos from "./components/frota/GraficoModelos/GraficoModelos";
 import { useDashboard } from "./useDashboard";
+import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
+import { podeVerDadosFinanceiros } from "../../services/auth";
 import "./dashboard.css";
 
 // TEMPORÁRIO: dados falsos só para conferir o visual. Apagar quando o backend fornecer o histórico.
@@ -32,6 +34,7 @@ const COMPARATIVO_TESTE: Partial<Record<IndicadorId, ComparativoIndicador>> = {
 export function Dashboard() {
   const [mesReferencia] = useState("2026-06");
   const { dados, isLoading, erro } = useDashboard(mesReferencia);
+  const financeiro = podeVerDadosFinanceiros();
 
   return (
     <div className="dashboard">
@@ -50,21 +53,28 @@ export function Dashboard() {
             </CardSkeleton>
           </div>
 
-          <div className="dashboard-chart dashboard-driver-chart">
-            <CardSkeleton isLoading={isLoading} altura={380}>
-              {dados && (
-                <GraficoMotoristas motoristas={dados.indicadores.motoristas} />
-              )}
-            </CardSkeleton>
-          </div>
+          {financeiro && (
+            <>
+              <div className="dashboard-chart dashboard-driver-chart">
+                <CardSkeleton isLoading={isLoading} altura={380}>
+                  {dados && (
+                    <GraficoMotoristas motoristas={dados.indicadores.motoristas} />
+                  )}
+                </CardSkeleton>
+              </div>
 
-          <div className="dashboard-chart">
-            <CardSkeleton isLoading={isLoading} altura={380}>
-              {dados && <GraficoModelos porModelo={dados.porModelo} />}
-            </CardSkeleton>
-          </div>
+              <div className="dashboard-chart">
+                <CardSkeleton isLoading={isLoading} altura={380}>
+                  {dados && <GraficoModelos porModelo={dados.porModelo} />}
+                </CardSkeleton>
+              </div>
+            </>
+          )}
         </div>
       )}
+
+      {/* Os dois gráficos são de rentabilidade: o operador vê o aviso no lugar */}
+      {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
 
       <RankingMotoristas />
     </div>

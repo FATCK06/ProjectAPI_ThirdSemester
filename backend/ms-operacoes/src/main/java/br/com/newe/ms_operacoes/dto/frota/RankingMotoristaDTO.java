@@ -7,7 +7,7 @@ public record RankingMotoristaDTO(
         UUID motoristaId,
         String nome,
         String cpf,
-        long totalViagens,
+        long numeroViagens,
         String tipoVeiculo,
         Integer distanciaMaximaKm
 ) {

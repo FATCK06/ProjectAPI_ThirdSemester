@@ -281,7 +281,9 @@ GET /api/viagens?mesReferencia=2026-09
 ]
 ```
 
-A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`, `retiradas`, `coletasReversa`, `percentualEfetividade`, `percentualAprovVeiculo`, `valorFretes`, `saldoDespesas`, `classificacao`, `observacoesOperacionais` e `criadoEm`.
+A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`, `retiradas`, `coletasReversa`, `percentualEfetividade`, `percentualAprovVeiculo`, `valorFretes`, `valeFrete`, `saldoDespesas`, `classificacao`, `observacoesOperacionais` e `criadoEm`.
+
+Os campos de valor (`valorFrete`, `valorFretes`, `valeFrete`, `valorNf`, `totalDespesas`, `saldoDespesas`, `saldoAPagar`) só vêm para os perfis Gestor e Administrador. Para os demais, saem da resposta.
 
 **Erros:** `400` se `mesReferencia` estiver fora do formato.
 
@@ -289,7 +291,12 @@ A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`,
 
 ## Dashboard
 
-Valores monetários em R$; percentuais de 0 a 100. Divisões por zero retornam `0`, assim um motorista sem viagem aparece zerado em vez de derrubar a tela.
+Valores monetários em R$; percentuais de 0 a 100.
+
+- **Receita e custo:** valor do frete = soma de `valor_fretes` (frete dos CT-e cobrado do cliente); custo total = soma de `vale_frete` (total pago ao agregado). Só entra a viagem apurável, com os dois valores maiores que zero; as demais contam como viagem e dia em operação.
+- **Sem base para a conta:** utilização e disponibilidade com divisão por zero retornam `0`. Já `rentabilidadeMediaViagem` (sem viagem apurável) e `margem` (sem frete) saem da resposta: zero diria que o resultado foi zero, quando não há dado.
+- **Perfil:** `valorFrete`, `custoTotal`, `rentabilidade`, `rentabilidadeMediaViagem` e `margem` só vêm para Gestor e Administrador, em todos os endpoints desta seção e em `/api/ranking/mensal`.
+- **Nomes:** os mesmos campos têm o mesmo nome em todos esses endpoints.
 
 ### `GET /api/dashboard/indicadores`
 
@@ -342,7 +349,7 @@ Totais do mês e uma linha por motorista, ordenada por rentabilidade.
 | Utilização | dias em operação ÷ dias disponíveis × 100 |
 | Disponibilidade | dias disponíveis ÷ dias do mês × 100 |
 | Rentabilidade | valor do frete − custo total |
-| Rentabilidade média por viagem | rentabilidade ÷ número de viagens |
+| Rentabilidade média por viagem | rentabilidade ÷ número de viagens apuráveis |
 | Margem | rentabilidade ÷ valor do frete × 100 |
 | Utilização média (totais) | soma dos dias em operação ÷ (dias disponíveis × motoristas) × 100 |
 
@@ -376,7 +383,9 @@ Os mesmos indicadores agrupados por modelo de veículo.
 
 ### `GET /api/dashboard/ranking-motoristas`
 
-Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa (km de chegada − km de saída; em empate, a mais recente).
+Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa.
+
+Viagem mais longa (mesma regra de `/api/ranking/mensal`): a distância é o `km_saida`, que no manifesto já é a distância da rota (o `km_chegada` vem sempre 0). Em empate, ou sem nenhum km informado, fica a viagem mais recente. Veículo fora do cadastro aparece como `"Não informado"`.
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|
@@ -396,7 +405,7 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
     "motoristaId": "a1b2c3d4-0000-4000-8000-000000000001",
     "nome": "JOAO DA SILVA",
     "cpf": "12345678901",
-    "totalViagens": 22,
+    "numeroViagens": 22,
     "tipoVeiculo": "FH 540",
     "distanciaMaximaKm": 480
   }
@@ -404,6 +413,39 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
 ```
 
 Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/ranking/mensal`
+
+Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM` com mês de 01 a 12 |
+| `ordenarPor` | query | `rentabilidade` | `nome`, `tipoVeiculo`, `numeroViagens`, `disponibilidade`, `utilizacao`, `valorFrete`, `custoTotal`, `rentabilidade` ou `rentabilidadeMediaViagem` |
+| `direcao` | query | `desc` | `asc` ou `desc` |
+
+Valor ausente fica no fim nas duas direções. Para quem não vê dado financeiro, ordenar por um campo financeiro cai em `numeroViagens`.
+
+**Resposta `200`:**
+
+```json
+[
+  {
+    "motoristaId": "a1b2c3d4-0000-4000-8000-000000000001",
+    "nome": "JOAO DA SILVA",
+    "tipoVeiculo": "FH 540",
+    "numeroViagens": 22,
+    "disponibilidade": 100.00,
+    "utilizacao": 76.92,
+    "valorFrete": 41200.00,
+    "custoTotal": 27800.00,
+    "rentabilidade": 13400.00,
+    "rentabilidadeMediaViagem": 609.09
+  }
+]
+```
+
+**Erros:** `400` para parâmetros inválidos.
 
 ### `GET /api/dashboard/motoristas/situacao`
 
@@ -447,7 +489,7 @@ Ordem: `DISPONIVEL` primeiro, depois menor utilização, depois nome. Sem result
 |---|---|
 | Utilização | dias em operação ÷ dias disponíveis × 100, 2 casas (HALF_UP). Pode passar de 100 |
 | Dias em operação | dias distintos com viagem no mês, somando todas as importações |
-| Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês — PENDENTE do cliente) |
+| Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês; PENDENTE do cliente) |
 | `BAIXA` | utilização < 50 → `DISPONIVEL` |
 | `INTERMEDIARIA` | 50 ≤ utilização < 80 → `DISPONIVEL` |
 | `ALTA` | utilização ≥ 80 → `INDISPONIVEL` |
