@@ -21,7 +21,7 @@ O frontend lê a URL da variável `VITE_API_URL`. Sem ela, usa o valor acima.
 |---|---|---|
 | `/api/auth/**`, `/api/usuarios/**` | ms-usuarios | 8081 |
 | `/api/motoristas/**`, `/api/veiculos/**`, `/api/agregados/**` | ms-frota | 8082 |
-| `/api/importacao/**`, `/api/viagens/**`, `/api/dashboard/**` | ms-operacoes | 8083 |
+| `/api/importacao/**`, `/api/viagens/**`, `/api/dashboard/**`, `/api/ranking/**` | ms-operacoes | 8083 |
 | `/api/status` | o próprio gateway | 8080 |
 
 ## Autenticação
@@ -30,6 +30,7 @@ A API usa **JWT** (HMAC-256, emissor `ms-usuarios`, validade de **2 horas**).
 
 1. Faça login em `POST /api/auth/login` e guarde o `token` da resposta.
 2. Envie o token em todas as outras chamadas:
+   Inclua o token no cabeçalho HTTP usando o esquema Bearer.
 
 ```
 Authorization: Bearer <token>
@@ -58,6 +59,7 @@ O gateway valida o token antes de rotear. Com o token válido, ele injeta dois h
 | `Operador` | uso operacional (importação e consultas) |
 | `Gestor` | acompanhamento gerencial (dashboard e indicadores) |
 | `Administrador` | tudo acima, mais cadastro de usuários e status dos serviços |
+
 
 ## Formato de erro
 
@@ -94,7 +96,7 @@ Consulta o `/actuator/health` de cada microsserviço (timeout de 3 s). O health 
   "servicos": [
     { "servico": "ms-usuarios",  "status": "UP",   "tempoMs": 42 },
     { "servico": "ms-frota",     "status": "UP",   "tempoMs": 38 },
-    { "servico": "ms-operacoes", "status": "DOWN", "tempoMs": 3001, "detalhe": "I/O error on GET request ..." }
+    { "servico": "ms-operacoes", "status": "DOWN", "tempoMs": 3001, "detalhe": "Sem resposta" }
   ]
 }
 ```
