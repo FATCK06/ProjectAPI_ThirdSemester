@@ -1,5 +1,8 @@
 import type { ResultadoValidacao } from '../../../../services/importacao';
+<<<<<<< HEAD
 import { DataTable, type ColunaTabela } from '../../../../components/DataTable/DataTable';
+=======
+>>>>>>> origin/develop
 import { formatarMoeda } from '../../../../utils/formatacao';
 import './step4.css';
 
@@ -54,6 +57,7 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
                 </p>
             </div>
 
+<<<<<<< HEAD
             {/* 9 colunas: cabem na largura da tela cortando os textos longos; a rolagem só aparece em telas estreitas */}
             <DataTable
                 colunas={COLUNAS}
@@ -62,6 +66,52 @@ export function Step4Revisao({ validacao }: PropsPasso4) {
                 layoutFixo
                 larguraMinima={760}
             />
+=======
+            <div className="revisao-tabela-area">
+                <table className="revisao-tabela">
+                    {/* Larguras fixas nas colunas curtas; as de texto dividem o resto e cortam com reticências */}
+                    <colgroup>
+                        <col className="col-manifesto" />
+                        <col className="col-data" />
+                        <col className="col-mes" />
+                        <col />
+                        <col className="col-cpf" />
+                        <col />
+                        <col className="col-veiculo" />
+                        <col />
+                        <col className="col-valor" />
+                    </colgroup>
+                    <thead>
+                        <tr>
+                            <th>Manifesto</th>
+                            <th>Data</th>
+                            <th>Mês</th>
+                            <th>Motorista</th>
+                            <th>CPF</th>
+                            <th>Agregado</th>
+                            <th>Veículo</th>
+                            <th>Destino</th>
+                            <th className="alinhar-direita">Frete agregado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {validacao.amostra.map((linha) => (
+                            <tr key={linha.numeroLinha}>
+                                <td className="celula-forte">{linha.manifesto ?? '-'}</td>
+                                <td>{formatarData(linha.data)}</td>
+                                <td>{linha.mesReferencia ?? '-'}</td>
+                                <td title={linha.motorista ?? undefined}>{linha.motorista ?? '-'}</td>
+                                <td className="celula-mono">{mascararCpf(linha.cpf)}</td>
+                                <td title={linha.agregado ?? undefined}>{linha.agregado ?? '-'}</td>
+                                <td className="celula-mono">{linha.veiculo ?? '-'}</td>
+                                <td title={linha.destino ?? undefined}>{linha.destino ?? '-'}</td>
+                                <td className="alinhar-direita">{formatarMoeda(linha.valorFrete)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+>>>>>>> origin/develop
 
             <p className="revisao-nota">
                 A coluna <strong>Mês</strong> vem da data de cada linha, não do arquivo. Por isso, um

@@ -78,6 +78,7 @@ export async function buscarRankingMotoristas(
     { params: { mesReferencia, limite } },
   );
   return data;
+<<<<<<< HEAD
 }
 
 export interface MesesReferencia {
@@ -89,6 +90,8 @@ export interface MesesReferencia {
 export async function buscarMesesReferencia(): Promise<MesesReferencia> {
   const { data } = await api.get<MesesReferencia>("/dashboard/meses-referencia");
   return data;
+=======
+>>>>>>> origin/develop
 }
 
 export async function buscarIndicadores(

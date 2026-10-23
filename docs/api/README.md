@@ -72,6 +72,7 @@ O código pergunta pela **permissão**, não pelo perfil. O mapa fica no `Permis
 | `VER_DADOS_FINANCEIROS` | Administrador, Gestor | `/api/viagens/**`, `/api/importacao/arquivos/{id}/viagens` e `/conteudo` (rota inteira); valores do dashboard e do ranking (campos vêm `null`) |
 
 
+
 ## Formato de erro
 
 Os erros tratados pela aplicação retornam JSON com a chave `erro`:

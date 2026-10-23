@@ -16,6 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Card } from "../../../../components/Card/Card";
+<<<<<<< HEAD
 import { AVISO_SEM_VIAGENS_MEDIA } from "../../../../components/Aviso/Aviso";
 import {
   type HistoricoMes,
@@ -25,6 +26,11 @@ import {
 import { podeVerDadosFinanceiros } from "../../../../services/auth";
 import { formatarIntervaloMeses, formatarMesCurto, formatarMesExtenso } from "../../../../utils/datas";
 import { formatarMoeda, formatarPercentual, SEM_VALOR } from "../../../../utils/formatacao";
+=======
+import { type IndicadoresMes } from "../../../../services/Dashboard";
+import { podeVerDadosFinanceiros } from "../../../../services/auth";
+import { formatarMoeda, formatarPercentual } from "../../../../utils/formatacao";
+>>>>>>> origin/develop
 import { Sparkline } from "./Sparkline";
 import {
   INDICADORES,
@@ -88,9 +94,25 @@ const LABEL_CATEGORIA: Record<Categoria, string> = {
 
 const CATEGORIAS: Categoria[] = ["operacional", "financeiro"];
 
+<<<<<<< HEAD
 // Uma casa: a média de um período pode não ser inteira (ex.: 693,5 viagens)
 function formatarNumero(valor: number): string {
   return valor.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
+=======
+const SELECAO_INICIAL: IndicadorId[] = [
+  "numeroViagens",
+  "diasDisponiveis",
+  "utilizacaoMedia",
+];
+
+function formatarMes(mesReferencia: string): string {
+  const [ano, mes] = mesReferencia.split("-").map(Number);
+  if (!ano || !mes) return mesReferencia;
+  return new Date(ano, mes - 1, 1).toLocaleDateString("pt-BR", {
+    month: "long",
+    year: "numeric",
+  });
+>>>>>>> origin/develop
 }
 
 function formatarVariacao(valor: number): string {
@@ -160,10 +182,14 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "roxo",
     Icone: Percent,
     maiorEhMelhor: true,
+<<<<<<< HEAD
     formatar: formatarPercentual,
     ajuda:
       "Dias em operação ÷ dias disponíveis × 100. Ainda não calculado, pois depende " +
       "dos dias disponíveis.",
+=======
+    obterValor: (i) => formatarPercentual(i.totais.utilizacaoMedia),
+>>>>>>> origin/develop
   },
   {
     id: "valorFrete",
@@ -171,12 +197,16 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "ciano",
     Icone: CircleDollarSign,
     maiorEhMelhor: true,
+<<<<<<< HEAD
     obterNumero: (t) => t.valorFrete,
     formatar: formatarMoeda,
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta(
       "Quanto os clientes pagaram à Newe pelas viagens (coluna Valor Fretes do CSV).",
     ),
+=======
+    obterValor: (i) => formatarMoeda(i.totais.valorFrete),
+>>>>>>> origin/develop
   },
   {
     id: "custoTotal",
@@ -184,6 +214,7 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "rosa",
     Icone: CreditCard,
     maiorEhMelhor: false, // custo maior é ruim
+<<<<<<< HEAD
     obterNumero: (t) => t.custoTotal,
     formatar: formatarMoeda,
     aproximado: faltamViagens,
@@ -191,6 +222,9 @@ const DEFINICOES: DefinicaoIndicador[] = [
       "Quanto a Newe pagou ao motorista pelas viagens (coluna Vale frete do CSV): " +
         "frete-base do motorista (Valor Frete) + pedágio, diárias e adicionais.",
     ),
+=======
+    obterValor: (i) => formatarMoeda(i.totais.custoTotal),
+>>>>>>> origin/develop
   },
   {
     id: "rentabilidade",
@@ -198,10 +232,14 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "verde",
     Icone: TrendingUp,
     maiorEhMelhor: true,
+<<<<<<< HEAD
     obterNumero: (t) => t.rentabilidade,
     formatar: formatarMoeda,
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta("Valor total dos fretes − custo total."),
+=======
+    obterValor: (i) => formatarMoeda(i.totais.rentabilidade),
+>>>>>>> origin/develop
   },
   {
     id: "rentabilidadeMediaViagem",
@@ -209,12 +247,16 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "ambar",
     Icone: Activity,
     maiorEhMelhor: true,
+<<<<<<< HEAD
     obterNumero: (t) => t.rentabilidadeMediaViagem,
     formatar: formatarMoeda,
     semValor: AVISO_SEM_VIAGENS_MEDIA,
     // Só quando alguma viagem ficou de fora: com todas apuradas o valor é exato
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta("Rentabilidade total ÷ viagens com frete e custo informados no CSV."),
+=======
+    obterValor: (i) => formatarMoeda(i.totais.rentabilidadeMediaViagem),
+>>>>>>> origin/develop
   },
   {
     id: "margem",
@@ -222,11 +264,15 @@ const DEFINICOES: DefinicaoIndicador[] = [
     tom: "azul",
     Icone: BadgePercent,
     maiorEhMelhor: true,
+<<<<<<< HEAD
     obterNumero: (t) => t.margem,
     formatar: formatarPercentual,
     semValor: "Sem valor de frete no período. Não é possível calcular a margem.",
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta("Rentabilidade total ÷ valor total dos fretes × 100: quanto sobra de cada R$ 100 faturados."),
+=======
+    obterValor: (i) => formatarPercentual(i.totais.margem),
+>>>>>>> origin/develop
   },
 ];
 
@@ -372,6 +418,11 @@ export function IndicadoresCard({
   mesesComparacao,
   onMesesComparacaoChange,
 }: PropsIndicadoresCard) {
+  // Quem não é gestor nem vê a categoria financeira no filtro: a API não manda os valores.
+  const categorias = podeVerDadosFinanceiros()
+    ? CATEGORIAS
+    : CATEGORIAS.filter((c) => c !== "financeiro");
+  const definicoes = DEFINICOES.filter((d) => categorias.includes(d.categoria));
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -416,8 +467,13 @@ export function IndicadoresCard({
     );
   }
 
+<<<<<<< HEAD
   const visiveis = indicadoresVisiveis(selecionados, financeiro).map(
     (i) => DEFINICAO_POR_ID.get(i.id)!,
+=======
+  const indicadoresVisiveis = definicoes.filter((d) =>
+    selecionados.includes(d.id),
+>>>>>>> origin/develop
   );
 
   // A escolha do usuário fica guardada; aqui só se usa o que o mês permite.
@@ -455,6 +511,7 @@ export function IndicadoresCard({
         </select>
       </label>
 
+<<<<<<< HEAD
       <div ref={containerRef} className="indicadores-filtro">
         <button
           type="button"
@@ -488,10 +545,20 @@ export function IndicadoresCard({
                       </label>
                     ),
                   )}
+=======
+      {mostrarFiltro && (
+        <div className="indicadores-menu">
+          <div className="indicadores-menu-lista">
+            {categorias.map((categoria) => (
+              <div key={categoria}>
+                <div className="indicadores-menu-categoria">
+                  {LABEL_CATEGORIA[categoria]}
+>>>>>>> origin/develop
                 </div>
               ))}
             </div>
 
+<<<<<<< HEAD
             <div className="indicadores-menu-rodape">
               <button type="button" onClick={() => onSelecionadosChange([])}>
                 Limpar
@@ -506,6 +573,37 @@ export function IndicadoresCard({
           </div>
         )}
       </div>
+=======
+                {definicoes.filter((d) => d.categoria === categoria).map(
+                  (d) => (
+                    <label key={d.id} className="indicadores-menu-item">
+                      <input
+                        type="checkbox"
+                        checked={selecionados.includes(d.id)}
+                        onChange={() => alternarIndicador(d.id)}
+                      />
+                      {d.titulo}
+                    </label>
+                  ),
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div className="indicadores-menu-rodape">
+            <button type="button" onClick={() => setSelecionados([])}>
+              Limpar
+            </button>
+            <button
+              type="button"
+              onClick={() => setSelecionados(definicoes.map((d) => d.id))}
+            >
+              Selecionar todos
+            </button>
+          </div>
+        </div>
+      )}
+>>>>>>> origin/develop
     </div>
   );
 

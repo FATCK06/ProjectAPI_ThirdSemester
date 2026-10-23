@@ -89,6 +89,7 @@ O botão no topo do menu recolhe a barra para mostrar só os ícones, deixando m
 
 <!-- Print sugerido: img/03-dashboard.png -->
 
+<<<<<<< HEAD
 O Dashboard mostra o desempenho da operação no mês. Ele tem um seletor de mês e quatro blocos. Usuários Operadores veem os indicadores operacionais e o ranking; Gestores e Administradores também veem os indicadores financeiros e os gráficos de rentabilidade.
 
 ### 5.0 Escolhendo o mês
@@ -102,6 +103,9 @@ O seletor no topo da tela vale para **todos os blocos** (indicadores, gráficos 
 | **Selecionar mês** | Abre o calendário para escolher qualquer mês até o atual. O mês escolhido aparece no próprio botão |
 
 > O mês atual costuma aparecer vazio até a planilha dele ser importada. Para ver meses já fechados, use **Mês anterior** ou **Selecionar mês**.
+=======
+O Dashboard mostra o desempenho da operação de **junho de 2026**. Usuários Operadores veem os indicadores operacionais e o ranking; Gestores e Administradores também veem os indicadores financeiros e os gráficos de rentabilidade.
+>>>>>>> origin/develop
 
 ### 5.1 Card de indicadores
 

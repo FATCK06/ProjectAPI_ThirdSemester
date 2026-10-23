@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useState } from "react";
 import { IndicadoresSkeleton } from "../../components/SkeletonLoader/IndicadoresSkeleton";
 import { GraficoSkeleton } from "../../components/SkeletonLoader/GraficoSkeleton";
@@ -18,6 +19,20 @@ import { useDashboard } from "./useDashboard";
 import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
 import { podeVerDadosFinanceiros } from "../../services/auth";
 import { buscarMesesReferencia, type MesesReferencia } from "../../services/Dashboard";
+=======
+import { useState } from "react";
+import { CardSkeleton } from "../../components/SkeletonLoader/CardSkeleton";
+import { RankingMotoristas } from "./components/frota/RankingMotoristas/RankingMotoristas";
+import IndicadoresCard, {
+  type ComparativoIndicador,
+  type IndicadorId,
+} from "./components/IndicadoresCard/IndicadoresCard";
+import GraficoMotoristas from "./components/frota/GraficoRentabilidadeMotoristas/GraficoMotoristas";
+import GraficoModelos from "./components/frota/GraficoModelos/GraficoModelos";
+import { useDashboard } from "./useDashboard";
+import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
+import { podeVerDadosFinanceiros } from "../../services/auth";
+>>>>>>> origin/develop
 import "./dashboard.css";
 
 // Enquanto false, o card mostra o aviso de "Em desenvolvimento" no lugar do gráfico
@@ -26,6 +41,7 @@ import "./dashboard.css";
 const GRAFICO_MODELOS_DISPONIVEL = false;
 
 export function Dashboard() {
+<<<<<<< HEAD
   const [meses, setMeses] = useState<MesesReferencia | null>(null);
   const [erroMeses, setErroMeses] = useState(false);
   const [mesReferencia, setMesReferencia] = useState<string | null>(null);
@@ -132,6 +148,53 @@ export function Dashboard() {
           )}
         </>
       )}
+=======
+  const [mesReferencia] = useState("2026-06");
+  const { dados, isLoading, erro } = useDashboard(mesReferencia);
+  const financeiro = podeVerDadosFinanceiros();
+
+  return (
+    <div className="dashboard">
+      {erro ? (
+        <p className="dashboard-erro">{erro}</p>
+      ) : (
+        <div className="dashboard-charts">
+          <div className="dashboard-indicators">
+            <CardSkeleton isLoading={isLoading} altura={260}>
+              {dados && (
+                <IndicadoresCard
+                  indicadores={dados.indicadores}
+                  comparativo={COMPARATIVO_TESTE}
+                />
+              )}
+            </CardSkeleton>
+          </div>
+
+          {financeiro && (
+            <>
+              <div className="dashboard-chart dashboard-driver-chart">
+                <CardSkeleton isLoading={isLoading} altura={380}>
+                  {dados && (
+                    <GraficoMotoristas motoristas={dados.indicadores.motoristas} />
+                  )}
+                </CardSkeleton>
+              </div>
+
+              <div className="dashboard-chart">
+                <CardSkeleton isLoading={isLoading} altura={380}>
+                  {dados && <GraficoModelos porModelo={dados.porModelo} />}
+                </CardSkeleton>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Os dois gráficos são de rentabilidade: o operador vê o aviso no lugar */}
+      {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
+
+      <RankingMotoristas />
+>>>>>>> origin/develop
     </div>
   );
 }

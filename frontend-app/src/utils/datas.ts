@@ -3,6 +3,7 @@ export function mesAtual(): string {
   const hoje = new Date();
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
 }
+<<<<<<< HEAD
 
 function formatarMes(mesReferencia: string, month: "short" | "long"): string {
   const [ano, mes] = mesReferencia.split("-").map(Number);
@@ -30,3 +31,5 @@ export function formatarIntervaloMeses(inicio: string, fim: string): string {
   const mesInicio = new Date(ano, mes - 1, 1).toLocaleDateString("pt-BR", { month: "short" });
   return `${mesInicio} a ${formatarMesCurto(fim)}`;
 }
+=======
+>>>>>>> origin/develop

@@ -2,7 +2,10 @@ import { Bar } from "react-chartjs-2";
 import type { ChartData, ChartOptions } from "chart.js";
 import "../../../../../components/chartSetup";
 import { Card } from "../../../../../components/Card/Card";
+<<<<<<< HEAD
 import { EmDesenvolvimento } from "../../../../../components/EmDesenvolvimento";
+=======
+>>>>>>> origin/develop
 import type { IndicadoresPorModelo } from "../../../../../services/Dashboard";
 
 interface PropsGraficoModelos {
