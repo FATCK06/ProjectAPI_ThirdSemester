@@ -42,7 +42,7 @@ public class AgregadoController {
 
     @PostMapping("/lote")
     public ResponseEntity<Map<String, UUID>> upsertLote(
-            @Valid @RequestBody @Size(max = 10000) List<AgregadoLoteItem> itens) {
+        @Valid @RequestBody @Size(max = 10000) List<@Valid AgregadoLoteItem> itens) {
         return ResponseEntity.ok(service.upsertLote(itens));
     }
 }

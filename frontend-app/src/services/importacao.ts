@@ -1,4 +1,5 @@
 import api from './api';
+import { formatarCamposErro, obterRespostaErro } from './errosApi';
 
 /** Limite do backend: spring.servlet.multipart.max-file-size=10MB */
 export const TAMANHO_MAXIMO_BYTES = 10 * 1024 * 1024;
@@ -202,25 +203,14 @@ export async function buscarResumo(): Promise<ResumoImportacao> {
     return data;
 }
 
-type RespostaErroApi = {
-    erro?: string;
-    campos?: Record<string, string>;
-};
-
 export function mensagemDeErro(erro: unknown): string {
-    const resposta = (
-        erro as { response?: { status?: number; data?: RespostaErroApi } }
-    )?.response;
+    const resposta = obterRespostaErro(erro);
 
     const mensagem = resposta?.data?.erro;
     const campos = resposta?.data?.campos;
 
     if (campos && Object.keys(campos).length > 0) {
-        const detalhes = Object.entries(campos)
-            .map(([campo, motivo]) => `${campo}: ${motivo}`)
-            .join('; ');
-
-        return `${mensagem ?? 'Dados inválidos.'} ${detalhes}`;
+        return `${mensagem ?? 'Dados inválidos.'} ${formatarCamposErro(campos)}`;
     }
 
     if (mensagem) return mensagem;

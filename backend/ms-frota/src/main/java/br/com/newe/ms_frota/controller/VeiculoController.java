@@ -55,7 +55,7 @@ public class VeiculoController {
 
     @PostMapping("/lote")
     public ResponseEntity<Map<String, UUID>> upsertLote(
-            @Valid @RequestBody @Size(max = 10000) List<VeiculoLoteItem> itens) {
+        @Valid @RequestBody @Size(max = 10000) List<@Valid VeiculoLoteItem> itens) {
         return ResponseEntity.ok(service.upsertLote(itens));
     }
 

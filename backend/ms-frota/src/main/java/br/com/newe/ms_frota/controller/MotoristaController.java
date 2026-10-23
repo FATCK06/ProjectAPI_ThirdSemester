@@ -56,16 +56,9 @@ public class MotoristaController {
         return ResponseEntity.ok(service.buscarResumos(ids));
     }
 
-    /**
-     * Upsert em lote usado pela importacao de manifestos. Devolve cpf -> id para
-     * todos os CPFs recebidos, criados agora ou ja existentes.
-     *
-     * Item sem CPF e ignorado em vez de derrubar o lote: numa planilha de
-     * centenas de linhas, uma linha ruim nao pode invalidar as outras.
-     */
     @PostMapping("/lote")
      public ResponseEntity<Map<String, UUID>> upsertLote(
-             @Valid @RequestBody @Size(max = 10000) List<MotoristaLoteItem> itens) {
+        @Valid @RequestBody @Size(max = 10000) List<@Valid MotoristaLoteItem> itens) {
          return ResponseEntity.ok(service.upsertLote(itens));
      }
 }
