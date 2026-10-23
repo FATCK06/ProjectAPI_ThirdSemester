@@ -67,7 +67,7 @@ export function Ranking() {
         </label>
       </header>
 
-      {carregando && <div className="ranking-page-skeleton"><CardSkeleton isLoading /></div>}
+      {carregando && <div className="ranking-page-skeleton"><CardSkeleton isLoading altura="100%" /></div>}
       {!carregando && erro && <div className="ranking-page-feedback"><p>Não foi possível carregar o ranking.</p><button type="button" onClick={() => setTentativa((valor) => valor + 1)}>Tentar novamente</button></div>}
       {!carregando && !erro && ordenadas.length === 0 && <div className="ranking-page-feedback"><p>Nenhum dado foi importado para este mês.</p></div>}
       {!carregando && !erro && ordenadas.length > 0 && (

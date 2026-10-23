@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import "./card.css";
 
 interface PropsCard {
