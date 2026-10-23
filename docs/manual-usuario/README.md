@@ -12,11 +12,14 @@ Parceiro: Newelog · Equipe RubyFox · FATEC São José dos Campos
 3. [Acessando o sistema](#3-acessando-o-sistema)
 4. [Navegação](#4-navegação)
 5. [Dashboard](#5-dashboard)
-6. [Importação de manifestos](#6-importação-de-manifestos)
-7. [Cadastrar usuário](#7-cadastrar-usuário-administrador)
-8. [Status dos serviços](#8-status-dos-serviços-administrador)
-9. [Dúvidas frequentes](#9-dúvidas-frequentes)
-10. [Glossário](#10-glossário)
+6. [Motoristas](#6-motoristas)
+7. [Ranking mensal](#7-ranking-mensal)
+8. [Importação de manifestos](#8-importação-de-manifestos)
+9. [Histórico de importações](#9-histórico-de-importações)
+10. [Cadastrar usuário](#10-cadastrar-usuário-administrador)
+11. [Status dos serviços](#11-status-dos-serviços-administrador)
+12. [Dúvidas frequentes](#12-dúvidas-frequentes)
+13. [Glossário](#13-glossário)
 
 ---
 
@@ -72,7 +75,10 @@ O menu lateral fica à esquerda da tela:
 | Item | Descrição |
 |---|---|
 | **Dashboard** | Indicadores e ranking de motoristas |
+| **Motoristas** | Consulta motoristas e indicadores operacionais do mês, como viagens, dias em operação, disponibilidade e utilização |
+| **Ranking mensal** | Compara e ordena o desempenho dos motoristas no período selecionado |
 | **Importação de Dados → Manifestos** | Importação do CSV de manifestos |
+| **Importação de Dados → Histórico de Importações** | Listagem de arquivos importados |
 | **Cadastrar usuário** | Somente Administrador |
 | **Status dos serviços** | Somente Administrador |
 | **Sair** | Encerra a sessão |
@@ -83,7 +89,7 @@ O botão no topo do menu recolhe a barra para mostrar só os ícones, deixando m
 
 <!-- Print sugerido: img/03-dashboard.png -->
 
-O Dashboard mostra o desempenho da operação no mês. Ele tem quatro blocos.
+O Dashboard mostra o desempenho da operação de **junho de 2026**. Usuários Operadores veem os indicadores operacionais e o ranking; Gestores e Administradores também veem os indicadores financeiros e os gráficos de rentabilidade.
 
 ### 5.1 Card de indicadores
 
@@ -108,11 +114,11 @@ O título mostra o mês de referência (ex.: **Indicadores de 2026-06**). Os ind
 
 ### 5.2 Rentabilidade por motorista
 
-Gráfico de barras com os **10 motoristas mais rentáveis** do mês. Passe o mouse sobre uma barra para ver o nome completo e o valor em reais.
+Gráfico de barras com os **10 motoristas mais rentáveis** do mês. Passe o mouse sobre uma barra para ver o nome completo e o valor em reais. Disponível para Gestores e Administradores.
 
 ### 5.3 Rentabilidade por modelo de veículo
 
-Gráfico de barras com a rentabilidade agrupada pelo modelo do veículo. Serve para comparar quais tipos de veículo rendem mais.
+Gráfico de barras com a rentabilidade agrupada pelo modelo do veículo. Serve para comparar quais tipos de veículo rendem mais. Disponível para Gestores e Administradores.
 
 ### 5.4 Ranking de motoristas
 
@@ -126,7 +132,7 @@ Tabela com os **5 motoristas com mais viagens** no mês escolhido.
 | Coluna | Descrição |
 |---|---|
 | Motorista | Nome do motorista |
-| Tipo de veículo | Placa do veículo usado na viagem mais longa do mês |
+| Tipo de veículo | Tipo/modelo do veículo usado na viagem mais longa do mês |
 | Nº de viagens | Viagens realizadas no mês |
 | Disponibilidade | Dias disponíveis sobre os dias do mês |
 | Utilização | Dias em operação sobre os dias disponíveis |
@@ -135,9 +141,35 @@ Tabela com os **5 motoristas com mais viagens** no mês escolhido.
 | Rentabilidade | Fretes menos custos |
 | Rentab. média por viagem | Rentabilidade dividida pelas viagens |
 
-Se aparecer **"Nenhuma viagem importada para este mês"**, ainda não há manifestos importados para aquele período. Se aparecer **"Não foi possível carregar o ranking"**, clique em **Tentar novamente**.
+Se aparecer **"Nenhuma viagem importada para este mês"**, ainda não há manifestos importados para aquele período. Se aparecer **"Não foi possível carregar o ranking"**, clique em **Tentar novamente**. Os valores financeiros não aparecem para Operadores.
 
-## 6. Importação de manifestos
+## 6. Motoristas
+
+<!-- Print sugerido: img/12-motoristas.png -->
+
+A página **Motoristas** apresenta os motoristas e seus indicadores operacionais no mês escolhido. Use os filtros para localizar registros:
+
+- **Buscar motorista ou placa**: filtra pelo nome do motorista ou pela placa;
+- **Tipo de veículo**: mostra apenas os motoristas associados ao tipo selecionado;
+- **Mês**: consulta os dados do período escolhido.
+
+Clique nos cabeçalhos da tabela para ordenar por motorista, tipo ou modelo de veículo, placa, viagens, dias em operação, disponibilidade, utilização ou efetividade. A lista é paginada; use **Anterior** e **Próxima** para navegar.
+
+Clique no nome de um motorista para abrir sua ficha cadastral, com dados pessoais e endereço. Use **Voltar para motoristas** para retornar à lista.
+
+Se não houver registros para o mês ou para os filtros escolhidos, a página informa que nenhum motorista foi encontrado. 
+
+## 7. Ranking mensal
+
+<!-- Print sugerido: img/13-ranking-mensal.png -->
+
+A página **Ranking mensal** lista os motoristas e permite comparar e ordenar seus resultados no período. Escolha o **Mês de referência** no topo da página. Clique no cabeçalho de uma coluna para ordenar; clique novamente para alternar entre ordem crescente e decrescente.
+
+A tabela inclui motorista, tipo de veículo, viagens, disponibilidade e utilização. Gestores e Administradores também veem valor dos fretes, custos, rentabilidade e rentabilidade média por viagem. Operadores não veem os valores financeiros.
+
+Se não houver dados para o período, a página informa que não há dados importados.
+
+## 8. Importação de manifestos
 
 Acesse **Importação de Dados → Manifestos**. A importação é feita em **6 etapas**, mostradas no topo da tela. Cada etapa aparece como *Pendente*, *Em progresso* ou *Concluído*.
 
@@ -238,7 +270,13 @@ Mostra o resumo da importação:
 
 Clique em **Importar outro arquivo** para começar de novo.
 
-## 7. Cadastrar usuário (Administrador)
+## 9. Histórico de importações
+
+<!-- Print sugerido: img/14-historico-importacoes.png -->
+
+A página **Importação de Dados → Histórico de Importações** apresenta uma tabela com o nome do arquivo, a data da importação, o usuário responsável e o status. Enquanto os dados são carregados, aparece a indicação **Carregando...**; se não for possível obter o histórico, a página mostra uma mensagem de erro.
+
+## 10. Cadastrar usuário (Administrador)
 
 <!-- Print sugerido: img/10-cadastro-usuario.png -->
 
@@ -254,7 +292,7 @@ Se der certo, aparece *"Nome cadastrado como Perfil. Já pode fazer login."*. Se
 
 > A senha é criptografada antes de ser gravada. Nem o Administrador consegue vê-la depois.
 
-## 8. Status dos serviços (Administrador)
+## 11. Status dos serviços (Administrador)
 
 <!-- Print sugerido: img/11-status.png -->
 
@@ -272,7 +310,7 @@ Mostra se cada parte do sistema está funcionando. É útil quando alguma tela n
 
 > Um serviço que está rodando mas não consegue acessar o banco de dados aparece como **Fora**.
 
-## 9. Dúvidas frequentes
+## 12. Dúvidas frequentes
 
 **O Dashboard está vazio.**
 Ainda não há viagens importadas para o mês exibido. Importe o manifesto do período, ou troque o mês no Ranking.
@@ -292,7 +330,7 @@ A sessão expira em 2 horas. Faça login novamente.
 **Não vejo "Cadastrar usuário" nem "Status dos serviços".**
 Essas opções aparecem só para o perfil Administrador.
 
-## 10. Glossário
+## 13. Glossário
 
 | Termo | Significado |
 |---|---|
