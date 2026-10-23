@@ -75,6 +75,38 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | 2 | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações. | 8 |
 | 3 | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação. | 6 |
 
+### Tarefas das histórias
+
+#### - **História 1: Importação da planilha de manifestos**
+
+- Criar a tela de upload com mês de referência (Front)
+- Criar o endpoint que recebe o arquivo (Back)
+- Validar formato e tamanho do arquivo (Back)
+- Persistir metadados da importação (Back)
+- Exibir a última importação realizada (Front + Back)
+- Criação do banco de dados no Supabase (Back)
+
+#### - **História 2: Tratamento dos dados da planilha de manifestos**
+
+- Mapear as colunas da planilha de manifestos (Definição)
+- Escrever o leitor da planilha de manifestos (Back)
+- Limpar e padronizar os dados (Back)
+- Separar as linhas com erro em vez de parar a importação (Back)
+- Calcular os indicadores derivados (Back)
+- Gravar os dados tratados no banco (Back)
+- Gravar os campos financeiros de forma controlada (Back)
+- Importação e tratamento para o banco de dados: mapeamento, validação, revisão, confirmação e resultado (Front + Back)
+
+#### - **História 3: Resumo visual dos dados importados**
+
+- Confirmar os indicadores do resumo (Definição)
+- Protótipo visual no Figma (Front)
+- Criar o endpoint do resumo (Back)
+- Montar os cards de indicadores (Front)
+- Montar os gráficos do resumo (Front)
+- Tratar os estados de carregando e sem dados (Front)
+
+
 ### Definition of Ready (DoR)
 
 - O valor da história está definido.
@@ -92,6 +124,58 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 - O manual do usuário foi atualizado.
 - O manual de instalação foi atualizado.
 
+### Histórias e verificações do DoR e DoD
+
+#### - **História 1: Importação**
+
+Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações.
+
+**Critérios de validação do DoR**
+
+- A planilha de manifestos tem que estar no formato .csv.
+- A planilha tem que possuir cabeçalho e pelo menos uma linha de dados.
+- O mês de referência da importação tem que estar definido.
+
+**Critérios de validação do DoD**
+
+- Arquivos fora do formato .csv não podem ser aceitos.
+- Arquivos sem cabeçalho ou sem dados não podem gerar erro no sistema.
+- A importação tem que registrar a data, a hora e o usuário responsável.
+- Uma nova importação do mesmo mês não pode duplicar os dados.
+
+#### - **História 2: Tratamento dos dados**
+
+Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- As colunas da planilha têm que estar mapeadas para os campos do sistema.
+- As regras de cálculo dos indicadores têm que estar definidas.
+
+**Critérios de validação do DoD**
+
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- O mesmo motorista escrito de formas diferentes tem que ser reconhecido como um só.
+- Linhas com erro têm que ser ignoradas e registradas com o motivo, sem interromper a importação.
+- Os dados tratados têm que estar gravados no banco e ligados ao mês de referência.
+
+#### - **História 3: Resumo visual**
+
+Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação.
+
+**Critérios de validação do DoR**
+
+- Os indicadores do resumo têm que estar definidos.
+- O protótipo da tela tem que estar disponível no Figma.
+- Tem que existir pelo menos uma importação concluída.
+
+**Critérios de validação do DoD**
+
+- Os indicadores exibidos têm que corresponder aos dados importados.
+- Os gráficos não podem quebrar quando não há dados.
+- A tela tem que exibir os estados de carregando e sem dados.
+
 </details>
 
 <details>
@@ -105,6 +189,39 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | 5 | Alta | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações. | 5 |
 | 6 | Alta | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram. | 6 |
 | 7 | Alta | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados. | 4 |
+
+### Tarefas das histórias
+
+#### - **História 4: Listagem dos motoristas agregados**
+
+- Criar o endpoint de listagem (Back)
+- Mostrar a tabela de motoristas (Front)
+- Adicionar busca por nome ou placa (Front + Back)
+- Adicionar ordenação pelas colunas (Front + Back)
+- Adicionar filtro por tipo de veículo (Front + Back)
+
+#### - **História 5: Situação e disponibilidade dos motoristas**
+
+- Definir as faixas de utilização (Definição)
+- Calcular a situação de cada motorista (Back)
+- Exibir situação e utilização na listagem (Front)
+- Adicionar filtro por situação (Front + Back)
+
+#### - **História 6: Ranking geral dos motoristas do mês**
+
+- Confirmar as colunas e a ordenação padrão (Definição)
+- Criar o endpoint do ranking mensal (Back)
+- Montar a tabela do ranking (Front)
+- Restringir as colunas financeiras por perfil (Front + Back)
+- Adicionar o seletor de mês (Front + Back)
+
+#### - **História 7: Níveis de acesso por perfil**
+
+- Definir a matriz de permissões (Definição)
+- Implementar login e sessão (Front + Back)
+- Bloquear as rotas no back-end por perfil (Back)
+- Ajustar a interface conforme o perfil (Front)
+- Criar a tela de acesso negado (Front)
 
 
 ### Definition of Ready (DoR)
@@ -216,6 +333,25 @@ Critérios de validação do DoD
 | :--: | :--------: | :--------- | :--------: |
 | 8 | Média | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema. | 6 |
 | 9 | Baixa | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo. | 6 |
+
+### Tarefas das histórias
+
+#### - **História 8: Exportação do resultado do mês**
+
+- Definir o layout da planilha exportada (Definição)
+- Gerar o arquivo no back-end (Back)
+- Excluir a aba gerencial para quem não é gestor (Back)
+- Adicionar o botão exportar (Front)
+- Respeitar os filtros aplicados na exportação (Front + Back)
+
+#### - **História 9: Comparação mensal de um motorista**
+
+- Criar o endpoint de histórico por período (Back)
+- Criar endpoint/serviço de histórico mensal do motorista (Back)
+- Adicionar o seletor de período na ficha (Front)
+- Montar o gráfico comparativo (Front)
+- Mostrar a variação em relação ao mês anterior (Front + Back)
+- Tratar os meses sem dados (Front + Back)
 
 ### Definition of Ready (DoR)
 
