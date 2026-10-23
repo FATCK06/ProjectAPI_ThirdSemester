@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
+import br.com.newe.ms_operacoes.controller.MesReferencia;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.frota.MotoristaMesDTO;
 import br.com.newe.ms_operacoes.dto.frota.RankingMotoristaDTO;
+import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
@@ -29,6 +31,8 @@ import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisL
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/dashboard")
@@ -58,14 +62,15 @@ public class DashboardFrotaController {
      */
     @GetMapping("/motoristas")
     public ResponseEntity<Page<MotoristaMesDTO>> motoristasMes(
-            @RequestParam("mesReferencia") String mesReferencia,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
             Pageable pageable) {
-        // O mês é obrigatório e a página/ordenação são limitadas para evitar
-        // consultas inválidas ou páginas excessivamente grandes.
-        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")
-                || pageable.getPageSize() > 100
-                || !ordenacaoMensalValida(pageable.getSort())) {
-            return ResponseEntity.badRequest().<Page<MotoristaMesDTO>>build();
+        // Página e ordenação limitadas para evitar consultas inválidas ou páginas
+        // excessivamente grandes.
+        if (pageable.getPageSize() > 100) {
+            throw new DadoInvalidoException("size", "até 100");
+        }
+        if (!ordenacaoMensalValida(pageable.getSort())) {
+            throw new DadoInvalidoException("sort", "coluna inválida");
         }
 
         // Uma ordenação determinística evita mudanças arbitrárias entre páginas.
@@ -77,11 +82,9 @@ public class DashboardFrotaController {
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
     public ResponseEntity<List<RankingMotoristaDTO>> rankingMotoristas(
-            @RequestParam("mesReferencia") String mesReferencia,
-            @RequestParam(value = "limite", defaultValue = "5") int limite) {
-        if (!mesReferencia.matches("\\d{4}-\\d{2}") || limite < 1 || limite > 50) {
-            return ResponseEntity.badRequest().build();
-        }
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
+            @RequestParam(value = "limite", defaultValue = "5")
+            @Min(value = 1, message = "de 1 a 50") @Max(value = 50, message = "de 1 a 50") int limite) {
 
         List<ViagemRepository.RankingMotoristaView> linhas = repository.rankingMotoristas(mesReferencia,
                 PageRequest.of(0, limite));
@@ -119,11 +122,8 @@ public class DashboardFrotaController {
 
     @GetMapping("/indicadores-por-modelo")
     public ResponseEntity<List<IndicadoresPorModelo>> indicadoresPorModelo(
-            @RequestParam("mesReferencia") String mesReferencia,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
             HttpServletRequest request) {
-        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
-            return ResponseEntity.badRequest().build();
-        }
         List<IndicadoresPorModelo> porModelo = indicadoresService.calcularPorModelo(mesReferencia);
         if (!perfilResolver.podeVerDadosFinanceiros(request)) {
             porModelo = porModelo.stream().map(IndicadoresPorModelo::semValoresFinanceiros).toList();

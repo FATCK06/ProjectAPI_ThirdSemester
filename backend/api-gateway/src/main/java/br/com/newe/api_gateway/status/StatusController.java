@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
 import br.com.newe.api_gateway.security.JwtAutenticacaoFilter;
 
@@ -103,11 +105,17 @@ public class StatusController {
         return m;
     }
 
+    /**
+     * So o motivo, sem a mensagem da excecao: ela traz a URL interna do servico.
+     * O 503 do health e o caso "no ar, mas sem alcancar o banco".
+     */
     private String resumir(Exception e) {
-        String mensagem = e.getMessage();
-        if (mensagem == null) {
-            return e.getClass().getSimpleName();
+        if (e instanceof RestClientResponseException resposta) {
+            return "Respondeu com erro " + resposta.getStatusCode().value();
         }
-        return mensagem.length() > 120 ? mensagem.substring(0, 120) : mensagem;
+        if (e instanceof ResourceAccessException) {
+            return "Sem resposta";
+        }
+        return "Falha ao consultar";
     }
 }

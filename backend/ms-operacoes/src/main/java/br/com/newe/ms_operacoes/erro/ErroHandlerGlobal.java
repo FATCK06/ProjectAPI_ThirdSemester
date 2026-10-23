@@ -44,7 +44,13 @@ public class ErroHandlerGlobal extends ResponseEntityExceptionHandler {
         this.mensagemArquivoGrande = "O arquivo excede o tamanho máximo de " + limiteArquivo.toMegabytes() + "MB.";
     }
 
-    /** O dashboard e a importacao dependem do ms-frota. Fora do ar, e 503, nao 500. */
+    @ExceptionHandler(DadoInvalidoException.class)
+    public ResponseEntity<RespostaErro> dadoInvalido(DadoInvalidoException e) {
+        return ResponseEntity.badRequest()
+                .body(new RespostaErro(RespostaErro.DADOS_INVALIDOS, Map.of(e.getCampo(), e.getMotivo())));
+    }
+
+    /** Outro servico fora do ar (ex.: o ms-frota, chamado pelo ms-operacoes): 503, nao 500. */
     @ExceptionHandler(ResourceAccessException.class)
     public ResponseEntity<RespostaErro> servicoIndisponivel(ResourceAccessException e) {
         log.warn("Servico externo indisponivel", e);

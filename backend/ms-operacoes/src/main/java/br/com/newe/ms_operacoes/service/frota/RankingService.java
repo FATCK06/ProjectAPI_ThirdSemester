@@ -27,7 +27,6 @@ public class RankingService {
     }
 
     public static boolean colunaValida(String coluna) { return COLUNAS.contains(coluna); }
-    public static boolean direcaoValida(String direcao) { return direcao.equalsIgnoreCase("asc") || direcao.equalsIgnoreCase("desc"); }
 
     public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao, boolean operador) {
         List<IndicadoresMotorista> indicadores = indicadoresService.calcular(mes).motoristas();

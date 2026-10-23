@@ -25,12 +25,9 @@ public class DashboardController {
 
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
     public ResponseEntity<IndicadoresMes> indicadores(
-            @RequestParam("mesReferencia") String mesReferencia,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
             @RequestParam(value = "ranking", defaultValue = "false") boolean ranking,
             HttpServletRequest request) {
-        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
-            return ResponseEntity.badRequest().build();
-        }
         IndicadoresMes indicadores = indicadoresService.calcular(mesReferencia);
         boolean ocultarValores = !perfilResolver.podeVerDadosFinanceiros(request);
         return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);

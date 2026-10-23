@@ -15,6 +15,8 @@ import br.com.logistica.msusuarios.entities.Usuario;
 import br.com.logistica.msusuarios.services.UsuarioService;
 import br.com.logistica.msusuarios.services.UsuarioService.EmailJaCadastradoException;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -34,7 +36,7 @@ public class UsuarioController {
      * Assim que existir um, restringir a esse perfil.
      */
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody CriarUsuarioRequest requisicao) {
+    public ResponseEntity<?> criar(@Valid @RequestBody CriarUsuarioRequest requisicao) {
         try {
             Usuario criado = service.criar(requisicao);
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.de(criado));
