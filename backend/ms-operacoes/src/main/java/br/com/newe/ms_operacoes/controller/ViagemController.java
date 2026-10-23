@@ -10,23 +10,43 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.newe.ms_operacoes.models.Viagem;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.security.PerfilResolver;
+import jakarta.servlet.http.HttpServletRequest;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.node.ObjectNode;
 
 @RestController
 @RequestMapping("/api/viagens")
 public class ViagemController {
 
-    private final ViagemRepository repository;
+    /** Propriedades de valor da Viagem no JSON; so quem ve dado financeiro as recebe. */
+    static final List<String> CAMPOS_FINANCEIROS = List.of(
+            "valorFrete", "valorFretes", "valeFrete", "valorNf",
+            "totalDespesas", "saldoDespesas", "saldoAPagar");
 
-    public ViagemController(ViagemRepository repository) {
+    private final ViagemRepository repository;
+    private final PerfilResolver perfilResolver;
+    private final JsonMapper jsonMapper;
+
+    public ViagemController(ViagemRepository repository, PerfilResolver perfilResolver, JsonMapper jsonMapper) {
         this.repository = repository;
+        this.perfilResolver = perfilResolver;
+        this.jsonMapper = jsonMapper;
     }
 
-    @GetMapping // "/api/viagens?mesReferencia=2026-09"
-    public ResponseEntity<List<Viagem>> listarPorMesReferencia(@RequestParam("mesReferencia") String mesReferencia) {
-        if (!mesReferencia.matches("\\d{4}-\\d{2}")) {
-            return ResponseEntity.badRequest().build();
+    @GetMapping // "/api/viagens?mesReferencia=2026-06"
+    public ResponseEntity<?> listarPorMesReferencia(@RequestParam("mesReferencia") @MesReferencia String mesReferencia,
+            HttpServletRequest request) {
+        List<Viagem> viagens = repository.findByMesReferencia(mesReferencia);
+        if (perfilResolver.podeVerDadosFinanceiros(request)) {
+            return ResponseEntity.ok(viagens);
         }
 
-        return ResponseEntity.ok(repository.findByMesReferencia(mesReferencia));
+        // Remove do JSON em vez de zerar na entidade: a Viagem e gerenciada pelo
+        // Hibernate, e alterar o campo dela arrisca gravar o valor apagado.
+        ArrayNode semValores = jsonMapper.valueToTree(viagens);
+        semValores.forEach(viagem -> ((ObjectNode) viagem).remove(CAMPOS_FINANCEIROS));
+        return ResponseEntity.ok(semValores);
     }
 }

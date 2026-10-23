@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.newe.ms_operacoes.models.Viagem;
+import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaMotoristaMesView;
 import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaMotoristaView;
 import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaVeiculoView;
 
@@ -71,14 +72,37 @@ class ViagemRepositoryTest {
         assertThat(soma.getCustoTotal()).isNull();
     }
 
+    @Test
+    void somasNosMesesSeparamPorMesEIgnoramMesForaDaLista() {
+        gravar(16882, 1, "1226.21", "430.75", UUID.randomUUID());
+        gravar(16883, 2, "500.00", "200.00", UUID.randomUUID());
+        gravar(17001, 5, 5, "300.00", "100.00", UUID.randomUUID());
+        gravar(17500, 6, 3, "999.00", "1.00", UUID.randomUUID()); // fora da lista
+
+        List<SomaMotoristaMesView> somas = repository.somasPorMotoristaNosMeses(List.of("2026-04", "2026-05"));
+
+        assertThat(somas).extracting(SomaMotoristaMesView::getMesReferencia)
+                .containsExactlyInAnyOrder("2026-04", "2026-05");
+        SomaMotoristaMesView abril = somas.stream().filter(s -> s.getMesReferencia().equals("2026-04")).findFirst()
+                .orElseThrow();
+        assertThat(abril.getNumeroViagens()).isEqualTo(2);
+        assertThat(abril.getDiasOperacao()).isEqualTo(2);
+        assertThat(abril.getValorFrete()).isEqualByComparingTo("1726.21");
+        assertThat(abril.getCustoTotal()).isEqualByComparingTo("630.75");
+    }
+
     private void gravar(int manifesto, int dia, String valorFretes, String valeFrete, UUID agregado) {
+        gravar(manifesto, 4, dia, valorFretes, valeFrete, agregado);
+    }
+
+    private void gravar(int manifesto, int mes, int dia, String valorFretes, String valeFrete, UUID agregado) {
         Viagem v = new Viagem();
         v.setIdManifesto(manifesto);
         v.setIdMotorista(motorista);
         v.setIdVeiculo(veiculo);
         v.setIdAgregado(agregado);
-        v.setDataViagem(LocalDate.of(2026, 4, dia));
-        v.setMesReferencia(MES);
+        v.setDataViagem(LocalDate.of(2026, mes, dia));
+        v.setMesReferencia(String.format("2026-%02d", mes));
         v.setValorFretes(new BigDecimal(valorFretes));
         v.setValeFrete(valeFrete == null ? null : new BigDecimal(valeFrete));
         repository.save(v);

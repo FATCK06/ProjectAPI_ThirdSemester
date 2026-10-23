@@ -5,6 +5,11 @@ import java.util.function.Function;
 
 /**
  * Liga cada coluna de desembolso do CSV a uma descricao de tipos_custo.
+ *
+ * So entra o que e custo da operacao. Adiantamento (parte do vale frete paga
+ * antes) e INSS, SEST/SENAT e IR (retidos do agregado) mudam quando e quanto o
+ * motorista recebe, nao quanto a viagem custou: somados aqui contariam em dobro.
+ * Esses valores continuam no manifesto e em saldo_a_pagar.
  */
 public enum CustoDoManifesto {
 
@@ -13,11 +18,7 @@ public enum CustoDoManifesto {
     DIARIA("Diária", LinhaManifesto::diaria),
     ADICIONAIS("Adicionais", LinhaManifesto::adicionais),
     DESCONTOS("Descontos", LinhaManifesto::descontos),
-    ADIANTAMENTO("Adiantamento", LinhaManifesto::adiantamento),
-    DESPESAS("Despesas", LinhaManifesto::despesas),
-    INSS("INSS", LinhaManifesto::inss),
-    SEST_SENAT("SEST/SENAT", LinhaManifesto::sestSenat),
-    IR("IR", LinhaManifesto::ir);
+    DESPESAS("Despesas", LinhaManifesto::despesas);
 
     private final String descricao;
     private final Function<LinhaManifesto, BigDecimal> extrator;

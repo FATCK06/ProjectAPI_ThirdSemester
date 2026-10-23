@@ -22,17 +22,23 @@ import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.models.ResumoImportacao;
 import br.com.newe.ms_operacoes.models.Viagem;
 import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_operacoes.repository.ImportacaoRepository.EmAndamentoView;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
+import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
 import br.com.newe.ms_operacoes.service.importacao.ArquivoInvalidoException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
+import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService.ArquivoComErroException;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
 import br.com.newe.ms_operacoes.dto.ImportacaoResumoDTO;
+import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 /**
  * Importacao em etapas.
@@ -116,17 +122,18 @@ public class ImportacaoController {
     @PostMapping("/{id}/validar")
     public ResponseEntity<?> validar(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int pagina,
-            @RequestParam(defaultValue = "50") int tamanho,
+            @RequestParam(defaultValue = "0") @Min(value = 0, message = "a partir de 0") int pagina,
+            @RequestParam(defaultValue = "50")
+            @Min(value = 1, message = "de 1 a 200") @Max(value = 200, message = "de 1 a 200") int tamanho,
             @RequestParam(required = false) Severidade severidade
     ) throws IOException {
+        // OK nao filtra nada: linha sem problema nem entra na lista.
+        if (severidade == Severidade.OK) {
+            throw new DadoInvalidoException("severidade", "use ERRO ou PENDENCIA");
+        }
         Importacao importacao = service.buscarPorId(id);
         if (importacao == null) {
             return ResponseEntity.notFound().build();
-        }
-        // OK nao filtra nada: linha sem problema nem entra na lista.
-        if (pagina < 0 || tamanho < 1 || tamanho > 200 || severidade == Severidade.OK) {
-            return ResponseEntity.badRequest().build();
         }
 
         ResultadoValidacao resultado = processamentoService.validar(importacao, pagina, tamanho, severidade);
@@ -152,9 +159,16 @@ public class ImportacaoController {
             int gravadas = processamentoService.executar(importacao);
             return ResponseEntity.ok(Map.of("id", id, "status", "CONCLUIDO", "linhasGravadas", gravadas));
 
-        } catch (RuntimeException e) {
+        } catch (ExecucaoRecusadaException e) {
+            // Outra importacao gravando (ou esta ja executada): nada foi tocado.
+            return erro(HttpStatus.CONFLICT, e.getMessage());
+
+        } catch (ArquivoComErroException e) {
+            // Quantas linhas estao invalidas: o usuario precisa saber para corrigir.
             return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
+        // Falha na gravacao (ImportacaoFalhouException) carrega o erro do banco na
+        // mensagem: segue para o ErroHandlerGlobal, que responde 500 sem detalhe.
     }
 
     // ── Consultas ────────────────────────────────────────────────────────────
@@ -173,6 +187,17 @@ public class ImportacaoController {
     @GetMapping("/resumo")
     public ResponseEntity<ResumoImportacao> resumo() {
         return ResponseEntity.ok(service.gerarResumo());
+    }
+
+    /**
+     * A importacao gravando agora, para a tela avisar antes de o usuario tentar
+     * outra. 204 quando nenhuma esta em andamento.
+     */
+    @GetMapping("/em-andamento")
+    public ResponseEntity<EmAndamentoView> emAndamento() {
+        return service.emAndamento()
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @GetMapping("/{id}")

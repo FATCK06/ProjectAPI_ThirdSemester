@@ -1,23 +1,17 @@
 package br.com.logistica.msusuarios.services;
 
-import java.util.List;
 import java.util.Locale;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import br.com.logistica.msusuarios.dtos.CriarUsuarioRequest;
+import br.com.logistica.msusuarios.entities.Perfil;
 import br.com.logistica.msusuarios.entities.Usuario;
 import br.com.logistica.msusuarios.repositories.UsuarioRepository;
 
 @Service
 public class UsuarioService {
-
-    public static final String PERFIL_OPERADOR = "Operador";
-    public static final String PERFIL_GESTOR = "Gestor";
-    public static final String PERFIL_ADMINISTRADOR = "Administrador";
-
-    private static final List<String> PERFIS = List.of(PERFIL_OPERADOR, PERFIL_GESTOR, PERFIL_ADMINISTRADOR);
 
     private static final int TAMANHO_MINIMO_SENHA = 4;
 
@@ -38,7 +32,7 @@ public class UsuarioService {
         String nome = exigir(requisicao.nome(), "nome");
         String email = exigir(requisicao.email(), "email").toLowerCase(Locale.ROOT);
         String senha = exigir(requisicao.senha(), "senha");
-        String perfil = normalizarPerfil(requisicao.perfilAcesso());
+        Perfil perfil = Perfil.de(exigir(requisicao.perfilAcesso(), "perfilAcesso"));
 
         if (senha.length() < TAMANHO_MINIMO_SENHA) {
             throw new IllegalArgumentException("A senha precisa de ao menos " + TAMANHO_MINIMO_SENHA + " caracteres");
@@ -56,16 +50,6 @@ public class UsuarioService {
         usuario.setSenha(passwordEncoder.encode(senha));
 
         return repository.save(usuario);
-    }
-
-    /** Aceita o perfil em qualquer caixa e grava na forma canonica ("Gestor", nao "GESTOR"). */
-    private String normalizarPerfil(String valor) {
-        String texto = exigir(valor, "perfilAcesso");
-        return PERFIS.stream()
-                .filter(p -> p.equalsIgnoreCase(texto))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Perfil invalido: " + texto + ". Use um destes: " + String.join(", ", PERFIS)));
     }
 
     private String exigir(String valor, String campo) {

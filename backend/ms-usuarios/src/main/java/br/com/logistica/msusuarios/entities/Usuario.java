@@ -20,7 +20,7 @@ public class Usuario {
     private String email;
 
     @Column(name = "perfil_acesso", nullable = false, length = 50)
-    private String perfilAcesso;
+    private Perfil perfilAcesso;
 
     @Column(name = "status_ativo")
     private Boolean statusAtivo = true;
@@ -58,11 +58,11 @@ public class Usuario {
         this.email = email;
     }
 
-    public String getPerfilAcesso() {
+    public Perfil getPerfilAcesso() {
         return perfilAcesso;
     }
 
-    public void setPerfilAcesso(String perfilAcesso) {
+    public void setPerfilAcesso(Perfil perfilAcesso) {
         this.perfilAcesso = perfilAcesso;
     }
     public Boolean getStatusAtivo() {

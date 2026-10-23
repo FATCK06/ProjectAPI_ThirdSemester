@@ -1,5 +1,5 @@
-import { useCallback, useState } from 'react';
-import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Step1Upload } from './components/Step1Upload';
 import { Step2Mapeamento } from './components/Step2Mapeamento';
 import { Step3Validacao } from './components/Step3Validacao';
@@ -9,15 +9,18 @@ import { Step6Resultado } from './components/Step6Resultado';
 import { ModalConfirmacao } from './components/ModalConfirmacao';
 import {
     validarImportacao,
+    buscarImportacaoEmAndamento,
     mensagemDeErro,
     obrigatoriasFaltando,
     podeExecutar,
     type FiltroProblemas,
     type ImportacaoCriada,
+    type ImportacaoEmAndamento,
     type ResultadoValidacao,
 } from '../../../services/importacao';
 import { useToast } from '../../../components/Toast';
 import './manifestos.css';
+import { PageHeader } from '../../../components/PageHeader';
 
 const STEPS = [
     'Upload de Arquivo',
@@ -35,6 +38,11 @@ const PASSO_REVISAO = 4;
 const PASSO_EXECUCAO = 5;
 const PASSO_RESULTADO = 6;
 
+function horaDe(iso: string | null): string | null {
+    if (!iso) return null;
+    return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+}
+
 export function ManifestosImport() {
     const [passoAtual, setPassoAtual] = useState(PASSO_UPLOAD);
     const [importacao, setImportacao] = useState<ImportacaoCriada | null>(null);
@@ -46,9 +54,26 @@ export function ManifestosImport() {
     // Fica aqui, e não no passo 3, porque ele remonta ao ir e voltar: o filtro
     // precisa continuar batendo com a lista que está em `validacao`.
     const [filtroProblemas, setFiltroProblemas] = useState<FiltroProblemas>(null);
+    // O backend grava uma importação por vez. Consultado ao abrir e de novo na
+    // revisão, que é o último passo antes de gravar.
+    const [outraEmAndamento, setOutraEmAndamento] = useState<ImportacaoEmAndamento | null>(null);
     const toast = useToast();
 
-    /** O parse roda no servidor a cada chamada e não é persistido — pode repetir à vontade. */
+    useEffect(() => {
+        if (passoAtual !== PASSO_UPLOAD && passoAtual !== PASSO_REVISAO) return;
+        let cancelado = false;
+        buscarImportacaoEmAndamento()
+            // Sem resposta, o aviso só não aparece: o backend recusa do mesmo jeito.
+            .catch(() => null)
+            .then((emAndamento) => {
+                if (!cancelado) setOutraEmAndamento(emAndamento);
+            });
+        return () => {
+            cancelado = true;
+        };
+    }, [passoAtual]);
+
+    /** O parse roda no servidor a cada chamada e não é persistido: pode repetir à vontade. */
     async function carregarValidacao(id: number, pagina = 0, filtro: FiltroProblemas = null) {
         setCarregando(true);
         try {
@@ -120,18 +145,22 @@ export function ManifestosImport() {
         if (passoAtual === PASSO_UPLOAD) return importacao !== null;
         // Sem coluna obrigatória nenhuma linha passa: não adianta seguir para a validação.
         if (passoAtual === PASSO_MAPEAMENTO) return colunasOk;
-        // Tudo ou nada: com erro, a prévia não serve para nada — o usuário fica onde vê os erros.
-        if (passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) return liberadoParaGravar;
+        // Tudo ou nada: com erro, a prévia não serve para nada. O usuário fica onde vê os erros.
+        if (passoAtual === PASSO_VALIDACAO) return liberadoParaGravar;
+        if (passoAtual === PASSO_REVISAO) return liberadoParaGravar && outraEmAndamento === null;
         return passoAtual < STEPS.length;
     }
 
     function motivoBloqueio() {
         if (passoAtual === PASSO_UPLOAD && !importacao) return 'Envie um arquivo para continuar';
         if (passoAtual === PASSO_MAPEAMENTO && !colunasOk) {
-            return 'Faltam colunas obrigatórias no arquivo — corrija e envie novamente';
+            return 'Faltam colunas obrigatórias no arquivo. Corrija e envie novamente';
         }
         if ((passoAtual === PASSO_VALIDACAO || passoAtual === PASSO_REVISAO) && !liberadoParaGravar) {
             return 'Corrija os erros do arquivo antes de enviar';
+        }
+        if (passoAtual === PASSO_REVISAO && outraEmAndamento) {
+            return 'Aguarde a importação em andamento terminar';
         }
         return undefined;
     }
@@ -142,6 +171,7 @@ export function ManifestosImport() {
 
     return (
         <div className="importacao-container">
+            <PageHeader titulo="Importação de Manifestos" subtitulo="Envie o CSV de manifestos, confira o mapeamento e valide os dados antes de gravar" />
             <div className="stepper-wrapper">
                 {STEPS.map((step, index) => {
                     const stepNumber = index + 1;
@@ -166,6 +196,18 @@ export function ManifestosImport() {
                     );
                 })}
             </div>
+
+            {outraEmAndamento && (passoAtual === PASSO_UPLOAD || passoAtual === PASSO_REVISAO) && (
+                <div className="importacao-em-andamento" role="status">
+                    <AlertTriangle size={18} />
+                    <span>
+                        Há uma importação sendo gravada: <strong>{outraEmAndamento.arquivoNome}</strong>
+                        {outraEmAndamento.usuarioResponsavel && <>, enviada por {outraEmAndamento.usuarioResponsavel}</>}
+                        {horaDe(outraEmAndamento.processamentoIniciadoEm) && <>, desde {horaDe(outraEmAndamento.processamentoIniciadoEm)}</>}.
+                        {' '}Só uma é gravada por vez: você pode preparar o arquivo, mas o envio fica liberado quando ela terminar.
+                    </span>
+                </div>
+            )}
 
             <div className="step-content">
                 {passoAtual === 1 && (
@@ -227,7 +269,7 @@ export function ManifestosImport() {
             {confirmando && validacao && (
                 <ModalConfirmacao
                     titulo="Enviar os dados para o banco?"
-                    mensagem={`${validacao.linhasValidas} viagens serão gravadas a partir de ${validacao.arquivoNome}. Até aqui nada foi gravado — esta é a etapa que grava.`}
+                    mensagem={`${validacao.linhasValidas} viagens serão gravadas a partir de ${validacao.arquivoNome}. Até aqui nada foi gravado. Esta é a etapa que grava.`}
                     textoConfirmar="Sim, enviar"
                     aoConfirmar={() => {
                         setConfirmando(false);

@@ -1,132 +1,74 @@
 package br.com.newe.ms_operacoes.controller;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import br.com.newe.ms_operacoes.client.FrotaClient;
-import br.com.newe.ms_operacoes.dto.MotoristaResumo;
-import br.com.newe.ms_operacoes.dto.RankingMotoristaDTO;
-import br.com.newe.ms_operacoes.repository.ViagemRepository;
+import br.com.newe.ms_operacoes.dto.MesesReferenciaDTO;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
+import br.com.newe.ms_operacoes.security.Permissao;
+import br.com.newe.ms_operacoes.service.indicadores.HistoricoMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
-import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
-    private final ViagemRepository repository;
-    private final FrotaClient frotaClient;
+    /** A operacao e no Brasil: o mes vira a meia-noite de Brasilia, nao em UTC. */
+    private static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
+
     private final IndicadoresService indicadoresService;
     private final PerfilResolver perfilResolver;
 
-    public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService, PerfilResolver perfilResolver) {
-        this.repository = repository;
-        this.frotaClient = frotaClient;
+    public DashboardController(IndicadoresService indicadoresService, PerfilResolver perfilResolver) {
         this.indicadoresService = indicadoresService;
         this.perfilResolver = perfilResolver;
     }
 
+    /**
+     * Mes atual e anterior pelo relogio do servidor, para o filtro do dashboard
+     * nao depender da data da maquina de quem acessa.
+     */
+    @GetMapping("/meses-referencia")
+    public MesesReferenciaDTO mesesReferencia() {
+        YearMonth atual = YearMonth.now(FUSO);
+        return new MesesReferenciaDTO(atual.toString(), atual.minusMonths(1).toString());
+    }
+
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
     public ResponseEntity<IndicadoresMes> indicadores(
-            @RequestParam("mesReferencia") String mesReferencia,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
             @RequestParam(value = "ranking", defaultValue = "false") boolean ranking,
             HttpServletRequest request) {
-        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
-            return ResponseEntity.badRequest().build();
-        }
         IndicadoresMes indicadores = indicadoresService.calcular(mesReferencia);
-        boolean ocultarValores = !perfilResolver.podeVerDadosFinanceiros(request);
+        boolean ocultarValores = !perfilResolver.possui(request, Permissao.VER_DADOS_FINANCEIROS);
         return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);
     }
 
-    @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
-    public ResponseEntity<List<RankingMotoristaDTO>> rankingMotoristas(
-            @RequestParam("mesReferencia") String mesReferencia,
-            @RequestParam(value = "limite", defaultValue = "5") int limite) {
-        if (!mesReferencia.matches("\\d{4}-\\d{2}") || limite < 1 || limite > 50) {
-            return ResponseEntity.badRequest().build();
+    /**
+     * Totais dos ultimos meses ate mesReferencia, para o comparativo com o mes
+     * anterior e a linha de tendencia dos cards.
+     */
+    @GetMapping("/indicadores/historico") // "/api/dashboard/indicadores/historico?mesReferencia=2026-06&meses=6"
+    public ResponseEntity<List<HistoricoMes>> historico(
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
+            @RequestParam(value = "meses", defaultValue = "6")
+            @Min(value = 2, message = "de 2 a 12") @Max(value = 12, message = "de 2 a 12") int meses,
+            HttpServletRequest request) {
+        List<HistoricoMes> historico = indicadoresService.historico(mesReferencia, meses);
+        if (!perfilResolver.possui(request, Permissao.VER_DADOS_FINANCEIROS)) {
+            historico = historico.stream().map(HistoricoMes::semValoresFinanceiros).toList();
         }
-
-        List<ViagemRepository.RankingMotoristaView> linhas = repository.rankingMotoristas(mesReferencia,
-                PageRequest.of(0, limite));
-
-        if (linhas.isEmpty()) {
-            return ResponseEntity.ok(List.of());
-        }
-
-        List<UUID> motoristaIds = linhas.stream().map(ViagemRepository.RankingMotoristaView::getMotoristaId).toList();
-
-        // Viagem mais longa por motorista; em empate, fica a mais recente.
-        // No manifesto, "Km saida" ja e a distancia da rota, nao o hodometro: bate com o
-        // km escrito nas observacoes em 96% dos casos, e "Km chegada" vem sempre 0.
-        // Zero ali significa nao informado.
-        Map<UUID, ViagemRepository.ViagemKmView> maisLonga = new HashMap<>();
-        Map<UUID, Integer> maiorDistancia = new HashMap<>();
-        for (ViagemRepository.ViagemKmView v : repository.kmViagensPorMotoristas(mesReferencia, motoristaIds)) {
-            Integer distancia = (v.getKmSaida() != null && v.getKmSaida() > 0) ? v.getKmSaida() : null;
-
-            if (!maisLonga.containsKey(v.getMotoristaId())) {
-                maisLonga.put(v.getMotoristaId(), v);
-                maiorDistancia.put(v.getMotoristaId(), distancia);
-                continue;
-            }
-
-            Integer atual = maiorDistancia.get(v.getMotoristaId());
-            if (distancia != null && (atual == null || distancia > atual)) {
-                maisLonga.put(v.getMotoristaId(), v);
-                maiorDistancia.put(v.getMotoristaId(), distancia);
-            }
-        }
-
-        // Nome, CPF e modelo pertencem ao ms-frota: uma chamada em lote para cada
-        Map<UUID, MotoristaResumo> motoristas = frotaClient.buscarMotoristas(motoristaIds).stream()
-                .collect(Collectors.toMap(MotoristaResumo::id, Function.identity()));
-        List<UUID> veiculoIds = maisLonga.values().stream()
-                .map(ViagemRepository.ViagemKmView::getVeiculoId)
-                .distinct()
-                .toList();
-        Map<UUID, String> tiposVeiculo = frotaClient.buscarTiposVeiculo(veiculoIds);
-
-        List<RankingMotoristaDTO> ranking = new ArrayList<>();
-        for (int i = 0; i < linhas.size(); i++) {
-            ViagemRepository.RankingMotoristaView linha = linhas.get(i);
-            MotoristaResumo motorista = motoristas.get(linha.getMotoristaId());
-            ViagemRepository.ViagemKmView viagem = maisLonga.get(linha.getMotoristaId());
-            ranking.add(new RankingMotoristaDTO(
-                    i + 1,
-                    linha.getMotoristaId(),
-                    motorista != null ? motorista.nome() : null,
-                    motorista != null ? motorista.cpf() : null,
-                    linha.getTotalViagens(),
-                    viagem != null ? tiposVeiculo.getOrDefault(viagem.getVeiculoId(), "Não informado") : null,
-                    maiorDistancia.get(linha.getMotoristaId())));
-        }
-
-        return ResponseEntity.ok(ranking);
-    }
-
-    @GetMapping("/indicadores-por-modelo")
-    public ResponseEntity<List<IndicadoresPorModelo>> indicadoresPorModelo(
-            @RequestParam("mesReferencia") String mesReferencia) {
-        if (!mesReferencia.matches("\\d{4}-(0[1-9]|1[0-2])")) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.ok(indicadoresService.calcularPorModelo(mesReferencia));
+        return ResponseEntity.ok(historico);
     }
 }

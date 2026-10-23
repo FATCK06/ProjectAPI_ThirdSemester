@@ -1,0 +1,174 @@
+.operacao-mensal-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+}
+
+/* Listagem sem card: o conteúdo fica direto no fundo da página, como no Ranking */
+.operacao-mensal-page {
+  min-width: 0;
+}
+
+.ficha-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.operacao-mensal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.operacao-mensal-subtitle {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.operacao-mensal-filtros {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.operacao-mensal-filtro {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.operacao-mensal-filtro input[type="search"] {
+  min-width: 220px;
+}
+
+.operacao-mensal-filtro input,
+.operacao-mensal-filtro select {
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  background: #ffffff;
+}
+
+.operacao-mensal-filtro select {
+  min-width: 150px;
+}
+
+.operacao-mensal-feedback button {
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.operacao-mensal-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: #64748b;
+  font-size: 14px;
+  text-align: center;
+}
+
+.ficha-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ficha-voltar:hover {
+  text-decoration: underline;
+}
+
+.ficha-secao {
+  margin-top: 24px;
+}
+
+.ficha-secao h2 {
+  margin-bottom: 12px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.ficha-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.ficha-grid > div {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.ficha-grid dt {
+  margin-bottom: 6px;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ficha-grid dd {
+  color: #1e293b;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .operacao-mensal-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 520px) {
+  .operacao-mensal-card {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+
+  .operacao-mensal-filtros {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .operacao-mensal-filtro {
+    align-items: flex-start;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .operacao-mensal-filtro input {
+    width: 100%;
+  }
+}

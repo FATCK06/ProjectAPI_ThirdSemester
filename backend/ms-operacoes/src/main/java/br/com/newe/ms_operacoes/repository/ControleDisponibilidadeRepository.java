@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import br.com.newe.ms_operacoes.models.ControleDisponibilidade;
+import br.com.newe.ms_operacoes.models.frota.ControleDisponibilidade;
 
 public interface ControleDisponibilidadeRepository extends JpaRepository<ControleDisponibilidade, UUID> {
 

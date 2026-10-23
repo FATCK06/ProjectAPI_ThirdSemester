@@ -24,3 +24,170 @@
     background-position: 200% 0;
   }
 }
+
+/* Quem pediu menos movimento no sistema vê o bloco parado */
+@media (prefers-reduced-motion: reduce) {
+  .shimmer {
+    animation: none;
+  }
+}
+
+/* Peça básica: uma barra ou forma cinza */
+.skeleton-bloco {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+/* Moldura com a mesma caixa do .ui-card, para o conteúdo entrar sem pular */
+.skeleton-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px 24px 24px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.skeleton-card-cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.skeleton-card-acoes {
+  display: flex;
+  gap: 8px;
+}
+
+.skeleton-card-titulos {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/*
+ * Indicadores: mesma grade do .indicadores-grid (IndicadoresCard.css). Flex com
+ * a última linha centralizada e colunas de no mínimo 300px pela largura do card.
+ */
+.skeleton-indicadores-area {
+  container-type: inline-size;
+}
+
+.skeleton-indicadores-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+.skeleton-indicadores-grid > .skeleton-indicador {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@container (min-width: 616px) {
+  .skeleton-indicadores-grid > .skeleton-indicador {
+    flex-basis: calc((100% - 16px) / 2);
+  }
+}
+
+@container (min-width: 932px) {
+  .skeleton-indicadores-grid > .skeleton-indicador {
+    flex-basis: calc((100% - 32px) / 3);
+  }
+}
+
+@container (min-width: 1248px) {
+  .skeleton-indicadores-grid > .skeleton-indicador {
+    flex-basis: calc((100% - 48px) / 4);
+  }
+}
+
+.skeleton-indicador {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  column-gap: 16px;
+  align-items: start;
+  padding: 16px 18px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.skeleton-indicador-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.skeleton-indicador .skeleton-sparkline {
+  align-self: end;
+}
+
+/* Tabela: mesma caixa do .data-table-wrap */
+.skeleton-tabela {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.skeleton-tabela-linha {
+  display: grid;
+  grid-template-columns: repeat(var(--colunas), minmax(0, 1fr));
+  gap: 16px;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 12px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.skeleton-tabela-cabecalho {
+  border-top: 0;
+  background: #f1f5f9;
+}
+
+/* Gráfico: barras alinhadas na base, sobre linhas de grade */
+.skeleton-grafico {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 4%;
+  padding: 0 2% 0 48px; /* espaço do eixo Y */
+  background-image: repeating-linear-gradient(
+    to top,
+    #f1f5f9 0,
+    #f1f5f9 1px,
+    transparent 1px,
+    transparent 25%
+  );
+}
+
+.skeleton-grafico-eixo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.skeleton-grafico .skeleton-barra {
+  flex: 1;
+  border-radius: 6px 6px 0 0;
+}
+
+@media (max-width: 640px) {
+  .skeleton-indicador .skeleton-sparkline {
+    display: none;
+  }
+}

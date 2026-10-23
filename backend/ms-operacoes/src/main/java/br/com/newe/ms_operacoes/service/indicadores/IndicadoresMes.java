@@ -16,11 +16,15 @@ public record IndicadoresMes(
         List<IndicadoresMotorista> motoristas
 ) {
 
-    /** utilizacaoMedia: dias em operacao somados / (dias disponiveis x motoristas). */
+    /**
+     * diasOperacao: soma dos dias distintos com viagem de cada motorista
+     * (motorista-dia). utilizacaoMedia: diasOperacao / (dias disponiveis x motoristas).
+     */
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record Totais(
             long motoristas,
             long numeroViagens,
+            long diasOperacao,
             long viagensApuradas,
             BigDecimal utilizacaoMedia,
             BigDecimal valorFrete,
@@ -31,7 +35,7 @@ public record IndicadoresMes(
     ) {
         /** Copia sem os campos financeiros (viram null e somem do JSON). */
         public Totais semValoresFinanceiros() {
-            return new Totais(motoristas, numeroViagens, viagensApuradas, utilizacaoMedia,
+            return new Totais(motoristas, numeroViagens, diasOperacao, viagensApuradas, utilizacaoMedia,
                     null, null, null, null, null);
         }
     }

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -40,6 +41,26 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "order by count(v) desc, v.idMotorista asc")
     List<RankingMotoristaView> rankingMotoristas(@Param("mesReferencia") String mesReferencia, Pageable pageable);
 
+    /**
+     * Agrega viagens por motorista e veículo e deixa o banco paginar os grupos.
+     * A countQuery conta motoristas distintos para que totalElements não conte
+     * viagens nem dependa da paginação.
+     */
+    @Query(value = "select v.idMotorista as motoristaId, "
+            + "v.idVeiculo as veiculoId, "
+            + "count(v) as viagensNoMes, "
+            + "count(distinct v.dataViagem) as diasEmOperacao, "
+            + "avg(v.percentualEfetividade) as avaliacaoMedia "
+            + "from Viagem v "
+            + "where v.mesReferencia = :mesReferencia "
+            + "group by v.idMotorista, v.idVeiculo",
+            countQuery = "select count(distinct v.idMotorista) "
+                    + "from Viagem v "
+                    + "where v.mesReferencia = :mesReferencia")
+    Page<MotoristaMesView> motoristasPorMes(
+            @Param("mesReferencia") String mesReferencia,
+            Pageable pageable);
+
     @Query("select v.idMotorista as motoristaId, v.idVeiculo as veiculoId, v.kmSaida as kmSaida, v.kmChegada as kmChegada "
             + "from Viagem v "
             + "where v.mesReferencia = :mesReferencia and v.idMotorista in :motoristaIds "
@@ -73,6 +94,22 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "where v.mesReferencia = :mesReferencia "
             + "group by v.idMotorista")
     List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
+
+    /**
+     * Mesmas somas de {@link #somasPorMotorista}, para varios meses numa consulta
+     * so: alimenta o comparativo com os meses anteriores no dashboard.
+     */
+    @Query("select v.mesReferencia as mesReferencia, "
+            + "v.idMotorista as motoristaId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
+            + "from Viagem v "
+            + "where v.mesReferencia in :meses "
+            + "group by v.mesReferencia, v.idMotorista")
+    List<SomaMotoristaMesView> somasPorMotoristaNosMeses(@Param("meses") Collection<String> meses);
 
     /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "
@@ -112,10 +149,26 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
         BigDecimal getCustoTotal();
     }
 
+    interface SomaMotoristaMesView extends SomaMotoristaView {
+        String getMesReferencia();
+    }
+
     interface RankingMotoristaView {
         UUID getMotoristaId();
 
         Long getTotalViagens();
+    }
+
+    interface MotoristaMesView {
+        UUID getMotoristaId();
+
+        UUID getVeiculoId();
+
+        Long getViagensNoMes();
+
+        Long getDiasEmOperacao();
+
+        BigDecimal getAvaliacaoMedia();
     }
 
     interface ViagemKmView {

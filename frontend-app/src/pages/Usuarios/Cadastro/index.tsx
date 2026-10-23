@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
-import { criarUsuario, mensagemDeErro, PERFIS, type Perfil } from '../../../services/usuarios';
+import { criarUsuario, mensagemDeErro } from '../../../services/usuarios';
+import { PERFIS, rotuloPerfil, type Perfil } from '../../../services/auth';
 import { useToast } from '../../../components/Toast';
 import './cadastro.css';
 
@@ -8,7 +9,7 @@ export function CadastroUsuario() {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
-    const [perfil, setPerfil] = useState<Perfil>('Operador');
+    const [perfil, setPerfil] = useState<Perfil>('OPERADOR');
     const [mostrarSenha, setMostrarSenha] = useState(false);
     const [enviando, setEnviando] = useState(false);
     const toast = useToast();
@@ -19,13 +20,13 @@ export function CadastroUsuario() {
 
         try {
             const usuario = await criarUsuario({ nome, email, senha, perfilAcesso: perfil });
-            toast.sucesso(`${usuario.nome} cadastrado como ${usuario.perfilAcesso}. Já pode fazer login.`, {
+            toast.sucesso(`${usuario.nome} cadastrado como ${rotuloPerfil(usuario.perfilAcesso)}. Já pode fazer login.`, {
                 titulo: 'Usuário cadastrado',
             });
             setNome('');
             setEmail('');
             setSenha('');
-            setPerfil('Operador');
+            setPerfil('OPERADOR');
         } catch (falha) {
             // Mantém o formulário preenchido para o usuário só corrigir o que falhou.
             toast.erro(mensagemDeErro(falha), { titulo: 'Não foi possível cadastrar' });
@@ -93,7 +94,7 @@ export function CadastroUsuario() {
                     <select id="perfil" value={perfil} onChange={(e) => setPerfil(e.target.value as Perfil)}>
                         {PERFIS.map((p) => (
                             <option key={p} value={p}>
-                                {p}
+                                {rotuloPerfil(p)}
                             </option>
                         ))}
                     </select>

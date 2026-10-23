@@ -46,7 +46,7 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | Sprint |         Período         |    Status    | Vídeo de Incremento |
 | :----: | :---------------------: | :----------: | :-----------------: |
 |   1    | 07/09/2026 a 27/09/2026 |  Concluído   | [Vídeo Sprint 1](https://youtu.be/goyPNGYXRPQ) |
-|   2    | 05/10/2026 a 25/10/2026 | Em andamento |     A publicar      |
+|   2    | 05/10/2026 a 25/10/2026 |  Concluído   |     A publicar      |
 |   3    | 02/11/2026 a 22/11/2026 |   Pendente   |     A publicar      |
 
 ## Backlog do Produto
@@ -56,10 +56,10 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 |  1   |    Alta    | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações;                     |     4      |   1    |  Concluído   |
 |  2   |    Alta    | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações; |     8      |   1    |  Concluído   |
 |  3   |    Alta    | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação;                         |     6      |   1    |  Concluído   |
-|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    | Em andamento |
-|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    | Em andamento |
-|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    | Em andamento |
-|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    | Em andamento |
+|  4   |    Alta    | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota;     |     6      |   2    |  Concluído   |
+|  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |  Concluído   |
+|  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |  Concluído   |
+|  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |  Concluído   |
 |  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
 |  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
 
@@ -71,9 +71,41 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | User Story | Estimativa |
 | :--: | :--------- | :--------: |
-| 1 | Como operador, quero uma interface para visualizar a quantidade de viagens realizadas por cada motorista e acompanhar a produtividade. | 6 |
-| 2 | Como operador, quero que uma planilha XML seja tratada pelo sistema e apresentada em um resumo visual. | 8 |
-| 3 | Como operador, desejo importar a planilha de controle para carregar os dados dos motoristas no sistema. | 6 |
+| 1 | Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações. | 4 |
+| 2 | Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações. | 8 |
+| 3 | Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação. | 6 |
+
+### Tarefas das histórias
+
+#### - **História 1: Importação da planilha de manifestos**
+
+- Criar a tela de upload com mês de referência (Front)
+- Criar o endpoint que recebe o arquivo (Back)
+- Validar formato e tamanho do arquivo (Back)
+- Persistir metadados da importação (Back)
+- Exibir a última importação realizada (Front + Back)
+- Criação do banco de dados no Supabase (Back)
+
+#### - **História 2: Tratamento dos dados da planilha de manifestos**
+
+- Mapear as colunas da planilha de manifestos (Definição)
+- Escrever o leitor da planilha de manifestos (Back)
+- Limpar e padronizar os dados (Back)
+- Separar as linhas com erro em vez de parar a importação (Back)
+- Calcular os indicadores derivados (Back)
+- Gravar os dados tratados no banco (Back)
+- Gravar os campos financeiros de forma controlada (Back)
+- Importação e tratamento para o banco de dados: mapeamento, validação, revisão, confirmação e resultado (Front + Back)
+
+#### - **História 3: Resumo visual dos dados importados**
+
+- Confirmar os indicadores do resumo (Definição)
+- Protótipo visual no Figma (Front)
+- Criar o endpoint do resumo (Back)
+- Montar os cards de indicadores (Front)
+- Montar os gráficos do resumo (Front)
+- Tratar os estados de carregando e sem dados (Front)
+
 
 ### Definition of Ready (DoR)
 
@@ -91,6 +123,58 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 - Foram realizados testes de regressão para verificar que outras funcionalidades não foram afetadas.
 - O manual do usuário foi atualizado.
 - O manual de instalação foi atualizado.
+
+### Histórias e verificações do DoR e DoD
+
+#### - **História 1: Importação**
+
+Como operador, quero importar a planilha de manifestos no sistema para carregar os dados das operações.
+
+**Critérios de validação do DoR**
+
+- A planilha de manifestos tem que estar no formato .csv.
+- A planilha tem que possuir cabeçalho e pelo menos uma linha de dados.
+- O mês de referência da importação tem que estar definido.
+
+**Critérios de validação do DoD**
+
+- Arquivos fora do formato .csv não podem ser aceitos.
+- Arquivos sem cabeçalho ou sem dados não podem gerar erro no sistema.
+- A importação tem que registrar a data, a hora e o usuário responsável.
+- Uma nova importação do mesmo mês não pode duplicar os dados.
+
+#### - **História 2: Tratamento dos dados**
+
+Como operador, quero que o sistema trate os dados das planilhas de manifestos para garantir a consistência das informações.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- As colunas da planilha têm que estar mapeadas para os campos do sistema.
+- As regras de cálculo dos indicadores têm que estar definidas.
+
+**Critérios de validação do DoD**
+
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- O mesmo motorista escrito de formas diferentes tem que ser reconhecido como um só.
+- Linhas com erro têm que ser ignoradas e registradas com o motivo, sem interromper a importação.
+- Os dados tratados têm que estar gravados no banco e ligados ao mês de referência.
+
+#### - **História 3: Resumo visual**
+
+Como operador, quero um resumo visual dos dados importados para conferir o resultado da importação.
+
+**Critérios de validação do DoR**
+
+- Os indicadores do resumo têm que estar definidos.
+- O protótipo da tela tem que estar disponível no Figma.
+- Tem que existir pelo menos uma importação concluída.
+
+**Critérios de validação do DoD**
+
+- Os indicadores exibidos têm que corresponder aos dados importados.
+- Os gráficos não podem quebrar quando não há dados.
+- A tela tem que exibir os estados de carregando e sem dados.
 
 </details>
 
@@ -101,9 +185,44 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 | Rank | Prioridade | User Story | Estimativa |
 | :--: | :--------: | :--------- | :--------: |
-| 4 | Alta | Como operador, quero filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos. | 6 |
-| 5 | Média | Como gestor, quero um painel para visualizar a lista de motoristas agregados da frota. | 6 |
-| 6 | Média | Como gestor, quero consultar a ficha de desempenho de um motorista para visualizar seu desempenho. | 5 |
+| 4 | Alta | Como gestor, quero listar os motoristas agregados com a quantidade de viagens para acompanhar a produtividade da frota. | 6 |
+| 5 | Alta | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações. | 5 |
+| 6 | Alta | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram. | 6 |
+| 7 | Alta | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados. | 4 |
+
+### Tarefas das histórias
+
+#### - **História 4: Listagem dos motoristas agregados**
+
+- Criar o endpoint de listagem (Back)
+- Mostrar a tabela de motoristas (Front)
+- Adicionar busca por nome ou placa (Front + Back)
+- Adicionar ordenação pelas colunas (Front + Back)
+- Adicionar filtro por tipo de veículo (Front + Back)
+
+#### - **História 5: Situação e disponibilidade dos motoristas**
+
+- Definir as faixas de utilização (Definição)
+- Calcular a situação de cada motorista (Back)
+- Exibir situação e utilização na listagem (Front)
+- Adicionar filtro por situação (Front + Back)
+
+#### - **História 6: Ranking geral dos motoristas do mês**
+
+- Confirmar as colunas e a ordenação padrão (Definição)
+- Criar o endpoint do ranking mensal (Back)
+- Montar a tabela do ranking (Front)
+- Restringir as colunas financeiras por perfil (Front + Back)
+- Adicionar o seletor de mês (Front + Back)
+
+#### - **História 7: Níveis de acesso por perfil**
+
+- Definir a matriz de permissões (Definição)
+- Implementar login e sessão (Front + Back)
+- Bloquear as rotas no back-end por perfil (Back)
+- Ajustar a interface conforme o perfil (Front)
+- Criar a tela de acesso negado (Front)
+
 
 ### Definition of Ready (DoR)
 
@@ -116,11 +235,175 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 
 ### Definition of Done (DoD)
 
-- O código passou por revisão (Code Review).
+- O código passou por Code Review.
 - O Pull Request para a branch principal foi aprovado por dois membros da equipe.
-- Foram realizados testes de regressão para verificar que outras funcionalidades não foram afetadas.
+- Foram realizados testes de regressão para garantir que outras funcionalidades não foram afetadas.
 - O manual do usuário foi atualizado.
 - O manual de instalação foi atualizado.
+
+
+### Histórias e verificações do DoR e DoD
+
+
+#### - **História 4: Filtro dos motoristas**
+
+Como operador, quero poder filtrar os motoristas por tipo de veículo para facilitar a análise de desempenho dos diferentes veículos.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- Não podem haver dados incongruentes (viagens finalizadas no futuro).
+- Um motorista tem que estar ligado a um veículo existente.
+
+
+Critérios de validação do DoD
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Só podem ser exibidos motoristas que se enquadram no filtro selecionado.
+- Um motorista tem que estar ligado a um veículo existente.
+
+#### - **História 5: Lista de motoristas**
+
+Como gestor, quero um painel para poder visualizar a lista de motoristas agregados da frota.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Um motorista não pode ter idade inferior a 18 anos.
+
+
+Critérios de validação do DoD
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Os dados do motorista estão corretos.
+- Um motorista tem que estar ligado a um veículo existente.
+
+#### - **História 6: Ficha de desempenho dos motoristas**
+
+Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram.
+
+
+Critérios de validação do DoR
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Um motorista não pode ter idade inferior a 18 anos.
+- Um motorista tem que estar ligado a um veículo existente.
+
+
+Critérios de validação do DoD
+
+- Os dados do motorista estão corretos.
+- O motorista está ligado a um veículo existente.
+- O motorista possui um status.
+- A contagem de viagens só pode contabilizar viagens “Finalizadas”.
+
+
+#### - **História 7: Níveis de acesso**
+
+Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados.
+
+
+
+Critérios de validação do DoR
+
+- Um operador não pode ter o mesmo login que um gestor.
+- As informações restritas ao gestor não devem ser exibidas ao operador.
+- O mesmo perfil não pode ter dois níveis de acesso diferentes.
+
+
+Critérios de validação do DoD
+
+- Os dados financeiros não devem ser exibidos ao operador.
+- Um operador não pode possuir nível de gestor.
+- Dois usuários não podem ter o mesmo login.
+
+</details>
+
+<details>
+<summary><strong>Backlog da Sprint 3, DoR e DoD</strong></summary>
+
+### Backlog da Sprint 3
+
+| Rank | Prioridade | User Story | Estimativa |
+| :--: | :--------: | :--------- | :--------: |
+| 8 | Média | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema. | 6 |
+| 9 | Baixa | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo. | 6 |
+
+### Tarefas das histórias
+
+#### - **História 8: Exportação do resultado do mês**
+
+- Definir o layout da planilha exportada (Definição)
+- Gerar o arquivo no back-end (Back)
+- Excluir a aba gerencial para quem não é gestor (Back)
+- Adicionar o botão exportar (Front)
+- Respeitar os filtros aplicados na exportação (Front + Back)
+
+#### - **História 9: Comparação mensal de um motorista**
+
+- Criar o endpoint de histórico por período (Back)
+- Criar endpoint/serviço de histórico mensal do motorista (Back)
+- Adicionar o seletor de período na ficha (Front)
+- Montar o gráfico comparativo (Front)
+- Mostrar a variação em relação ao mês anterior (Front + Back)
+- Tratar os meses sem dados (Front + Back)
+
+### Definition of Ready (DoR)
+
+- O valor da história está definido.
+- Os cenários de teste estão estabelecidos.
+- As regras de negócio estão documentadas.
+- As dependências externas estão identificadas.
+- Os mockups ou fluxos de UX estão disponíveis.
+- Os fluxos principais estão definidos.
+
+### Definition of Done (DoD)
+
+- O código passou por Code Review.
+- O Pull Request para a branch principal foi aprovado por dois membros da equipe.
+- Foram realizados testes de regressão para garantir que outras funcionalidades não foram afetadas.
+- O manual do usuário foi atualizado.
+- O manual de instalação foi atualizado.
+
+### Histórias e verificações do DoR e DoD
+
+#### - **História 8: Exportação**
+
+Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver linhas duplicadas (viagens duplicadas).
+- Não podem haver dados incongruentes (viagens finalizadas no futuro).
+- Um motorista tem que estar ligado a um veículo existente.
+
+**Critérios de validação do DoD**
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Um motorista tem que estar ligado a um veículo existente.
+- O documento exportado tem que possuir as mesmas informações que o usuário selecionou.
+
+#### - **História 9: Comparação mensal**
+
+Como gestor, quero comparar os meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.
+
+**Critérios de validação do DoR**
+
+- Os dados principais — “Status”, “Nome do Motorista”, “CPF”, “PIS”, “Local de Saída”, “Local de Entrega” e os valores financeiros — não podem estar em branco ou possuir erro de digitação.
+- Não podem haver dados incongruentes (mesmo motorista com documentos diferentes).
+- Não podem haver linhas duplicadas (viagens duplicadas).
+
+**Critérios de validação do DoD**
+
+- O mesmo motorista não pode ser exibido duas vezes.
+- Um motorista tem que estar ligado a um veículo existente.
+- Viagens inconclusas não podem ser contabilizadas na comparação.
 
 </details>
 
@@ -161,16 +444,28 @@ cd ProjectAPI_ThirdSemester
 
 ### 2. Configurar as credenciais
 
-As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Em cada serviço, entre em `src/main/resources/`, copie o `application-dev.properties.example` para `application-dev.properties` e preencha com os dados passados pelo time.
+As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Elas ficam num único arquivo, `backend/.env`, lido pelos quatro serviços. Copie o arquivo de exemplo e preencha com os dados passados pelo time:
 
-| Serviço        | Pasta                             | Porta | O que preencher                         |
-| -------------- | --------------------------------- | ----- | --------------------------------------- |
-| `ms-usuarios`  | `backend/ms-usuarios/ms-usuarios` | 8081  | Banco e chave do JWT                    |
-| `ms-frota`     | `backend/ms-frota`                | 8082  | Banco                                   |
-| `ms-operacoes` | `backend/ms-operacoes`            | 8083  | Banco                                   |
-| `api-gateway`  | `backend/api-gateway`             | 8080  | Chave do JWT (a mesma do `ms-usuarios`) |
+```bash
+cp backend/.env.example backend/.env      # Linux e macOS
+copy backend\.env.example backend\.env    # Windows
+```
 
-O `application-dev.properties` já está no `.gitignore`, então não corre risco de ser commitado.
+| Variável                    | O que é                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `SUPABASE_DB_URL`           | Endereço JDBC do banco (Supabase > Connect > Session pooler)    |
+| `SUPABASE_DB_USER`          | Usuário do banco                                                |
+| `SUPABASE_DB_PASSWORD`      | Senha do banco                                                  |
+| `API_SECURITY_TOKEN_SECRET` | Chave que assina o login, com no mínimo 32 caracteres           |
+
+O `backend/.env` já está no `.gitignore`, então não corre risco de ser commitado. Se a mesma variável estiver definida no sistema, ela tem prioridade sobre o arquivo.
+
+| Serviço        | Pasta                  | Porta |
+| -------------- | ---------------------- | ----- |
+| `ms-usuarios`  | `backend/ms-usuarios`  | 8081  |
+| `ms-frota`     | `backend/ms-frota`     | 8082  |
+| `ms-operacoes` | `backend/ms-operacoes` | 8083  |
+| `api-gateway`  | `backend/api-gateway`  | 8080  |
 
 ### 3. Subir o backend
 

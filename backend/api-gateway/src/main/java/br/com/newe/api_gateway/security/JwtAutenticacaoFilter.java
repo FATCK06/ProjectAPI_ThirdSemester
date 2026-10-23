@@ -6,15 +6,14 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.JWT;
@@ -30,16 +29,22 @@ import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * Valida o JWT na entrada e injeta a identidade nos headers que os servicos leem
- * (ver PerfilResolver no ms-operacoes).
+ * Valida o JWT na entrada, preenche o SecurityContext com as permissoes do perfil
+ * e injeta a identidade nos headers que os servicos leem (ver PerfilResolver no
+ * ms-operacoes).
  *
- * O ponto central e a limpeza: qualquer X-User-Role ou X-User-Name que venha do
- * cliente e DESCARTADO antes de rotear. Sem isso o gateway nao resolveria nada -
- * bastaria um curl com "X-User-Role: GESTOR" para ver dado financeiro, que era
- * exatamente a falha existente.
+ * Este filtro nao recusa nada: so diz QUEM e. Quem decide se a rota exige login
+ * (401) ou uma permissao (403) e o SecurityConfig. Por isso token invalido nao
+ * barra aqui - o login, que e publico, tem que funcionar mesmo com um token
+ * vencido ainda guardado no navegador.
+ *
+ * O outro ponto central e a limpeza: qualquer X-User-Role ou X-User-Name que
+ * venha do cliente e DESCARTADO antes de rotear, em toda requisicao. Sem isso
+ * bastaria um curl com "X-User-Role: GESTOR" para ver dado financeiro.
+ *
+ * Nao e @Component de proposito: o Spring Boot registraria o filtro tambem como
+ * filtro de servlet, fora da cadeia do Spring Security. O SecurityConfig o cria.
  */
-@Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class JwtAutenticacaoFilter extends OncePerRequestFilter {
 
     public static final String HEADER_PERFIL = "X-User-Role";
@@ -52,18 +57,9 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
             HEADER_PERFIL.toLowerCase(Locale.ROOT),
             HEADER_USUARIO.toLowerCase(Locale.ROOT));
 
-    /**
-     * Rotas alcancaveis sem token.
-     *
-     * /api/auth/     - o login, obviamente.
-     * /api/usuarios  - cadastro, aberto para criar o primeiro Administrador.
-     *                  TODO fechar assim que existir um: hoje qualquer um cria
-     *                  usuario com perfil Administrador.
-     */
-
     private final JWTVerifier verificador;
 
-    public JwtAutenticacaoFilter(@Value("${api.security.token.secret}") String secret) {
+    public JwtAutenticacaoFilter(String secret) {
         if (secret == null || secret.length() < 32){
             throw new IllegalStateException(
                 "api.security.token.secret ausente ou curto demais (minimo 32 caracteres)");
@@ -77,71 +73,35 @@ public class JwtAutenticacaoFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // Preflight nao carrega Authorization; quem responde e o CorsFilter.
-        if (HttpMethod.OPTIONS.matches(request.getMethod()) || ehPublica(request)) {
-            chain.doFilter(semIdentidade(request), response);
-            return;
-        }
-
-        String token = extrairToken(request);
-        if (token == null) {
-            recusar(response, "Token ausente");
-            return;
-        }
-
-        DecodedJWT jwt;
-        try {
-            jwt = verificador.verify(token);
-        } catch (JWTVerificationException e) {
-            recusar(response, "Token invalido ou expirado");
-            return;
-        }
-        if (jwt.getExpiresAt() == null) {
-            recusar(response, "Token invalido ou expirado");
-            return;
-        }
-
         Map<String, String> identidade = new HashMap<>();
-        identidade.put(HEADER_USUARIO.toLowerCase(Locale.ROOT), jwt.getSubject());
 
-        String perfil = jwt.getClaim("perfil").asString();
-        if (perfil != null) {
-            identidade.put(HEADER_PERFIL.toLowerCase(Locale.ROOT), perfil);
+        DecodedJWT jwt = verificar(extrairToken(request));
+        if (jwt != null) {
+            Optional<Perfil> perfil = Perfil.de(jwt.getClaim("perfil").asString());
+
+            // Perfil desconhecido ainda e um usuario logado, so que sem permissao nenhuma.
+            List<GrantedAuthority> autoridades = perfil.map(Permissao::autoridadesDe).orElse(List.of());
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(jwt.getSubject(), null, autoridades));
+
+            identidade.put(HEADER_USUARIO.toLowerCase(Locale.ROOT), jwt.getSubject());
+            perfil.ifPresent(p -> identidade.put(HEADER_PERFIL.toLowerCase(Locale.ROOT), p.name()));
         }
 
         chain.doFilter(new RequestComIdentidade(request, identidade), response);
     }
 
-    /**
-     * Recusa escrevendo o corpo na mao, em vez de response.sendError().
-     *
-     * O sendError descarta a resposta e dispara o tratamento de erro do container,
-     * que monta uma resposta nova - jogando fora os cabecalhos que o CorsFilter ja
-     * tinha adicionado. Sem Access-Control-Allow-Origin, o navegador bloqueia a
-     * resposta e o front recebe "erro de rede" no lugar de 401, escondendo a causa.
-     */
-    private void recusar(HttpServletResponse response, String mensagem) throws IOException {
-        response.setStatus(HttpStatus.UNAUTHORIZED.value());
-        response.setContentType("application/json;charset=UTF-8");
-        response.getWriter().write("{\"erro\":\"" + mensagem + "\"}");
-        response.getWriter().flush();
-    }
-
-    private boolean ehPublica(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-
-        if (uri.startsWith("/api/auth/")) {
-            return true;
+    /** Token assinado por nos, do emissor certo e com validade. null em qualquer outro caso. */
+    private DecodedJWT verificar(String token) {
+        if (token == null) {
+            return null;
         }
-
-        // Só o cadastro (POST) fica aberto. Listar, editar e excluir exigem token.
-        boolean ehCadastro = uri.equals("/api/usuarios") || uri.equals("/api/usuarios/");
-        return ehCadastro && HttpMethod.POST.matches(request.getMethod());
-    }
-
-    /** Rota publica tambem precisa ter os headers limpos: ninguem entra com perfil forjado. */
-    private HttpServletRequest semIdentidade(HttpServletRequest request) {
-        return new RequestComIdentidade(request, Map.of());
+        try {
+            DecodedJWT jwt = verificador.verify(token);
+            return jwt.getExpiresAt() == null ? null : jwt;
+        } catch (JWTVerificationException e) {
+            return null;
+        }
     }
 
     private String extrairToken(HttpServletRequest request) {
