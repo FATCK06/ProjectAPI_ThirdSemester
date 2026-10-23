@@ -324,8 +324,6 @@ copy backend\.env.example backend\.env    # Windows
 
 O `backend/.env` já está no `.gitignore`, então não corre risco de ser commitado. Se a mesma variável estiver definida no sistema, ela tem prioridade sobre o arquivo.
 
-Nos serviços ms-frota e ms-operacoes, também é preciso preencher o arquivo `application.properties` com os mesmos dados.
-
 | Serviço        | Pasta                  | Porta |
 | -------------- | ---------------------- | ----- |
 | `ms-usuarios`  | `backend/ms-usuarios`  | 8081  |
