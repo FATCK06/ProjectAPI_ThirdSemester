@@ -20,6 +20,7 @@ import {
 } from '../../../services/importacao';
 import { useToast } from '../../../components/Toast';
 import './manifestos.css';
+import { PageHeader } from '../../../components/PageHeader';
 
 const STEPS = [
     'Upload de Arquivo',
@@ -170,6 +171,7 @@ export function ManifestosImport() {
 
     return (
         <div className="importacao-container">
+            <PageHeader titulo="Importação de Manifestos" subtitulo="Envie o CSV de manifestos, confira o mapeamento e valide os dados antes de gravar" />
             <div className="stepper-wrapper">
                 {STEPS.map((step, index) => {
                     const stepNumber = index + 1;

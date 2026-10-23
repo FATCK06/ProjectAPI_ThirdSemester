@@ -12,6 +12,7 @@ import br.com.newe.ms_operacoes.controller.MesReferencia;
 import br.com.newe.ms_operacoes.dto.frota.RankingMensalMotoristaDTO;
 import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
+import br.com.newe.ms_operacoes.security.Permissao;
 import br.com.newe.ms_operacoes.service.frota.RankingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Pattern;
@@ -37,6 +38,7 @@ public class RankingController {
         if (!RankingService.colunaValida(ordenarPor)) {
             throw new DadoInvalidoException("ordenarPor", "coluna inválida");
         }
-        return ResponseEntity.ok(rankingService.rankingMensal(mesReferencia, ordenarPor, direcao, !perfilResolver.podeVerDadosFinanceiros(request)));
+        boolean ocultarValores = !perfilResolver.possui(request, Permissao.VER_DADOS_FINANCEIROS);
+        return ResponseEntity.ok(rankingService.rankingMensal(mesReferencia, ordenarPor, direcao, ocultarValores));
     }
 }

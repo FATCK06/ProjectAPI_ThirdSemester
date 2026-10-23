@@ -2,10 +2,13 @@ import { Bar } from "react-chartjs-2";
 import type { ChartData, ChartOptions } from "chart.js";
 import "../../../../../components/chartSetup";
 import { Card } from "../../../../../components/Card/Card";
+import { EmDesenvolvimento } from "../../../../../components/EmDesenvolvimento";
 import type { IndicadoresPorModelo } from "../../../../../services/Dashboard";
 
 interface PropsGraficoModelos {
   porModelo: IndicadoresPorModelo[];
+  // Enquanto false, mostra o aviso de "Em desenvolvimento" no lugar do gráfico
+  disponivel: boolean;
 }
 
 function montarDados(porModelo: IndicadoresPorModelo[]): ChartData<"bar"> {
@@ -86,12 +89,16 @@ const opcoes: ChartOptions<"bar"> = {
   },
 };
 
-export function GraficoModelos({ porModelo }: PropsGraficoModelos) {
+export function GraficoModelos({ porModelo, disponivel }: PropsGraficoModelos) {
   return (
     <Card titulo="Rentabilidade por Tipo de Veículo">
-      <div className="ui-card-chart" style={{ width: "100%", height: "300px" }}>
-        <Bar data={montarDados(porModelo)} options={opcoes} />
-      </div>
+      {disponivel ? (
+        <div className="ui-card-chart" style={{ width: "100%", height: "300px" }}>
+          <Bar data={montarDados(porModelo)} options={opcoes} />
+        </div>
+      ) : (
+        <EmDesenvolvimento mensagem="O gráfico de rentabilidade por tipo de veículo estará disponível em breve." />
+      )}
     </Card>
   );
 }

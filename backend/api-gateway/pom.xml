@@ -50,6 +50,14 @@
 			<version>4.4.0</version>
 		</dependency>
 
+		<!-- Autorizacao por rota (SecurityConfig). Alem das regras declarativas,
+		     traz o StrictHttpFirewall, que recusa URLs como /api//status ou
+		     /api/./usuarios - truques que burlariam um startsWith feito na mao. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc-test</artifactId>

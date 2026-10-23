@@ -57,6 +57,35 @@ public class IndicadoresService {
     }
 
     /**
+     * Totais dos {@code quantidade} meses terminados em mesReferencia, do mais
+     * antigo ao mais novo. Uma consulta so e sem ms-frota: os totais nao usam nome.
+     *
+     * @param mesReferencia "yyyy-MM", ultimo mes da serie
+     */
+    public List<HistoricoMes> historico(String mesReferencia, int quantidade) {
+        YearMonth ultimo = YearMonth.parse(mesReferencia);
+        List<YearMonth> meses = new ArrayList<>(quantidade);
+        for (int i = quantidade - 1; i >= 0; i--) {
+            meses.add(ultimo.minusMonths(i));
+        }
+
+        Map<String, List<ViagemRepository.SomaMotoristaMesView>> somasPorMes = viagemRepository
+                .somasPorMotoristaNosMeses(meses.stream().map(YearMonth::toString).toList()).stream()
+                .collect(Collectors.groupingBy(ViagemRepository.SomaMotoristaMesView::getMesReferencia));
+
+        List<HistoricoMes> historico = new ArrayList<>(quantidade);
+        for (YearMonth mes : meses) {
+            long diasNoMes = mes.lengthOfMonth();
+            long diasDisponiveis = diasDisponiveis(mes);
+            List<IndicadoresMotorista> motoristas = somasPorMes.getOrDefault(mes.toString(), List.of()).stream()
+                    .map(soma -> indicadoresDe(soma, null, diasDisponiveis, diasNoMes))
+                    .toList();
+            historico.add(new HistoricoMes(mes.toString(), totais(motoristas, diasDisponiveis)));
+        }
+        return historico;
+    }
+
+    /**
      * PENDENTE (cliente): nada no sistema registra ferias, afastamento ou
      * manutencao, entao por ora todo dia do mes conta como disponivel - a
      * disponibilidade sai 100% para todos. Dias uteis foi descartado: quem roda
@@ -112,6 +141,7 @@ public class IndicadoresService {
         return new IndicadoresMes.Totais(
                 motoristas.size(),
                 viagens,
+                diasOperacao,
                 apuradas,
                 CalculoIndicadores.utilizacao(diasOperacao, diasDisponiveis * motoristas.size()),
                 frete,

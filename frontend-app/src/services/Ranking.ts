@@ -14,9 +14,9 @@ export type RankingMensalMotorista = Pick<IndicadoresMotorista,
   | 'rentabilidadeMediaViagem'
 > & { tipoVeiculo: string | null };
 
-export async function buscarRankingMensal(mesReferencia: string) {
+export async function buscarRankingMensal(mesReferencia: string, ordenarPor?: string) {
   const { data } = await api.get<RankingMensalMotorista[]>('/ranking/mensal', {
-    params: { mesReferencia },
+    params: { mesReferencia, ordenarPor },
   });
   return data;
 }

@@ -108,11 +108,80 @@
   font-weight: 600;
 }
 
-/* Grade de indicadores */
+/*
+ * Grade de indicadores. Flex em vez de grid para a última linha incompleta ficar
+ * centralizada, com cards da mesma largura das linhas de cima. A quantidade de
+ * colunas acompanha a largura do card (container query), cada uma com pelo menos
+ * 300px. O IndicadoresSkeleton repete estas regras (skeleton.css).
+ */
+.indicadores-area {
+  container-type: inline-size;
+}
+
 .indicadores-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 16px;
+}
+
+.indicadores-grid > .indicador-item {
+  flex: 0 0 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@container (min-width: 616px) {
+  .indicadores-grid > .indicador-item {
+    flex-basis: calc((100% - 16px) / 2);
+  }
+}
+
+@container (min-width: 932px) {
+  .indicadores-grid > .indicador-item {
+    flex-basis: calc((100% - 32px) / 3);
+  }
+}
+
+@container (min-width: 1248px) {
+  .indicadores-grid > .indicador-item {
+    flex-basis: calc((100% - 48px) / 4);
+  }
+}
+
+/* Seletor do período de comparação, ao lado do botão Filtros */
+.indicadores-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.indicadores-comparacao {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.indicadores-comparacao select {
+  font-family: inherit;
+  font-size: 13px;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+}
+
+/* Mês sem histórico para comparar */
+.indicadores-comparacao select:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 
 .indicador-item {
@@ -188,6 +257,27 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: #64748b;
+}
+
+.indicador-ajuda {
+  display: inline-flex;
+  vertical-align: -2px;
+  margin-left: 6px;
+  color: #94a3b8;
+  cursor: help;
+}
+
+.indicador-ajuda:hover,
+.indicador-ajuda:focus-visible {
+  color: var(--tom-icone);
+}
+
+.indicador-asterisco {
+  margin-left: 2px;
+  font-size: 18px;
+  vertical-align: super;
+  color: #94a3b8;
+  cursor: help;
 }
 
 .indicador-valor {

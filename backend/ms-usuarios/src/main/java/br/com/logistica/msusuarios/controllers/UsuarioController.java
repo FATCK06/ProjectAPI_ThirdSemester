@@ -32,8 +32,8 @@ public class UsuarioController {
      * por isso criar usuario direto no banco nao funciona: o login compara hash
      * com hash, e texto puro nunca bate.
      *
-     * TODO: hoje esta aberto para permitir criar o primeiro Administrador.
-     * Assim que existir um, restringir a esse perfil.
+     * Restrito a Administrador (SecurityConfig aqui e no gateway). O primeiro
+     * Administrador e criado pelo AdministradorInicial.
      */
     @PostMapping
     public ResponseEntity<?> criar(@Valid @RequestBody CriarUsuarioRequest requisicao) {

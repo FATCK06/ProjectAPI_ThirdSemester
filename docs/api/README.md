@@ -41,24 +41,36 @@ O gateway valida o token antes de rotear. Com o token válido, ele injeta dois h
 | Header | Conteúdo |
 |---|---|
 | `X-User-Name` | e-mail do usuário (subject do token) |
-| `X-User-Role` | perfil de acesso (`Operador`, `Gestor` ou `Administrador`) |
+| `X-User-Role` | perfil de acesso (`OPERADOR`, `GESTOR` ou `ADMINISTRADOR`) |
 
 > Qualquer `X-User-Name` ou `X-User-Role` enviado pelo cliente é **descartado** pelo gateway. Não adianta forjar esses headers.
+>
+> Os microsserviços escutam só em `127.0.0.1` (`server.address`), para ninguém chegar neles pulando o gateway. Em container, use `SERVER_ADDRESS=0.0.0.0` e **não publique** as portas 8081–8083.
 
 ### Rotas públicas (sem token)
 
 | Rota | Motivo |
 |---|---|
 | `POST /api/auth/login` | login |
-| `POST /api/usuarios` | cadastro, aberto provisoriamente para criar o primeiro Administrador |
 
-## Perfis de acesso
+Sem token (ou com token inválido/expirado), as demais rotas respondem `401`. Com token válido mas sem a permissão exigida, `403`.
+
+## Perfis e permissões
 
 | Perfil | Descrição |
 |---|---|
-| `Operador` | uso operacional (importação e consultas) |
-| `Gestor` | acompanhamento gerencial (dashboard e indicadores) |
-| `Administrador` | tudo acima, mais cadastro de usuários e status dos serviços |
+| `OPERADOR` | uso operacional (importação e consultas), sem dados financeiros |
+| `GESTOR` | acompanhamento gerencial (dashboard e indicadores) |
+| `ADMINISTRADOR` | tudo acima, mais cadastro de usuários e status dos serviços |
+
+O código pergunta pela **permissão**, não pelo perfil. O mapa fica no `Permissao.java` do gateway (rotas inteiras), no `Permissao.java` do ms-operacoes (campos dentro da resposta) e no `services/auth.ts` do front (o que desenhar).
+
+| Permissão | Perfis | Onde vale |
+|---|---|---|
+| `GERENCIAR_USUARIOS` | Administrador | `/api/usuarios/**` |
+| `VER_STATUS_SERVICO` | Administrador | `/api/status/**` |
+| `VER_DADOS_FINANCEIROS` | Administrador, Gestor | `/api/viagens/**`, `/api/importacao/arquivos/{id}/viagens` e `/conteudo` (rota inteira); valores do dashboard e do ranking (campos vêm `null`) |
+
 
 
 ## Formato de erro

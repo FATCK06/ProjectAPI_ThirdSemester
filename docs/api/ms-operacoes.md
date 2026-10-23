@@ -18,6 +18,8 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/viagens` | Viagens de um mês |
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
+| `GET` | `/api/dashboard/indicadores/historico` | Totais dos últimos meses, para o comparativo dos cards |
+| `GET` | `/api/dashboard/meses-referencia` | Mês atual e anterior pelo relógio do servidor |
 | `GET` | `/api/dashboard/ranking-motoristas` | Top N motoristas por número de viagens |
 | `GET` | `/api/ranking/mensal` | Ranking mensal completo dos motoristas, com ordenação por coluna |
 | `GET` | `/api/dashboard/motoristas/situacao` | Situação (disponível/indisponível) de cada motorista no mês |
@@ -316,6 +318,7 @@ Totais do mês e uma linha por motorista, ordenada por rentabilidade.
   "totais": {
     "motoristas": 48,
     "numeroViagens": 612,
+    "diasOperacao": 960,
     "utilizacaoMedia": 71.40,
     "valorFrete": 1203450.00,
     "custoTotal": 845000.00,
@@ -351,6 +354,7 @@ Totais do mês e uma linha por motorista, ordenada por rentabilidade.
 | Rentabilidade | valor do frete − custo total |
 | Rentabilidade média por viagem | rentabilidade ÷ número de viagens apuráveis |
 | Margem | rentabilidade ÷ valor do frete × 100 |
+| Dias em operação (totais) | soma dos dias distintos com viagem de cada motorista (motorista-dia) |
 | Utilização média (totais) | soma dos dias em operação ÷ (dias disponíveis × motoristas) × 100 |
 
 **Erros:** `400` se `mesReferencia` for inválido.
@@ -381,11 +385,48 @@ Os mesmos indicadores agrupados por modelo de veículo.
 ]
 ```
 
+### `GET /api/dashboard/indicadores/historico`
+
+Os `totais` de `/indicadores` para cada um dos últimos `meses` meses até `mesReferencia`, do mais antigo ao mais novo. É uma consulta só, sem chamar o ms-frota. Mês sem viagem vem com tudo zerado (`motoristas: 0`) em vez de ficar de fora. Sem `VER_DADOS_FINANCEIROS`, os campos financeiros somem, como em `/indicadores`.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM`; é o último mês da série |
+| `meses` | query | `6` | 2 a 12 |
+
+**Resposta `200`:**
+
+```json
+[
+  { "mesReferencia": "2026-05", "totais": { "motoristas": 102, "numeroViagens": 596, "diasOperacao": 541, "...": "..." } },
+  { "mesReferencia": "2026-06", "totais": { "motoristas": 93, "numeroViagens": 483, "diasOperacao": 456, "...": "..." } }
+]
+```
+
+O card do Dashboard compara o último mês com o penúltimo (variação % e "vs. mês (valor)") e desenha a linha de tendência a partir do primeiro mês com viagem.
+
+**Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/dashboard/meses-referencia`
+
+Mês atual e anterior, calculados pelo relógio do servidor no fuso `America/Sao_Paulo`. O filtro do Dashboard usa este endpoint para não depender da data da máquina de quem acessa.
+
+**Resposta `200`:**
+
+```json
+{
+  "mesAtual": "2026-10",
+  "mesAnterior": "2026-09"
+}
+```
+
 ### `GET /api/dashboard/ranking-motoristas`
 
 Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa.
 
 Viagem mais longa (mesma regra de `/api/ranking/mensal`): a distância é o `km_saida`, que no manifesto já é a distância da rota (o `km_chegada` vem sempre 0). Em empate, ou sem nenhum km informado, fica a viagem mais recente. Veículo fora do cadastro aparece como `"Não informado"`.
+
+O card de ranking do Dashboard usa este endpoint para o top 5 e completa cada linha com os indicadores de `/api/dashboard/indicadores` que a tela já carregou, sem recalculá-los.
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|

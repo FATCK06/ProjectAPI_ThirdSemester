@@ -1,0 +1,8 @@
+.page-header { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; }
+.page-header h1 { font-size: 24px; color: #1e293b; }
+.page-header p { margin-top: 4px; font-size: 14px; color: #64748b; }
+.page-header-acoes { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 640px) {
+  .page-header { align-items: flex-start; flex-direction: column; }
+  .page-header-acoes { width: 100%; }
+}

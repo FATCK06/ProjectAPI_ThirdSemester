@@ -20,6 +20,9 @@ export interface IndicadoresMotorista {
 export interface Totais {
   motoristas: number;
   numeroViagens: number;
+  diasOperacao: number;
+  // Viagens com frete e custo informados: só elas entram nas somas financeiras
+  viagensApuradas: number;
   utilizacaoMedia: number;
   valorFrete?: number;
   custoTotal?: number;
@@ -34,6 +37,12 @@ export interface IndicadoresMes {
   diasDisponiveis: number;
   totais: Totais;
   motoristas: IndicadoresMotorista[];
+}
+
+// Mês sem viagem vem com tudo zerado (motoristas = 0)
+export interface HistoricoMes {
+  mesReferencia: string;
+  totais: Totais;
 }
 
 export interface IndicadoresPorModelo {
@@ -71,12 +80,37 @@ export async function buscarRankingMotoristas(
   return data;
 }
 
+export interface MesesReferencia {
+  mesAtual: string;
+  mesAnterior: string;
+}
+
+// Vem do servidor para não depender do relógio da máquina de quem acessa
+export async function buscarMesesReferencia(): Promise<MesesReferencia> {
+  const { data } = await api.get<MesesReferencia>("/dashboard/meses-referencia");
+  return data;
+}
+
 export async function buscarIndicadores(
   mesReferencia: string,
 ): Promise<IndicadoresMes> {
   const { data } = await api.get<IndicadoresMes>("/dashboard/indicadores", {
     params: { mesReferencia },
   });
+  return data;
+}
+
+// Totais dos últimos `meses` meses até mesReferencia, do mais antigo ao mais novo
+export async function buscarHistorico(
+  mesReferencia: string,
+  meses: number,
+): Promise<HistoricoMes[]> {
+  const { data } = await api.get<HistoricoMes[]>(
+    "/dashboard/indicadores/historico",
+    {
+      params: { mesReferencia, meses },
+    },
+  );
   return data;
 }
 

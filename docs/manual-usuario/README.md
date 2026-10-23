@@ -89,22 +89,59 @@ O botão no topo do menu recolhe a barra para mostrar só os ícones, deixando m
 
 <!-- Print sugerido: img/03-dashboard.png -->
 
-O Dashboard mostra o desempenho da operação de **junho de 2026**. Usuários Operadores veem os indicadores operacionais e o ranking; Gestores e Administradores também veem os indicadores financeiros e os gráficos de rentabilidade.
+O Dashboard mostra o desempenho da operação no mês. Ele tem um seletor de mês e quatro blocos. Usuários Operadores veem os indicadores operacionais e o ranking; Gestores e Administradores também veem os indicadores financeiros e os gráficos de rentabilidade.
+
+### 5.0 Escolhendo o mês
+
+O seletor no topo da tela vale para **todos os blocos** (indicadores, gráficos e ranking):
+
+| Opção | O que mostra |
+|---|---|
+| **Mês atual** | O mês do calendário (é a opção que abre por padrão) |
+| **Mês anterior** | O mês anterior ao atual |
+| **Selecionar mês** | Abre o calendário para escolher qualquer mês até o atual. O mês escolhido aparece no próprio botão |
+
+> O mês atual costuma aparecer vazio até a planilha dele ser importada. Para ver meses já fechados, use **Mês anterior** ou **Selecionar mês**.
 
 ### 5.1 Card de indicadores
 
-O título mostra o mês de referência (ex.: **Indicadores de 2026-06**). Os indicadores são divididos em duas categorias:
+O título mostra o mês de referência (ex.: **Indicadores de junho de 2026**). Os indicadores são divididos em duas categorias:
 
 | Categoria | Indicador | O que significa |
 |---|---|---|
 | Operacional | **Nº de viagens** | Total de viagens no mês |
-| Operacional | **Dias disponíveis** | Dias do mês em que os motoristas podiam operar |
-| Operacional | **% de utilização** | Quanto dos dias disponíveis foi de fato usado em viagens |
-| Financeiro | **Valor total dos fretes** | Soma do valor de frete das viagens |
-| Financeiro | **Custo total** | Soma dos custos das viagens |
+| Operacional | **Dias em operação*** | Soma, por motorista, das datas diferentes com manifesto. Viagem de mais de um dia conta como 1, pois a coluna Diária do CSV vem vazia |
+| Operacional | **Dias disponíveis** | Dias do mês em que os motoristas podiam operar. Exibe "–": o CSV não informa férias, afastamento ou manutenção |
+| Operacional | **% de utilização** | Quanto dos dias disponíveis foi de fato usado em viagens. Exibe "–" enquanto não houver dias disponíveis |
+| Financeiro | **Valor total dos fretes** | Quanto os clientes pagaram à Newe (coluna *Valor Fretes*) |
+| Financeiro | **Custo total** | Quanto a Newe pagou ao motorista (coluna *Vale frete*) |
 | Financeiro | **Rentabilidade total** | Valor dos fretes menos custo total |
-| Financeiro | **Rentabilidade média/viagem** | Rentabilidade dividida pelo número de viagens |
+| Financeiro | **Rentabilidade média/viagem** | Rentabilidade dividida pelas viagens com frete e custo informados no CSV |
 | Financeiro | **Margem** | Rentabilidade como percentual do valor dos fretes |
+
+> Os cinco indicadores financeiros só somam as viagens com frete **e** custo informados no CSV. Quando alguma viagem do mês veio sem esses valores, o valor ganha um **\*** e o tooltip mostra quantas ficaram de fora.
+
+**Comparação com meses anteriores:** use **Comparar com**, no canto do card, para escolher o período. O subtítulo do card mostra contra o que está comparando (ex.: "Comparando com a média de abr. a mai. de 2026").
+
+| Opção | Variação abaixo do valor | Gráfico à direita |
+|---|---|---|
+| **Mês anterior** (padrão) | Contra o mês anterior, ex.: "vs. mai. de 2026 (596)" | Não tem: dois pontos não formam tendência |
+| **Últimos 2 meses** / **Últimos 3 meses** | Contra a **média** do período, ex.: "vs. média de abr. a mai. de 2026 (694)" | Linha com o período e o mês exibido. Passe o mouse para ver o valor de cada mês |
+
+A seta fica verde quando o indicador melhorou e vermelha quando piorou. Dias disponíveis e % de utilização não têm comparação enquanto exibirem "-".
+
+**Só aparecem as opções que têm dados:** um período só fica disponível se **todos** os meses dele tiverem viagens importadas. Exemplo com abril a junho importados:
+
+| Mês exibido | Opções disponíveis |
+|---|---|
+| Junho | Mês anterior e Últimos 2 meses (maio e abril). Últimos 3 meses aparece como "(sem dados)", porque março não foi importado |
+| Maio | Só Mês anterior (abril) |
+| Abril ou janeiro | Nenhuma: não há meses anteriores importados |
+| Outubro (ainda não importado) | Nenhuma: sem viagens no próprio mês, não há o que comparar |
+
+A escolha do período e dos indicadores continua valendo quando você troca o mês no seletor do topo. Se o novo mês tiver menos histórico, o card usa o maior período possível e volta ao escolhido quando houver dados.
+
+Quando o número de indicadores não fecha a última linha, os que sobram ficam **centralizados**, com o mesmo tamanho dos de cima.
 
 **Escolhendo o que aparece no card:**
 
@@ -124,18 +161,15 @@ Gráfico de barras com a rentabilidade agrupada pelo modelo do veículo. Serve p
 
 <!-- Print sugerido: img/04-ranking.png -->
 
-Tabela com os **5 motoristas com mais viagens** no mês escolhido.
-
-1. Use o campo **Mês**, no canto do ranking, para escolher o período.
-2. A tabela é atualizada sozinha.
+Tabela com os **5 motoristas com mais viagens** no mês escolhido no seletor do topo da tela.
 
 | Coluna | Descrição |
 |---|---|
 | Motorista | Nome do motorista |
 | Tipo de veículo | Tipo/modelo do veículo usado na viagem mais longa do mês |
 | Nº de viagens | Viagens realizadas no mês |
-| Disponibilidade | Dias disponíveis sobre os dias do mês |
-| Utilização | Dias em operação sobre os dias disponíveis |
+| Disponibilidade | Dias disponíveis sobre os dias do mês. Exibe "–" até termos os dias disponíveis |
+| Utilização | Dias em operação sobre os dias disponíveis. Exibe "–" até termos os dias disponíveis |
 | Valor dos fretes | Soma dos fretes do motorista |
 | Custos | Soma dos custos |
 | Rentabilidade | Fretes menos custos |
@@ -313,7 +347,7 @@ Mostra se cada parte do sistema está funcionando. É útil quando alguma tela n
 ## 12. Dúvidas frequentes
 
 **O Dashboard está vazio.**
-Ainda não há viagens importadas para o mês exibido. Importe o manifesto do período, ou troque o mês no Ranking.
+Ainda não há viagens importadas para o mês exibido. O Dashboard abre no mês atual, que costuma estar vazio até a planilha dele ser importada. Use **Mês anterior** ou **Selecionar mês** no topo da tela.
 
 **Importei o arquivo, mas os números não mudaram.**
 Confira se a importação chegou à etapa 6 (Resultado). Se todas as linhas aparecerem como *já existiam*, o arquivo já tinha sido importado antes.
@@ -341,5 +375,8 @@ Essas opções aparecem só para o perfil Administrador.
 | **Utilização** | Dias em operação ÷ dias disponíveis |
 | **Rentabilidade** | Valor do frete − custos |
 | **Margem** | Rentabilidade ÷ valor do frete |
+| **Valor Fretes** (coluna do CSV) | Quanto o cliente pagou à Newe pela viagem. É a **receita** |
+| **Valor Frete** (coluna do CSV) | Frete-base que a Newe paga ao motorista, sem pedágio nem extras |
+| **Vale frete** (coluna do CSV) | Total pago ao motorista: Valor Frete + pedágio + diárias + adicionais. É o **custo** |
 | **Pendência / aviso** | Problema que não impede a importação |
 | **Erro** | Problema que impede a importação do arquivo |

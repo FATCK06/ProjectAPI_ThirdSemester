@@ -1,9 +1,6 @@
 import api from './api';
+import type { Perfil } from './auth';
 import { formatarCamposErro, obterRespostaErro } from './errosApi';
-
-export const PERFIS = ['Operador', 'Gestor', 'Administrador'] as const;
-
-export type Perfil = (typeof PERFIS)[number];
 
 export interface CriarUsuarioRequest {
     nome: string;
