@@ -1,22 +1,16 @@
 package br.com.newe.ms_operacoes.controller;
 
-<<<<<<< HEAD
 import java.time.YearMonth;
 import java.time.ZoneId;
 import java.util.List;
 
-=======
->>>>>>> origin/develop
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<<<<<<< HEAD
 import br.com.newe.ms_operacoes.dto.MesesReferenciaDTO;
-=======
->>>>>>> origin/develop
 import br.com.newe.ms_operacoes.security.PerfilResolver;
 import br.com.newe.ms_operacoes.security.Permissao;
 import br.com.newe.ms_operacoes.service.indicadores.HistoricoMes;
@@ -30,12 +24,9 @@ import jakarta.validation.constraints.Min;
 @RequestMapping("/api/dashboard")
 public class DashboardController {
 
-<<<<<<< HEAD
     /** A operacao e no Brasil: o mes vira a meia-noite de Brasilia, nao em UTC. */
     private static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
 
-=======
->>>>>>> origin/develop
     private final IndicadoresService indicadoresService;
     private final PerfilResolver perfilResolver;
 
@@ -63,7 +54,6 @@ public class DashboardController {
         boolean ocultarValores = !perfilResolver.possui(request, Permissao.VER_DADOS_FINANCEIROS);
         return ResponseEntity.ok(ocultarValores ? indicadores.semValoresFinanceiros() : indicadores);
     }
-<<<<<<< HEAD
 
     /**
      * Totais dos ultimos meses ate mesReferencia, para o comparativo com o mes
@@ -81,6 +71,4 @@ public class DashboardController {
         }
         return ResponseEntity.ok(historico);
     }
-=======
->>>>>>> origin/develop
 }
