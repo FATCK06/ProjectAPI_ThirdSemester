@@ -14,7 +14,10 @@ export function CardSkeleton({
   if (!isLoading) return <>{children}</>;
 
   return (
-    <div className={`card-skeleton-frame skeleton-base ${isLoading ? "shimmer" : ""}`}>
+    <div
+      className="card-skeleton-frame skeleton-base shimmer"
+      style={{ height: altura }}
+    >
       {!isLoading && children}
     </div>
   );

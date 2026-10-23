@@ -38,13 +38,16 @@ public class DashboardController {
     private final FrotaClient frotaClient;
     private final IndicadoresService indicadoresService;
     private final MotoristasMesService motoristasMesService;
+    private final PerfilResolver perfilResolver;
 
     public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService, MotoristasMesService motoristasMesService) {
+            IndicadoresService indicadoresService, MotoristasMesService motoristasMesService,
+            PerfilResolver perfilResolver) {
         this.repository = repository;
         this.frotaClient = frotaClient;
         this.indicadoresService = indicadoresService;
         this.motoristasMesService = motoristasMesService;
+        this.perfilResolver = perfilResolver;
     }
 
     /**
@@ -68,15 +71,8 @@ public class DashboardController {
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("motoristaId"))
                 : pageable;
         return ResponseEntity.ok(motoristasMesService.listar(mesReferencia, pagina));
-    private final PerfilResolver perfilResolver;
-
-    public DashboardController(ViagemRepository repository, FrotaClient frotaClient,
-            IndicadoresService indicadoresService, PerfilResolver perfilResolver) {
-        this.repository = repository;
-        this.frotaClient = frotaClient;
-        this.indicadoresService = indicadoresService;
-        this.perfilResolver = perfilResolver;
     }
+
 
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
     public ResponseEntity<IndicadoresMes> indicadores(

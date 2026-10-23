@@ -8,7 +8,7 @@ interface PropsGraficoMotoristas {
   motoristas: IndicadoresMotorista[];
 }
 
-function abreviarNome(nome?: string): string {
+function abreviarNome(nome?: string | null): string {
   const partes = nome?.trim().split(/\s+/).filter(Boolean) ?? [];
   if (partes.length === 0) return "Sem nome";
   return partes.length > 1 ? `${partes[0]} ${partes[partes.length - 1]}` : partes[0];

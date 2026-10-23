@@ -45,7 +45,7 @@ REM ─────────────────────────�
 REM 2. Credenciais locais (nao versionadas)
 REM ─────────────────────────────────────────────────────────────
 set FALTA=0
-call :checa_dev "ms-usuarios\ms-usuarios"
+call :checa_dev "ms-usuarios"
 call :checa_dev "ms-frota"
 call :checa_dev "ms-operacoes"
 call :checa_dev "api-gateway"
@@ -86,7 +86,7 @@ REM 4. Sobe
 REM ─────────────────────────────────────────────────────────────
 echo.
 echo  Subindo ms-usuarios  :8081
-start "ms-usuarios"  cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-usuarios\ms-usuarios && mvnw.cmd spring-boot:run"
+start "ms-usuarios"  cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-usuarios && mvnw.cmd spring-boot:run"
 
 echo  Subindo ms-frota     :8082
 start "ms-frota"     cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-frota && mvnw.cmd spring-boot:run"
