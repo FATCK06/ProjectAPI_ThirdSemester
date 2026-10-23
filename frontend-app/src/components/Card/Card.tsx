@@ -4,9 +4,9 @@ interface PropsCard {
     titulo: string;
     subtitulo?: string;
     sobretitulo?: string
-    acoes?: React.ReactNode;
+    acoes?: ReactNode;
     className?: string;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export function Card({

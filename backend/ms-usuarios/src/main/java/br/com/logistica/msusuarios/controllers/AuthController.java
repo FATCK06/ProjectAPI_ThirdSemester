@@ -55,7 +55,7 @@ public class AuthController {
             String tokenReal = tokenService.gerarToken(usuarioLogado);
             response.put("token", tokenReal);
             response.put("nome", usuarioLogado.getNome());
-            response.put("perfil", usuarioLogado.getPerfilAcesso());
+            response.put("perfil", usuarioLogado.getPerfilAcesso().name());
 
             return ResponseEntity.ok(response);
         }

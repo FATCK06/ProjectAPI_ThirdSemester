@@ -13,25 +13,25 @@ public enum CampoManifesto {
     FILIAL("Filial", Tipo.TEXTO, Nivel.IMPORTANTE, false),
     DATA("Data", Tipo.DATA, Nivel.OBRIGATORIO, false),
     NOME("Motorista", Tipo.TEXTO, Nivel.IMPORTANTE, false),
-    CPF("CPF", Tipo.DOCUMENTO, Nivel.OBRIGATORIO, false, 11),
-    PIS("PIS", Tipo.DOCUMENTO, Nivel.OPCIONAL, false),
+    CPF("CPF", Tipo.CPF, Nivel.OBRIGATORIO, false),
+    PIS("PIS", Tipo.PIS, Nivel.OPCIONAL, false),
     DATA_NASCIMENTO("Data de nascimento", Tipo.DATA, Nivel.OPCIONAL, false),
     ENDERECO("Endereço motorista", Tipo.TEXTO, Nivel.OPCIONAL, false),
-    CEP("CEP Motorista", Tipo.DOCUMENTO, Nivel.OPCIONAL, false),
+    CEP("CEP Motorista", Tipo.CEP, Nivel.OPCIONAL, false),
     BAIRRO("Bairro Motorista", Tipo.TEXTO, Nivel.OPCIONAL, false),
     CIDADE("Cidade Motorista", Tipo.TEXTO, Nivel.OPCIONAL, false),
-    ESTADO("Estado Motorista", Tipo.TEXTO, Nivel.OPCIONAL, false),
+    ESTADO("Estado Motorista", Tipo.UF, Nivel.OPCIONAL, false),
     CHEFE_GUARNICAO("Chefe de Guarnição", Tipo.TEXTO, Nivel.OPCIONAL, false),
     VIGILANTE1("Vigilante 1", Tipo.TEXTO, Nivel.OPCIONAL, false),
     VIGILANTE2("Vigilante 2", Tipo.TEXTO, Nivel.OPCIONAL, false),
     AGREGADO("Agregado", Tipo.TEXTO, Nivel.IMPORTANTE, false),
-    AGREGADO_DOCUMENTO("CPF/CNPJ Agregado", Tipo.DOCUMENTO, Nivel.IMPORTANTE, false),
-    AGREGADO_PIS("PIS Agregado", Tipo.DOCUMENTO, Nivel.OPCIONAL, false),
+    AGREGADO_DOCUMENTO("CPF/CNPJ Agregado", Tipo.CPF_OU_CNPJ, Nivel.IMPORTANTE, false),
+    AGREGADO_PIS("PIS Agregado", Tipo.PIS, Nivel.OPCIONAL, false),
     REGIME_FISCAL("Regime Fiscal", Tipo.TEXTO, Nivel.OPCIONAL, false),
-    VEICULO("Veículo", Tipo.TEXTO, Nivel.OBRIGATORIO, false),
-    REBOQUE1("Reboque 1", Tipo.TEXTO, Nivel.OPCIONAL, false),
-    REBOQUE2("Reboque 2", Tipo.TEXTO, Nivel.OPCIONAL, false),
-    REBOQUE3("Reboque 3", Tipo.TEXTO, Nivel.OPCIONAL, false),
+    VEICULO("Veículo", Tipo.PLACA, Nivel.OBRIGATORIO, false),
+    REBOQUE1("Reboque 1", Tipo.PLACA, Nivel.OPCIONAL, false),
+    REBOQUE2("Reboque 2", Tipo.PLACA, Nivel.OPCIONAL, false),
+    REBOQUE3("Reboque 3", Tipo.PLACA, Nivel.OPCIONAL, false),
     DESTINO("Destino", Tipo.TEXTO, Nivel.IMPORTANTE, false),
     KM_SAIDA("Km saída", Tipo.INTEIRO, Nivel.OPCIONAL, false),
     KM_CHEGADA("Km chegada", Tipo.INTEIRO, Nivel.OPCIONAL, false),
@@ -71,7 +71,7 @@ public enum CampoManifesto {
     STATUS("Status", Tipo.TEXTO, Nivel.IMPORTANTE, false),
     USUARIO("Usuário", Tipo.TEXTO, Nivel.IMPORTANTE, false);
 
-    public enum Tipo { TEXTO, DOCUMENTO, INTEIRO, DECIMAL, DATA }
+    public enum Tipo { TEXTO, CPF, CNPJ, CPF_OU_CNPJ, PIS, CEP, PLACA, UF, INTEIRO, DECIMAL, DATA }
 
     /** OBRIGATORIO barra a linha; IMPORTANTE vira pendencia; o resto so informa. */
     public enum Nivel { OBRIGATORIO, IMPORTANTE, OPCIONAL, DERIVADO }
@@ -80,18 +80,12 @@ public enum CampoManifesto {
     private final Tipo tipo;
     private final Nivel nivel;
     private final boolean zeroAusente;
-    private final Integer tamanhoExato;
 
     CampoManifesto(String coluna, Tipo tipo, Nivel nivel, boolean zeroAusente) {
-        this(coluna, tipo, nivel, zeroAusente, null);
-    }
-
-    CampoManifesto(String coluna, Tipo tipo, Nivel nivel, boolean zeroAusente, Integer tamanhoExato) {
         this.coluna = coluna;
         this.tipo = tipo;
         this.nivel = nivel;
         this.zeroAusente = zeroAusente;
-        this.tamanhoExato = tamanhoExato;
     }
 
     public String coluna() {
@@ -111,18 +105,17 @@ public enum CampoManifesto {
         return zeroAusente;
     }
 
-    /** Quantidade exata de digitos, quando o campo tem uma. Hoje so o CPF. */
-    public Integer tamanhoExato() {
-        return tamanhoExato;
-    }
-
     /** O que a celula deveria conter, para a tela explicar o erro. */
     public String formatoEsperado() {
         return switch (tipo) {
             case TEXTO -> "Texto";
-            case DOCUMENTO -> tamanhoExato == null
-                    ? "Somente digitos"
-                    : tamanhoExato + " digitos";
+            case CPF -> "CPF com 11 digitos e digito verificador valido";
+            case CNPJ -> "CNPJ com 14 digitos e digito verificador valido";
+            case CPF_OU_CNPJ -> "CPF (11 digitos) ou CNPJ (14 digitos) com digito verificador valido";
+            case PIS -> "PIS com 11 digitos e digito verificador valido";
+            case CEP -> "CEP com 8 digitos";
+            case PLACA -> "Placa no padrao AAA9999 ou Mercosul AAA9A99";
+            case UF -> "Sigla de UF com 2 letras (ex.: SP)";
             case INTEIRO -> "Numero inteiro";
             case DECIMAL -> "Numero decimal (1.234,56)";
             case DATA -> "Data no formato DD/MM/AAAA";
@@ -135,15 +128,7 @@ public enum CampoManifesto {
             return new AvaliacaoCampo(this, valorCru, EstadoCampo.VAZIO, null, null);
         }
         try {
-            Object valor = converter(valorCru);
-            if (valor == null) {
-                return new AvaliacaoCampo(this, valorCru, EstadoCampo.NAO_CONVERTE, null,
-                        "Valor sem digitos: " + valorCru);
-            }
-            if (tamanhoExato != null && valor instanceof String digitos && digitos.length() != tamanhoExato) {
-                return new AvaliacaoCampo(this, valorCru, EstadoCampo.NAO_CONVERTE, null,
-                        "Esperado " + tamanhoExato + " digitos, veio com " + digitos.length());
-            }
+            Object valor = converter(ManifestoCsvConfig.textoOuNulo(valorCru));
             if (zeroAusente && ehZero(valor)) {
                 // O zero segue para a gravacao como veio no arquivo; o estado so sinaliza.
                 return new AvaliacaoCampo(this, valorCru, EstadoCampo.AUSENTE_COMO_ZERO, valor, null);
@@ -154,13 +139,20 @@ public enum CampoManifesto {
         }
     }
 
-    private Object converter(String valorCru) {
+    /** Recebe o texto ja sem o envolucro do Excel e nunca vazio. */
+    private Object converter(String texto) {
         return switch (tipo) {
-            case TEXTO -> ManifestoCsvConfig.textoOuNulo(valorCru);
-            case DOCUMENTO -> ManifestoCsvConfig.digitosOuNulo(valorCru);
-            case INTEIRO -> inteiroExato(valorCru);
-            case DECIMAL -> ManifestoCsvConfig.decimalBrOuNulo(valorCru);
-            case DATA -> ManifestoCsvConfig.dataOuNula(valorCru);
+            case TEXTO -> texto;
+            case CPF -> ValidadorCadastral.cpf(texto);
+            case CNPJ -> ValidadorCadastral.cnpj(texto);
+            case CPF_OU_CNPJ -> ValidadorCadastral.cpfOuCnpj(texto);
+            case PIS -> ValidadorCadastral.pis(texto);
+            case CEP -> ValidadorCadastral.cep(texto);
+            case PLACA -> ValidadorCadastral.placa(texto);
+            case UF -> ValidadorCadastral.uf(texto);
+            case INTEIRO -> inteiroExato(texto);
+            case DECIMAL -> ManifestoCsvConfig.decimalBrOuNulo(texto);
+            case DATA -> ManifestoCsvConfig.dataOuNula(texto);
         };
     }
 

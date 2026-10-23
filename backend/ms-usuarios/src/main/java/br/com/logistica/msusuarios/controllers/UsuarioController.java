@@ -15,6 +15,8 @@ import br.com.logistica.msusuarios.entities.Usuario;
 import br.com.logistica.msusuarios.services.UsuarioService;
 import br.com.logistica.msusuarios.services.UsuarioService.EmailJaCadastradoException;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
@@ -30,11 +32,11 @@ public class UsuarioController {
      * por isso criar usuario direto no banco nao funciona: o login compara hash
      * com hash, e texto puro nunca bate.
      *
-     * TODO: hoje esta aberto para permitir criar o primeiro Administrador.
-     * Assim que existir um, restringir a esse perfil.
+     * Restrito a Administrador (SecurityConfig aqui e no gateway). O primeiro
+     * Administrador e criado pelo AdministradorInicial.
      */
     @PostMapping
-    public ResponseEntity<?> criar(@RequestBody CriarUsuarioRequest requisicao) {
+    public ResponseEntity<?> criar(@Valid @RequestBody CriarUsuarioRequest requisicao) {
         try {
             Usuario criado = service.criar(requisicao);
             return ResponseEntity.status(HttpStatus.CREATED).body(UsuarioResponse.de(criado));

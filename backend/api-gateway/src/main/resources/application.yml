@@ -2,10 +2,13 @@ spring:
   application:
     name: api-gateway
 
-  # O perfil dev carrega application-dev.properties, que traz a chave do JWT e
-  # nao e versionado. Mesmo padrao do ms-usuarios.
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  # A chave do JWT vem de backend/.env (copia do .env.example, fora do git).
+  # Variavel de ambiente definida no sistema tem prioridade sobre o arquivo.
+  config:
+    import: optional:file:../.env[.properties]
 
   cloud:
     gateway:
@@ -36,13 +39,20 @@ spring:
 
 server:
   port: 8080
+  # Erro que escapa do ErroHandlerGlobal (ex.: falha num filtro) cai no /error do
+  # Spring. Estes ja sao os padroes; ficam explicitos para ninguem ligar sem querer.
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
 
 # Mesma chave que o ms-usuarios usa para assinar. O gateway valida e injeta o
 # perfil nos headers; os servicos de tras confiam neles.
 #
-# O valor real vem de application-dev.properties (perfil dev, fora do git) ou da
-# variavel de ambiente. Sem chave, o JwtAutenticacaoFilter falha na subida - de
-# proposito: e melhor nao subir do que subir aceitando token nao verificado.
+# O valor real vem do .env ou da variavel de ambiente. Sem chave, o
+# JwtAutenticacaoFilter falha na subida, de proposito: e melhor nao subir do que
+# subir aceitando token nao verificado.
 api:
   security:
     token:

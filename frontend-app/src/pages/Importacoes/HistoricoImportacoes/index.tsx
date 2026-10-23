@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import DataTable, { type ColunaTabela } from "../../../components/DataTable/DataTable";
 import api from "../../../services/api";
 import "./HistoricoImportacoes.css";
+import { PageHeader } from "../../../components/PageHeader";
 
 interface ImportacaoArquivo {
   id: string;
@@ -36,18 +37,24 @@ export function HistoricoImport() {
       .finally(() => setCarregando(false));
   }, []);
 
-  if (carregando) return <p>Carregando...</p>;
-  if (erro) return <p>{erro}</p>;
-
+  // O cabeçalho fica sempre visível; só o conteúdo abaixo dele muda.
   return (
     <div className="historico-importacoes">
-      <h2>Histórico de Importações de Arquivo</h2>
-      <DataTable
-        colunas={colunas}
-        linhas={importacoes}
-        chaveLinha={(linha) => linha.id}
-        alturaMaxima="70vh"
+      <PageHeader
+        titulo="Histórico de Importações"
+        subtitulo="Arquivos importados, com data, responsável e status de cada envio"
       />
+      {carregando && <p>Carregando...</p>}
+      {!carregando && erro && <p>{erro}</p>}
+      {!carregando && !erro && (
+        <DataTable
+          colunas={colunas}
+          linhas={importacoes}
+          chaveLinha={(linha) => linha.id}
+          alturaMaxima="70vh"
+          mensagemVazia="Nenhuma importação realizada até agora."
+        />
+      )}
     </div>
   );
 }

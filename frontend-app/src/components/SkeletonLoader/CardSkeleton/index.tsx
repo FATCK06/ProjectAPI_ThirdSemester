@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import "../skeleton.css";
 
 interface CardSkeletonProps {
   children?: ReactNode;
@@ -6,6 +7,11 @@ interface CardSkeletonProps {
   altura?: number | string; // cada seção tem uma altura diferente
 }
 
+/**
+ * Bloco genérico do tamanho de um card. Para indicadores, tabelas e gráficos,
+ * prefira IndicadoresSkeleton, TableSkeleton e GraficoSkeleton, que imitam o
+ * formato do conteúdo.
+ */
 export function CardSkeleton({
   children,
   isLoading,
@@ -15,10 +21,11 @@ export function CardSkeleton({
 
   return (
     <div
-      className="card-skeleton-frame skeleton-base shimmer"
+      className="skeleton-base shimmer"
       style={{ height: altura }}
-    >
-      {!isLoading && children}
-    </div>
+      role="status"
+      aria-busy="true"
+      aria-label="Carregando"
+    />
   );
 }

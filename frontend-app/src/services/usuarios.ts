@@ -1,8 +1,6 @@
 import api from './api';
-
-export const PERFIS = ['Operador', 'Gestor', 'Administrador'] as const;
-
-export type Perfil = (typeof PERFIS)[number];
+import type { Perfil } from './auth';
+import { formatarCamposErro, obterRespostaErro } from './errosApi';
 
 export interface CriarUsuarioRequest {
     nome: string;
@@ -30,7 +28,13 @@ export async function criarUsuario(dados: CriarUsuarioRequest): Promise<UsuarioR
 }
 
 export function mensagemDeErro(erro: unknown): string {
-    const resposta = (erro as { response?: { status?: number; data?: { erro?: string } } })?.response;
+    const resposta = obterRespostaErro(erro);
+
+    const campos = resposta?.data?.campos;
+    if (campos && Object.keys(campos).length > 0) {
+        const mensagem = resposta.data?.erro ?? 'Dados inválidos.';
+        return `${mensagem} ${formatarCamposErro(campos)}`;
+    }
 
     // O backend manda { erro: "..." } em 400 e 409 — usa a mensagem dele quando vier.
     if (resposta?.data?.erro) return resposta.data.erro;

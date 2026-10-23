@@ -1,4 +1,5 @@
 import api from './api';
+import { formatarCamposErro, obterRespostaErro } from './errosApi';
 
 /** Limite do backend: spring.servlet.multipart.max-file-size=10MB */
 export const TAMANHO_MAXIMO_BYTES = 10 * 1024 * 1024;
@@ -203,9 +204,16 @@ export async function buscarResumo(): Promise<ResumoImportacao> {
 }
 
 export function mensagemDeErro(erro: unknown): string {
-    const resposta = (erro as { response?: { status?: number; data?: { erro?: string } } })?.response;
+    const resposta = obterRespostaErro(erro);
 
-    if (resposta?.data?.erro) return resposta.data.erro;
+    const mensagem = resposta?.data?.erro;
+    const campos = resposta?.data?.campos;
+
+    if (campos && Object.keys(campos).length > 0) {
+        return `${mensagem ?? 'Dados inválidos.'} ${formatarCamposErro(campos)}`;
+    }
+
+    if (mensagem) return mensagem;
     if (resposta?.status === 401) return 'Sua sessão expirou. Faça login novamente.';
     if (resposta?.status === 409) return 'Esta importação já foi executada ou há outra sendo gravada.';
     if (resposta?.status === 413) return 'Arquivo maior que o limite aceito pelo servidor.';

@@ -17,18 +17,17 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.util.List;
 
 import java.io.IOException;
-import java.util.Collections;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
-    
-    @Autowired 
+
+    @Autowired
     private TokenService tokenService;
 
-    @Autowired 
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
-    @Override 
+    @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recuperarToken(request);
 
@@ -41,18 +40,18 @@ public class SecurityFilter extends OncePerRequestFilter {
                 .ifPresent(usuario -> {
                     var authentication = new UsernamePasswordAuthenticationToken(
                         usuario, null, autoridadesDe(usuario));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);    
-                }); 
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                });
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
+    // O perfil vem do banco, nao do token: perfil rebaixado vale ja na proxima requisicao.
     private List<GrantedAuthority> autoridadesDe(Usuario usuario) {
-        String perfil = usuario.getPerfilAcesso();
-        if (perfil == null) return List.of();
-        return List.of(new SimpleGrantedAuthority("ROLE_" + perfil.toUpperCase())); 
+        if (usuario.getPerfilAcesso() == null) return List.of();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getPerfilAcesso().name()));
     }
 
 

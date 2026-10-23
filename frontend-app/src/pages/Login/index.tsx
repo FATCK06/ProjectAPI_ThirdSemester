@@ -32,11 +32,9 @@ export function Login() {
 
       if (resposta.data && resposta.data.token) {
         localStorage.setItem('@Logistica:token', resposta.data.token);
-        // Guardados para a interface decidir o que mostrar (ex.: a página de
-        // status, só para Administrador). Não valem como segurança: quem manda
-        // é o perfil dentro do token, que o gateway valida a cada requisição.
+        // O perfil não é guardado à parte: ele é lido de dentro do token
+        // (perfilAtual em services/auth), que é o mesmo que o gateway confere.
         localStorage.setItem('@Logistica:nome', resposta.data.nome ?? '');
-        localStorage.setItem('@Logistica:perfil', resposta.data.perfil ?? '');
         navigate('/dashboard');
       }
     } catch (erro) {

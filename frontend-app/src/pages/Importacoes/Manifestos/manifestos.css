@@ -1,12 +1,11 @@
 /* src/pages/Importacoes/Manifestos/manifestos.css */
 
+/* Sem padding próprio: o .layout-content já dá o respiro, e assim o título
+   e o stepper ficam alinhados com as outras telas */
 .importacao-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: white;
-  padding: 32px;
-  border-radius: 12px;
 }
 
 /* --- STEPPER --- */

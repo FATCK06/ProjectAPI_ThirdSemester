@@ -18,6 +18,8 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/viagens` | Viagens de um mês |
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
+| `GET` | `/api/dashboard/indicadores/historico` | Totais dos últimos meses, para o comparativo dos cards |
+| `GET` | `/api/dashboard/meses-referencia` | Mês atual e anterior pelo relógio do servidor |
 | `GET` | `/api/dashboard/ranking-motoristas` | Top N motoristas por número de viagens |
 | `GET` | `/api/ranking/mensal` | Ranking mensal completo dos motoristas, com ordenação por coluna |
 | `GET` | `/api/dashboard/motoristas/situacao` | Situação (disponível/indisponível) de cada motorista no mês |
@@ -104,16 +106,16 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
   "problemas": [
     {
       "numeroLinha": 17,
-      "valores": { "CPF": "1234567890", "Data": "12/07/2026" },
+      "valores": { "CPF": "11.222.333/0001-81", "Data": "12/07/2026" },
       "problemas": [
         {
           "campo": "CPF",
           "coluna": "CPF",
           "severidade": "ERRO",
           "estado": "NAO_CONVERTE",
-          "valorEncontrado": "1234567890",
-          "valorEsperado": "11 digitos",
-          "mensagem": "A coluna 'CPF' na linha 17 nao esta no formato esperado: Esperado 11 digitos, veio com 10"
+          "valorEncontrado": "11.222.333/0001-81",
+          "valorEsperado": "CPF com 11 digitos e digito verificador valido",
+          "mensagem": "A coluna 'CPF' na linha 17 nao esta no formato esperado: CPF invalido: 14 digitos, parece um CNPJ"
         }
       ]
     }
@@ -125,7 +127,7 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
       "data": "2026-07-01",
       "mesReferencia": "2026-07",
       "motorista": "JOAO DA SILVA",
-      "cpf": "12345678901",
+      "cpf": "12345678909",
       "agregado": "TRANSPORTES EXEMPLO LTDA",
       "veiculo": "ABC1D23",
       "destino": "Campinas",
@@ -144,6 +146,19 @@ Lê o arquivo e devolve as colunas encontradas, as linhas com problema (paginada
 | Opcional | aceita | `PENDENCIA` |
 
 Estados possíveis de uma célula: `OK`, `VAZIO`, `NAO_CONVERTE` e `AUSENTE_COMO_ZERO` (colunas em que o CSV usa `0,00` para dizer "não informado").
+
+**Regras de formato dos campos cadastrais:**
+
+| Coluna | Regra (`valorEsperado`) |
+|---|---|
+| `CPF` | 11 dígitos, não todos iguais, dígitos verificadores válidos |
+| `CPF/CNPJ Agregado` | 11 dígitos validados como CPF ou 14 validados como CNPJ |
+| `PIS`, `PIS Agregado` | 11 dígitos com dígito verificador válido |
+| `CEP Motorista` | 8 dígitos |
+| `Veículo`, `Reboque 1`, `Reboque 2`, `Reboque 3` | placa antiga (`AAA9999`) ou Mercosul (`AAA9A99`); aceita hífen e minúsculas |
+| `Estado Motorista` | sigla de uma das 27 UFs |
+
+Nos documentos (CPF, CNPJ, PIS e CEP) a célula só pode ter dígitos e máscara (`.`, `-`, `/`, espaços). Letras ou outros caracteres fazem a célula ser recusada, em vez de serem descartados. A `mensagem` diz o que veio e o que era esperado, por exemplo `CPF invalido: contem letras`, `CPF invalido: 14 digitos, parece um CNPJ`, `CPF invalido: digito verificador nao confere`, `Placa invalida: 'AB12345' fora do padrao AAA9999 ou AAA9A99`.
 
 O arquivo só pode ser gravado quando `linhasInvalidas = 0`, existe ao menos uma linha válida e nenhuma coluna obrigatória está faltando (todo item de `mapeamento` com `obrigatoria: true` tem `encontrada: true`). Linhas só com pendência não bloqueiam.
 
@@ -268,7 +283,9 @@ GET /api/viagens?mesReferencia=2026-09
 ]
 ```
 
-A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`, `retiradas`, `coletasReversa`, `percentualEfetividade`, `percentualAprovVeiculo`, `valorFretes`, `saldoDespesas`, `classificacao`, `observacoesOperacionais` e `criadoEm`.
+A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`, `retiradas`, `coletasReversa`, `percentualEfetividade`, `percentualAprovVeiculo`, `valorFretes`, `valeFrete`, `saldoDespesas`, `classificacao`, `observacoesOperacionais` e `criadoEm`.
+
+Os campos de valor (`valorFrete`, `valorFretes`, `valeFrete`, `valorNf`, `totalDespesas`, `saldoDespesas`, `saldoAPagar`) só vêm para os perfis Gestor e Administrador. Para os demais, saem da resposta.
 
 **Erros:** `400` se `mesReferencia` estiver fora do formato.
 
@@ -276,7 +293,12 @@ A entidade também traz `reboque1..3`, `m3`, `coletas`, `entregas`, `despachos`,
 
 ## Dashboard
 
-Valores monetários em R$; percentuais de 0 a 100. Divisões por zero retornam `0`, assim um motorista sem viagem aparece zerado em vez de derrubar a tela.
+Valores monetários em R$; percentuais de 0 a 100.
+
+- **Receita e custo:** valor do frete = soma de `valor_fretes` (frete dos CT-e cobrado do cliente); custo total = soma de `vale_frete` (total pago ao agregado). Só entra a viagem apurável, com os dois valores maiores que zero; as demais contam como viagem e dia em operação.
+- **Sem base para a conta:** utilização e disponibilidade com divisão por zero retornam `0`. Já `rentabilidadeMediaViagem` (sem viagem apurável) e `margem` (sem frete) saem da resposta: zero diria que o resultado foi zero, quando não há dado.
+- **Perfil:** `valorFrete`, `custoTotal`, `rentabilidade`, `rentabilidadeMediaViagem` e `margem` só vêm para Gestor e Administrador, em todos os endpoints desta seção e em `/api/ranking/mensal`.
+- **Nomes:** os mesmos campos têm o mesmo nome em todos esses endpoints.
 
 ### `GET /api/dashboard/indicadores`
 
@@ -296,6 +318,7 @@ Totais do mês e uma linha por motorista, ordenada por rentabilidade.
   "totais": {
     "motoristas": 48,
     "numeroViagens": 612,
+    "diasOperacao": 960,
     "utilizacaoMedia": 71.40,
     "valorFrete": 1203450.00,
     "custoTotal": 845000.00,
@@ -329,8 +352,9 @@ Totais do mês e uma linha por motorista, ordenada por rentabilidade.
 | Utilização | dias em operação ÷ dias disponíveis × 100 |
 | Disponibilidade | dias disponíveis ÷ dias do mês × 100 |
 | Rentabilidade | valor do frete − custo total |
-| Rentabilidade média por viagem | rentabilidade ÷ número de viagens |
+| Rentabilidade média por viagem | rentabilidade ÷ número de viagens apuráveis |
 | Margem | rentabilidade ÷ valor do frete × 100 |
+| Dias em operação (totais) | soma dos dias distintos com viagem de cada motorista (motorista-dia) |
 | Utilização média (totais) | soma dos dias em operação ÷ (dias disponíveis × motoristas) × 100 |
 
 **Erros:** `400` se `mesReferencia` for inválido.
@@ -361,9 +385,48 @@ Os mesmos indicadores agrupados por modelo de veículo.
 ]
 ```
 
+### `GET /api/dashboard/indicadores/historico`
+
+Os `totais` de `/indicadores` para cada um dos últimos `meses` meses até `mesReferencia`, do mais antigo ao mais novo. É uma consulta só, sem chamar o ms-frota. Mês sem viagem vem com tudo zerado (`motoristas: 0`) em vez de ficar de fora. Sem `VER_DADOS_FINANCEIROS`, os campos financeiros somem, como em `/indicadores`.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM`; é o último mês da série |
+| `meses` | query | `6` | 2 a 12 |
+
+**Resposta `200`:**
+
+```json
+[
+  { "mesReferencia": "2026-05", "totais": { "motoristas": 102, "numeroViagens": 596, "diasOperacao": 541, "...": "..." } },
+  { "mesReferencia": "2026-06", "totais": { "motoristas": 93, "numeroViagens": 483, "diasOperacao": 456, "...": "..." } }
+]
+```
+
+O card do Dashboard compara o último mês com o penúltimo (variação % e "vs. mês (valor)") e desenha a linha de tendência a partir do primeiro mês com viagem.
+
+**Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/dashboard/meses-referencia`
+
+Mês atual e anterior, calculados pelo relógio do servidor no fuso `America/Sao_Paulo`. O filtro do Dashboard usa este endpoint para não depender da data da máquina de quem acessa.
+
+**Resposta `200`:**
+
+```json
+{
+  "mesAtual": "2026-10",
+  "mesAnterior": "2026-09"
+}
+```
+
 ### `GET /api/dashboard/ranking-motoristas`
 
-Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa (km de chegada − km de saída; em empate, a mais recente).
+Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa.
+
+Viagem mais longa (mesma regra de `/api/ranking/mensal`): a distância é o `km_saida`, que no manifesto já é a distância da rota (o `km_chegada` vem sempre 0). Em empate, ou sem nenhum km informado, fica a viagem mais recente. Veículo fora do cadastro aparece como `"Não informado"`.
+
+O card de ranking do Dashboard usa este endpoint para o top 5 e completa cada linha com os indicadores de `/api/dashboard/indicadores` que a tela já carregou, sem recalculá-los.
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|
@@ -383,7 +446,7 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
     "motoristaId": "a1b2c3d4-0000-4000-8000-000000000001",
     "nome": "JOAO DA SILVA",
     "cpf": "12345678901",
-    "totalViagens": 22,
+    "numeroViagens": 22,
     "tipoVeiculo": "FH 540",
     "distanciaMaximaKm": 480
   }
@@ -391,6 +454,39 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
 ```
 
 Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/ranking/mensal`
+
+Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM` com mês de 01 a 12 |
+| `ordenarPor` | query | `rentabilidade` | `nome`, `tipoVeiculo`, `numeroViagens`, `disponibilidade`, `utilizacao`, `valorFrete`, `custoTotal`, `rentabilidade` ou `rentabilidadeMediaViagem` |
+| `direcao` | query | `desc` | `asc` ou `desc` |
+
+Valor ausente fica no fim nas duas direções. Para quem não vê dado financeiro, ordenar por um campo financeiro cai em `numeroViagens`.
+
+**Resposta `200`:**
+
+```json
+[
+  {
+    "motoristaId": "a1b2c3d4-0000-4000-8000-000000000001",
+    "nome": "JOAO DA SILVA",
+    "tipoVeiculo": "FH 540",
+    "numeroViagens": 22,
+    "disponibilidade": 100.00,
+    "utilizacao": 76.92,
+    "valorFrete": 41200.00,
+    "custoTotal": 27800.00,
+    "rentabilidade": 13400.00,
+    "rentabilidadeMediaViagem": 609.09
+  }
+]
+```
+
+**Erros:** `400` para parâmetros inválidos.
 
 ### `GET /api/dashboard/motoristas/situacao`
 
@@ -434,7 +530,7 @@ Ordem: `DISPONIVEL` primeiro, depois menor utilização, depois nome. Sem result
 |---|---|
 | Utilização | dias em operação ÷ dias disponíveis × 100, 2 casas (HALF_UP). Pode passar de 100 |
 | Dias em operação | dias distintos com viagem no mês, somando todas as importações |
-| Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês — PENDENTE do cliente) |
+| Dias disponíveis | mesmo valor de `/indicadores` (hoje, todos os dias do mês; PENDENTE do cliente) |
 | `BAIXA` | utilização < 50 → `DISPONIVEL` |
 | `INTERMEDIARIA` | 50 ≤ utilização < 80 → `DISPONIVEL` |
 | `ALTA` | utilização ≥ 80 → `INDISPONIVEL` |

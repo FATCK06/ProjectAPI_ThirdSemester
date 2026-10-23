@@ -44,16 +44,10 @@ echo  JDK: %JAVA_HOME%
 REM ─────────────────────────────────────────────────────────────
 REM 2. Credenciais locais (nao versionadas)
 REM ─────────────────────────────────────────────────────────────
-set FALTA=0
-call :checa_dev "ms-usuarios"
-call :checa_dev "ms-frota"
-call :checa_dev "ms-operacoes"
-call :checa_dev "api-gateway"
-
-if %FALTA% NEQ 0 (
+if not exist ".env" (
     echo.
-    echo  Copie cada application-dev.properties.example para application-dev.properties
-    echo  e preencha com os dados do time. Veja docs\task\onboarding.md
+    echo  [FALTA] backend\.env
+    echo  Copie o .env.example para .env e preencha com os dados do time.
     echo.
     pause
     exit /b 1
@@ -107,10 +101,3 @@ echo  Depois abra http://localhost:5173
 echo  Para derrubar tudo: parar-tudo.cmd
 echo.
 exit /b 0
-
-:checa_dev
-if not exist "%~1\src\main\resources\application-dev.properties" (
-    echo  [FALTA] %~1\src\main\resources\application-dev.properties
-    set FALTA=1
-)
-goto :eof

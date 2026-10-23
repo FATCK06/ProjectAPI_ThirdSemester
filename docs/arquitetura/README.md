@@ -226,21 +226,22 @@ sequenceDiagram
     participant OP as ms-operacoes
     participant FR as ms-frota
 
+    F->>OP: GET /dashboard/meses-referencia
+    OP-->>F: mês atual e anterior (relógio do servidor)
     par indicadores do mês
         F->>OP: GET /dashboard/indicadores?mesReferencia
         OP->>FR: POST /motoristas/resumos (ids)
-    and por modelo
-        F->>OP: GET /dashboard/indicadores-por-modelo?mesReferencia
-        OP->>FR: POST /veiculos/modelos (ids)
     and ranking
-        F->>OP: GET /dashboard/ranking-motoristas?mesReferencia&limite=5
+        F->>OP: GET /ranking/mensal?mesReferencia&ordenarPor=viagens
         OP->>FR: POST /motoristas/resumos (ids)
-        OP->>FR: POST /veiculos/placas (ids)
+        OP->>FR: POST /veiculos/modelos (ids)
     end
     OP-->>F: JSON pronto para os cards, gráficos e tabela
 ```
 
 As chamadas ao ms-frota são **sempre em lote**: uma requisição para todos os ids, nunca uma por motorista.
+
+Um único mês, escolhido no topo da tela, vale para todos os blocos. `GET /dashboard/indicadores-por-modelo` só é chamado quando o gráfico por tipo de veículo estiver ligado (`GRAFICO_MODELOS_DISPONIVEL` em `Dashboard.tsx`).
 
 ## 7. Dados
 

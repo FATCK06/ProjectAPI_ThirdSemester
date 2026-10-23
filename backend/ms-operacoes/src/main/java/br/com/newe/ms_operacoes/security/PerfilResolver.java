@@ -1,7 +1,5 @@
 package br.com.newe.ms_operacoes.security;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,21 +14,13 @@ public class PerfilResolver {
     public static final String HEADER_PERFIL = "X-User-Role";
     public static final String HEADER_USUARIO = "X-User-Name";
 
-    public static final String PERFIL_ADMINISTRADOR = "ADMINISTRADOR";
-    public static final String PERFIL_GESTOR = "GESTOR";
-    public static final String PERFIL_OPERADOR = "OPERADOR";
-
-    // Quem PODE ver dados financeiros. Perfil ausente, desconhecido ou novo
-    // fica de fora por padrao: na duvida, nega.
-    private static final Set<String> PERFIS_DADOS_FINANCEIROS = Set.of(PERFIL_ADMINISTRADOR, PERFIL_GESTOR);
-
-    public boolean podeVerDadosFinanceiros(HttpServletRequest request) {
-        String perfil = resolver(request);
-        return perfil != null && PERFIS_DADOS_FINANCEIROS.contains(perfil);
+    public boolean possui(HttpServletRequest request, Permissao permissao) {
+        return permissao.concede(resolver(request));
     }
 
-    public boolean isOperador(HttpServletRequest request) {
-        return PERFIL_OPERADOR.equals(resolver(request));
+    /** Atalho para {@code possui(request, VER_DADOS_FINANCEIROS)}: a regra continua em Permissao. */
+    public boolean podeVerDadosFinanceiros(HttpServletRequest request) {
+        return possui(request, Permissao.VER_DADOS_FINANCEIROS);
     }
 
     public String resolverUsuario(HttpServletRequest request) {

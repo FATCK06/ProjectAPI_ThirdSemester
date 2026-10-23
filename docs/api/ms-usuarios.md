@@ -29,7 +29,7 @@ Autentica o usuário por e-mail e senha.
   "sucesso": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
   "nome": "Maria Souza",
-  "perfil": "Gestor"
+  "perfil": "GESTOR"
 }
 ```
 
@@ -48,7 +48,7 @@ O token carrega as claims `sub` (e-mail), `nome`, `perfil`, `iss` (`ms-usuarios`
 
 Cadastra um novo usuário. A senha chega em texto e é gravada com **BCrypt**, então criar usuário direto no banco não funciona: o login compara hashes.
 
-> **Atenção:** a rota está aberta provisoriamente para permitir criar o primeiro Administrador. Ela deve ser restrita ao perfil `Administrador` assim que ele existir.
+> Restrita ao perfil `ADMINISTRADOR` (no gateway e aqui). O **primeiro** Administrador é criado na subida do serviço quando não existe nenhum e as variáveis `ADMIN_INICIAL_EMAIL` e `ADMIN_INICIAL_SENHA` estão definidas (`AdministradorInicial`).
 
 **Body:**
 
