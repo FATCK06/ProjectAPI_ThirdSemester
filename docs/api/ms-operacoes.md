@@ -425,11 +425,8 @@ Mês atual e anterior, calculados pelo relógio do servidor no fuso `America/Sao
 Os N motoristas com mais viagens no mês, com o tipo do veículo usado na viagem mais longa.
 
 Viagem mais longa (mesma regra de `/api/ranking/mensal`): a distância é o `km_saida`, que no manifesto já é a distância da rota (o `km_chegada` vem sempre 0). Em empate, ou sem nenhum km informado, fica a viagem mais recente. Veículo fora do cadastro aparece como `"Não informado"`.
-<<<<<<< HEAD
 
 O card de ranking do Dashboard usa este endpoint para o top 5 e completa cada linha com os indicadores de `/api/dashboard/indicadores` que a tela já carregou, sem recalculá-los.
-=======
->>>>>>> origin/develop
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|

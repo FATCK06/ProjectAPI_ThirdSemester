@@ -12,10 +12,7 @@ import br.com.newe.ms_operacoes.controller.MesReferencia;
 import br.com.newe.ms_operacoes.dto.frota.RankingMensalMotoristaDTO;
 import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
-<<<<<<< HEAD
 import br.com.newe.ms_operacoes.security.Permissao;
-=======
->>>>>>> origin/develop
 import br.com.newe.ms_operacoes.service.frota.RankingService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Pattern;
