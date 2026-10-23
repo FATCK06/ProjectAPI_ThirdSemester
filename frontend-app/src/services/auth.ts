@@ -62,7 +62,17 @@ export function ehAdministrador(): boolean {
 }
 
 /**
- * Como o token é stateless (JWT), sair é apagar o que está guardado aqui — não
+ * Espelha o PerfilResolver do ms-operacoes: gestor e administrador veem frete,
+ * custo e rentabilidade; perfil ausente ou desconhecido fica de fora. Também só
+ * decide o que desenhar: para os outros perfis a API já não manda esses valores.
+ */
+export function podeVerDadosFinanceiros(): boolean {
+    const perfil = (localStorage.getItem(CHAVE_PERFIL) ?? '').toLowerCase();
+    return perfil === 'gestor' || perfil === PERFIL_ADMINISTRADOR.toLowerCase();
+}
+
+/**
+ * Como o token é stateless (JWT), sair é apagar o que está guardado aqui. Não
  * existe sessão no servidor para encerrar. O token continua tecnicamente válido
  * até expirar, em 2 horas.
  */

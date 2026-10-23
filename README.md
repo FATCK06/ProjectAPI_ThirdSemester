@@ -308,16 +308,28 @@ cd ProjectAPI_ThirdSemester
 
 ### 2. Configurar as credenciais
 
-As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Em cada serviço, entre em `src/main/resources/`, copie o `application-dev.properties.example` para `application-dev.properties` e preencha com os dados passados pelo time.
+As credenciais do banco (Supabase) e a chave do JWT não ficam no repositório. Elas ficam num único arquivo, `backend/.env`, lido pelos quatro serviços. Copie o arquivo de exemplo e preencha com os dados passados pelo time:
 
-| Serviço        | Pasta                             | Porta | O que preencher                         |
-| -------------- | --------------------------------- | ----- | --------------------------------------- |
-| `ms-usuarios`  | `backend/ms-usuarios/ms-usuarios` | 8081  | Banco e chave do JWT                    |
-| `ms-frota`     | `backend/ms-frota`                | 8082  | Banco                                   |
-| `ms-operacoes` | `backend/ms-operacoes`            | 8083  | Banco                                   |
-| `api-gateway`  | `backend/api-gateway`             | 8080  | Chave do JWT (a mesma do `ms-usuarios`) |
+```bash
+cp backend/.env.example backend/.env      # Linux e macOS
+copy backend\.env.example backend\.env    # Windows
+```
 
-O `application-dev.properties` já está no `.gitignore`, então não corre risco de ser commitado.
+| Variável                    | O que é                                                         |
+| --------------------------- | --------------------------------------------------------------- |
+| `SUPABASE_DB_URL`           | Endereço JDBC do banco (Supabase > Connect > Session pooler)    |
+| `SUPABASE_DB_USER`          | Usuário do banco                                                |
+| `SUPABASE_DB_PASSWORD`      | Senha do banco                                                  |
+| `API_SECURITY_TOKEN_SECRET` | Chave que assina o login, com no mínimo 32 caracteres           |
+
+O `backend/.env` já está no `.gitignore`, então não corre risco de ser commitado. Se a mesma variável estiver definida no sistema, ela tem prioridade sobre o arquivo.
+
+| Serviço        | Pasta                  | Porta |
+| -------------- | ---------------------- | ----- |
+| `ms-usuarios`  | `backend/ms-usuarios`  | 8081  |
+| `ms-frota`     | `backend/ms-frota`     | 8082  |
+| `ms-operacoes` | `backend/ms-operacoes` | 8083  |
+| `api-gateway`  | `backend/api-gateway`  | 8080  |
 
 ### 3. Subir o backend
 

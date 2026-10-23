@@ -62,7 +62,7 @@ public class IndicadoresService {
      * disponibilidade sai 100% para todos. Dias uteis foi descartado: quem roda
      * no sabado passaria de 100% de utilizacao.
      */
-    static long diasDisponiveis(YearMonth mes) {
+    public static long diasDisponiveis(YearMonth mes) {
         return mes.lengthOfMonth();
     }
 
