@@ -4,27 +4,19 @@ import { TableSkeleton } from '../../../components/SkeletonLoader/TableSkeleton'
 import { Aviso, AVISO_CUSTOS_NAO_INFORMADOS, AVISO_SEM_PERMISSAO_FINANCEIRO, AVISO_SEM_VIAGENS_MEDIA } from '../../../components/Aviso/Aviso';
 import { podeVerDadosFinanceiros } from '../../../services/auth';
 import { mesAtual } from '../../../utils/datas';
-import { formatarMoeda, SEM_VALOR } from '../../../utils/formatacao';
+import { formatarMoeda, formatarPercentual, SEM_VALOR } from '../../../utils/formatacao';
 import './ranking.css';
 import { PageHeader } from '../../../components/PageHeader';
 import { DataTable, type ColunaTabela } from '../../../components/DataTable/DataTable';
 
 type Linha = RankingMensalMotorista;
-
-// O CSV não informa férias, afastamento nem manutenção: sem dias disponíveis,
-// disponibilidade e utilização ficam vazias, como no Dashboard.
-const AVISO_SEM_DIAS_DISPONIVEIS = 'Ainda não calculado: o CSV de manifestos não informa os dias disponíveis.';
-
-function semDiasDisponiveis() {
-  return <span className="ranking-page-sem-valor" title={AVISO_SEM_DIAS_DISPONIVEIS} aria-label={AVISO_SEM_DIAS_DISPONIVEIS}>{SEM_VALOR}</span>;
-}
+const NAO_INFORMADO = 'N\u00e3o informado';
 
 const COLUNAS_OPERACIONAIS: ColunaTabela<Linha>[] = [
-  { chave: 'nome', titulo: 'Motorista', render: (l) => l.nome || SEM_VALOR, ordenarPor: (l) => l.nome },
-  { chave: 'tipoVeiculo', titulo: 'Tipo de veículo', render: (l) => l.tipoVeiculo || SEM_VALOR, ordenarPor: (l) => l.tipoVeiculo },
-  { chave: 'numeroViagens', titulo: 'Viagens', render: (l) => l.numeroViagens, ordenarPor: (l) => l.numeroViagens },
-  { chave: 'disponibilidade', titulo: 'Disponibilidade', render: semDiasDisponiveis },
-  { chave: 'utilizacao', titulo: 'Utilização', render: semDiasDisponiveis },
+  { chave: 'nome', titulo: 'Motorista', render: (l) => l.nome || l.motorista || NAO_INFORMADO, ordenarPor: (l) => l.nome || l.motorista },
+  { chave: 'tipoVeiculo', titulo: 'Tipo de veículo', render: (l) => l.tipoVeiculo || NAO_INFORMADO, ordenarPor: (l) => l.tipoVeiculo },
+  { chave: 'numeroViagens', titulo: 'N\u00famero de Viagens', render: (l) => l.numeroViagens, ordenarPor: (l) => l.numeroViagens },
+  { chave: 'utilizacao', titulo: 'Utilização', render: (l) => formatarPercentual(l.utilizacao), ordenarPor: (l) => l.utilizacao },
 ];
 
 // Só para quem tem VER_DADOS_FINANCEIROS (o backend já manda esses campos nulos para os demais)

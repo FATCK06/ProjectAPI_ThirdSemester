@@ -24,8 +24,12 @@ public record RankingMensalMotoristaDTO(
         BigDecimal rentabilidade,
         BigDecimal rentabilidadeMediaViagem) {
 
+    private static final String NAO_INFORMADO = "N\u00e3o informado";
+
     public static RankingMensalMotoristaDTO de(IndicadoresMotorista i, String tipoVeiculo) {
-        return new RankingMensalMotoristaDTO(i.motoristaId(), i.nome(), tipoVeiculo, i.numeroViagens(),
+        String nome = i.nome() == null || i.nome().isBlank() ? NAO_INFORMADO : i.nome();
+        String tipo = tipoVeiculo == null || tipoVeiculo.isBlank() ? NAO_INFORMADO : tipoVeiculo;
+        return new RankingMensalMotoristaDTO(i.motoristaId(), nome, tipo, i.numeroViagens(),
                 i.disponibilidade(), i.utilizacao(), i.valorFrete(), i.custoTotal(), i.rentabilidade(),
                 i.rentabilidadeMediaViagem());
     }

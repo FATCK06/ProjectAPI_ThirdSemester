@@ -18,6 +18,7 @@ import { useDashboard } from "./useDashboard";
 import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
 import { podeVerDadosFinanceiros } from "../../services/auth";
 import { buscarMesesReferencia, type MesesReferencia } from "../../services/Dashboard";
+import { mesAtual } from "../../utils/datas";
 import "./dashboard.css";
 
 // Enquanto false, o card mostra o aviso de "Em desenvolvimento" no lugar do gráfico
@@ -27,7 +28,6 @@ const GRAFICO_MODELOS_DISPONIVEL = false;
 
 export function Dashboard() {
   const [meses, setMeses] = useState<MesesReferencia | null>(null);
-  const [erroMeses, setErroMeses] = useState(false);
   const [mesReferencia, setMesReferencia] = useState<string | null>(null);
   const { dados, isLoading, erro } = useDashboard(mesReferencia, {
     buscarPorModelo: GRAFICO_MODELOS_DISPONIVEL,
@@ -52,16 +52,25 @@ export function Dashboard() {
         setMesReferencia(resposta.mesAtual);
       })
       .catch(() => {
-        if (!cancelado) setErroMeses(true);
+        if (cancelado) return;
+
+        // Mantém o dashboard disponível se a API ainda não oferecer essa rota.
+        const atual = mesAtual();
+        const [ano, mes] = atual.split("-").map(Number);
+        const anterior = new Date(ano, mes - 2, 1);
+        const mesesLocais = {
+          mesAtual: atual,
+          mesAnterior: `${anterior.getFullYear()}-${String(anterior.getMonth() + 1).padStart(2, "0")}`,
+        };
+        setMeses(mesesLocais);
+        setMesReferencia(mesesLocais.mesAtual);
       });
     return () => {
       cancelado = true;
     };
   }, []);
 
-  const mensagemErro = erroMeses
-    ? "Não foi possível carregar o mês de referência."
-    : erro;
+  const mensagemErro = erro;
 
   return (
     <div className="dashboard">

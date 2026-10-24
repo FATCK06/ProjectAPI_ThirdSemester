@@ -41,9 +41,11 @@ export function useDashboard(mesReferencia: string | null, { buscarPorModelo }: 
         //assim o skeleton fica até o card e os dois graficos estarem prontos
         Promise.all([
             buscarIndicadores(mesReferencia),
-            buscarHistorico(mesReferencia, MESES_HISTORICO),
+            // O histórico só alimenta comparações. Se essa rota estiver
+            // indisponível, ainda mostramos os indicadores do mês.
+            buscarHistorico(mesReferencia, MESES_HISTORICO).catch(() => []),
             buscarPorModelo
-                ? buscarIndicadoresPorModelo(mesReferencia)
+                ? buscarIndicadoresPorModelo(mesReferencia).catch(() => [])
                 : Promise.resolve<IndicadoresPorModelo[]>([]),
         ])
             .then(([indicadores, historico, porModelo]) => {
