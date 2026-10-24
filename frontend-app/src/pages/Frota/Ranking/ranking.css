@@ -1,0 +1,8 @@
+.ranking-page { display: flex; flex-direction: column; gap: 24px; width: 100%; min-width: 0; }
+/* O gap de .ranking-page já separa o cabeçalho do conteúdo */
+.ranking-page .page-header { margin-bottom: 0; }
+.ranking-page .page-header label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #64748b; }
+.ranking-page .page-header input { font: inherit; padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; background: #fff; }
+.ranking-page-feedback { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 48px; border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; color: #64748b; }
+.ranking-page-feedback button { padding: 8px 16px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #334155; cursor: pointer; }
+.ranking-page-sem-valor { color: #94a3b8; cursor: help; }

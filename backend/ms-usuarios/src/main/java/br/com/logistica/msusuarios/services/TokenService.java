@@ -33,7 +33,7 @@ public class TokenService {
                 .withIssuer("ms-usuarios")
                 .withSubject(usuario.getEmail())
                 .withClaim("nome", usuario.getNome())
-                .withClaim("perfil", usuario.getPerfilAcesso())
+                .withClaim("perfil", usuario.getPerfilAcesso().name())
                 .withExpiresAt(gerarDataExpiracao()) // 2 horas de validade
                 .sign(algorithm);
         } catch (JWTCreationException exception) {

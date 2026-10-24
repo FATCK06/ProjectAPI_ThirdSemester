@@ -7,8 +7,12 @@ import java.math.RoundingMode;
  * Formulas do ranking gerencial. Vieram do antigo ms-indicadores; ficam aqui,
  * sem dependencia de banco, para serem testadas isoladas.
  *
- * Divisao por zero devolve zero: motorista sem viagem ou mes sem dia disponivel
- * aparece com indicador zerado em vez de derrubar o dashboard.
+ * Nas percentuais operacionais, divisao por zero devolve zero: mes sem dia
+ * disponivel aparece com utilizacao zerada em vez de derrubar o dashboard.
+ *
+ * Media por viagem e margem devolvem nulo quando falta a base (sem viagem
+ * apuravel, sem frete). Zero diria que o resultado foi zero, quando na verdade
+ * nao ha dado; a tela mostra o aviso no lugar.
  */
 public final class CalculoIndicadores {
 
@@ -31,16 +35,20 @@ public final class CalculoIndicadores {
         return zeroSeNulo(frete).subtract(zeroSeNulo(custo));
     }
 
+    /** Nulo sem viagem apuravel. */
     public static BigDecimal rentabilidadeMediaPorViagem(BigDecimal rentabilidade, long numeroViagens) {
         if (numeroViagens == 0) {
-            return BigDecimal.ZERO;
+            return null;
         }
         return zeroSeNulo(rentabilidade).divide(BigDecimal.valueOf(numeroViagens), 2, RoundingMode.HALF_UP);
     }
 
-    /** Rentabilidade / frete, em %. */
+    /** Rentabilidade / frete, em %. Nulo sem frete. */
     public static BigDecimal margem(BigDecimal rentabilidade, BigDecimal frete) {
-        return percentual(zeroSeNulo(rentabilidade), zeroSeNulo(frete));
+        if (zeroSeNulo(frete).signum() == 0) {
+            return null;
+        }
+        return percentual(zeroSeNulo(rentabilidade), frete);
     }
 
     static BigDecimal percentual(BigDecimal parte, BigDecimal todo) {

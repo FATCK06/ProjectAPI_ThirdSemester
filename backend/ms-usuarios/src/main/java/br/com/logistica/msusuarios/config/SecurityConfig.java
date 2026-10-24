@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import br.com.logistica.msusuarios.entities.Perfil;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -31,9 +33,10 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll() // Destranca a porta de login
-                        // Aberto para permitir criar o primeiro Administrador.
-                        // TODO restringir a ADMINISTRADOR assim que existir um.
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                        // Mesma regra do gateway, repetida aqui: se alguem chegar
+                        // direto na porta 8081, o servico ainda se defende sozinho.
+                        // O primeiro Administrador nasce do AdministradorInicial.
+                        .requestMatchers("/api/usuarios/**").hasRole(Perfil.ADMINISTRADOR.name())
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Destranca o Pre-flight do CORS para o
                                                                                 // React
                         // O gateway consulta isto de servidor para servidor, sem token.

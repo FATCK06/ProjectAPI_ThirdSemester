@@ -6,16 +6,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 
-import br.com.newe.api_gateway.security.JwtAutenticacaoFilter;
+import br.com.newe.api_gateway.security.SecurityConfig;
 
 /**
  * Situacao dos servicos por tras do gateway, para diagnostico.
@@ -56,20 +56,9 @@ public class StatusController {
         this.restClient = RestClient.builder().requestFactory(fabrica).build();
     }
 
-    /**
-     * Restrito a Administrador. O perfil vem do header que o
-     * {@link JwtAutenticacaoFilter} injeta depois de validar o token - nunca do
-     * que o cliente mandou, que e descartado antes de chegar aqui.
-     */
+    /** Exige a permissao VER_STATUS_SERVICO, conferida no {@link SecurityConfig} antes de chegar aqui. */
     @GetMapping
-    public ResponseEntity<?> status(
-            @RequestHeader(name = JwtAutenticacaoFilter.HEADER_PERFIL, required = false) String perfil) {
-
-        if (!"Administrador".equalsIgnoreCase(perfil == null ? "" : perfil.trim())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("erro", "Disponivel apenas para o perfil Administrador"));
-        }
-
+    public ResponseEntity<?> status() {
         List<Map<String, Object>> resultado = servicos.entrySet().stream()
                 .map(e -> consultar(e.getKey(), e.getValue()))
                 .toList();
@@ -103,11 +92,17 @@ public class StatusController {
         return m;
     }
 
+    /**
+     * So o motivo, sem a mensagem da excecao: ela traz a URL interna do servico.
+     * O 503 do health e o caso "no ar, mas sem alcancar o banco".
+     */
     private String resumir(Exception e) {
-        String mensagem = e.getMessage();
-        if (mensagem == null) {
-            return e.getClass().getSimpleName();
+        if (e instanceof RestClientResponseException resposta) {
+            return "Respondeu com erro " + resposta.getStatusCode().value();
         }
-        return mensagem.length() > 120 ? mensagem.substring(0, 120) : mensagem;
+        if (e instanceof ResourceAccessException) {
+            return "Sem resposta";
+        }
+        return "Falha ao consultar";
     }
 }

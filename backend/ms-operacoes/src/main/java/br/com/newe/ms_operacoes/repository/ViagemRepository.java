@@ -95,6 +95,22 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.idMotorista")
     List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
 
+    /**
+     * Mesmas somas de {@link #somasPorMotorista}, para varios meses numa consulta
+     * so: alimenta o comparativo com os meses anteriores no dashboard.
+     */
+    @Query("select v.mesReferencia as mesReferencia, "
+            + "v.idMotorista as motoristaId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
+            + "from Viagem v "
+            + "where v.mesReferencia in :meses "
+            + "group by v.mesReferencia, v.idMotorista")
+    List<SomaMotoristaMesView> somasPorMotoristaNosMeses(@Param("meses") Collection<String> meses);
+
     /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "
             + "count(v) as numeroViagens, "
@@ -131,6 +147,10 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
         BigDecimal getValorFrete();
 
         BigDecimal getCustoTotal();
+    }
+
+    interface SomaMotoristaMesView extends SomaMotoristaView {
+        String getMesReferencia();
     }
 
     interface RankingMotoristaView {

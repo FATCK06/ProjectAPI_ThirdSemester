@@ -1,0 +1,37 @@
+.acesso-negado {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 320px;
+  margin: 24px;
+  padding: 24px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #64748b;
+  text-align: center;
+}
+
+.acesso-negado strong {
+  font-size: 16px;
+  color: #334155;
+}
+
+.acesso-negado p {
+  max-width: 360px;
+  font-size: 13px;
+}
+
+.acesso-negado-voltar {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2563eb;
+  text-decoration: none;
+}
+
+.acesso-negado-voltar:hover {
+  text-decoration: underline;
+}

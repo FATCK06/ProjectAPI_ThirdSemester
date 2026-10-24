@@ -2,12 +2,15 @@ import { useId } from "react";
 
 interface PropsSparkline {
   valores: number[];
+  // Meses e valores por extenso: vira o tooltip e o texto para leitor de tela
+  titulo?: string;
   largura?: number;
   altura?: number;
 }
 
 export function Sparkline({
   valores,
+  titulo,
   largura = 140,
   altura = 48,
 }: PropsSparkline) {
@@ -41,8 +44,9 @@ export function Sparkline({
       width={largura}
       height={altura}
       viewBox={`0 0 ${largura} ${altura}`}
-      aria-hidden="true"
+      {...(titulo ? { role: "img", "aria-label": titulo } : { "aria-hidden": true })}
     >
+      {titulo && <title>{titulo}</title>}
       <defs>
         <linearGradient id={idGradiente} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="currentColor" stopOpacity="0.25" />

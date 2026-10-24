@@ -31,15 +31,25 @@ class CalculoIndicadoresTest {
     }
 
     @Test
-    void semViagensMediaEZero() {
-        assertThat(CalculoIndicadores.rentabilidadeMediaPorViagem(new BigDecimal("4000"), 0))
-                .isEqualByComparingTo("0");
+    void semViagensMediaENula() {
+        assertThat(CalculoIndicadores.rentabilidadeMediaPorViagem(new BigDecimal("4000"), 0)).isNull();
     }
 
     @Test
-    void semFreteMargemEZero() {
-        assertThat(CalculoIndicadores.margem(new BigDecimal("-500"), BigDecimal.ZERO))
-                .isEqualByComparingTo("0");
+    void semFreteMargemENula() {
+        assertThat(CalculoIndicadores.margem(new BigDecimal("-500"), BigDecimal.ZERO)).isNull();
+        assertThat(CalculoIndicadores.margem(BigDecimal.ZERO, null)).isNull();
+    }
+
+    // Caso real: motorista do veiculo de frota propria tem viagens, mas nenhuma apuravel.
+    @Test
+    void motoristaSemViagemApuravelFicaSemMediaESemMargem() {
+        IndicadoresMotorista m = IndicadoresService.indicadoresDe(soma(5, 5, 0, null, null), "Jose", 30, 30);
+
+        assertThat(m.numeroViagens()).isEqualTo(5);
+        assertThat(m.rentabilidade()).isEqualByComparingTo("0");
+        assertThat(m.rentabilidadeMediaViagem()).isNull();
+        assertThat(m.margem()).isNull();
     }
 
     // sum() devolve nulo quando todas as viagens estao sem valor.
@@ -73,7 +83,8 @@ class CalculoIndicadoresTest {
 
         assertThat(totais.motoristas()).isZero();
         assertThat(totais.utilizacaoMedia()).isEqualByComparingTo("0");
-        assertThat(totais.margem()).isEqualByComparingTo("0");
+        assertThat(totais.rentabilidadeMediaViagem()).isNull();
+        assertThat(totais.margem()).isNull();
     }
 
     // Manifesto 16882 (abr/2026): Valor Fretes 1.226,21 e Vale frete 430,75

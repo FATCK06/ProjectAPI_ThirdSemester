@@ -31,7 +31,7 @@ class CsvManifestoParserTest {
 
     @Test
     void valorInvalidoEmCampoOpcionalViraPendenciaENaoBloqueia() throws IOException {
-        ResultadoParse resultado = parse("123;01/04/2026;12345678901;ABC1D23;abc;5;10,00");
+        ResultadoParse resultado = parse("123;01/04/2026;12345678909;ABC1D23;abc;5;10,00");
 
         assertThat(resultado.temErro()).isFalse();
         assertThat(resultado.linhas()).hasSize(1);
@@ -47,7 +47,7 @@ class CsvManifestoParserTest {
 
     @Test
     void colunaOpcionalAusenteNoCabecalhoNaoBloqueia() throws IOException {
-        String csv = "Manifesto;Data;CPF;Veículo\n123;01/04/2026;12345678901;ABC1D23\n";
+        String csv = "Manifesto;Data;CPF;Veículo\n123;01/04/2026;12345678909;ABC1D23\n";
 
         ResultadoParse resultado = parser.parse(csv.getBytes(ManifestoCsvConfig.CHARSET));
 
@@ -57,7 +57,7 @@ class CsvManifestoParserTest {
 
     @Test
     void inteiroComCasaDecimalNaoETruncado() throws IOException {
-        ResultadoParse resultado = parse("123;01/04/2026;12345678901;ABC1D23;100;12,5;10,00");
+        ResultadoParse resultado = parse("123;01/04/2026;12345678909;ABC1D23;100;12,5;10,00");
 
         assertThat(resultado.linhas().get(0).servicos()).isNull();
         ProblemaCelula servicos = problemaNaColuna(resultado.problemas().get(0), "Serviços");
@@ -66,7 +66,7 @@ class CsvManifestoParserTest {
 
     @Test
     void contagemComCasasZeradasContinuaAceita() throws IOException {
-        ResultadoParse resultado = parse("123;01/04/2026;12345678901;ABC1D23;1.000,00;5,00;10,00");
+        ResultadoParse resultado = parse("123;01/04/2026;12345678909;ABC1D23;1.000,00;5,00;10,00");
 
         assertThat(resultado.linhas().get(0).kmSaida()).isEqualTo(1000);
         assertThat(resultado.linhas().get(0).servicos()).isEqualTo(5);
@@ -74,7 +74,7 @@ class CsvManifestoParserTest {
 
     @Test
     void zeroComoAusenteSinalizaMasGravaOZero() throws IOException {
-        ResultadoParse resultado = parse("123;01/04/2026;12345678901;ABC1D23;100;5;0,00");
+        ResultadoParse resultado = parse("123;01/04/2026;12345678909;ABC1D23;100;5;0,00");
 
         assertThat(resultado.linhas().get(0).kgReal()).isEqualByComparingTo(BigDecimal.ZERO);
         ProblemaCelula kg = problemaNaColuna(resultado.problemas().get(0), "Kg Real");
@@ -85,7 +85,7 @@ class CsvManifestoParserTest {
     void erroEmCampoObrigatorioBloqueiaALinha() throws IOException {
         ResultadoParse resultado = parse(
                 "123;01/04/2026;123;ABC1D23;100;5;10,00",
-                "124;31/02/2026;12345678901;ABC1D23;100;5;10,00");
+                "124;31/02/2026;12345678909;ABC1D23;100;5;10,00");
 
         assertThat(resultado.temErro()).isTrue();
         assertThat(resultado.linhas()).isEmpty();
@@ -95,8 +95,26 @@ class CsvManifestoParserTest {
     }
 
     @Test
+    void cnpjNaColunaCpfBloqueiaALinhaDizendoOQueVeio() throws IOException {
+        ResultadoParse resultado = parse(
+                "123;01/04/2026;11.222.333/0001-81;ABC1D23;100;5;10,00",
+                "124;01/04/2026;12345678909;ABC1D23;100;5;10,00");
+
+        assertThat(resultado.temErro()).isTrue();
+        assertThat(resultado.linhas()).hasSize(1);
+        assertThat(resultado.linhas().get(0).cpf()).isEqualTo("12345678909");
+
+        ProblemaCelula cpf = problemaNaColuna(resultado.problemas().get(0), "CPF");
+        assertThat(cpf.severidade()).isEqualTo(Severidade.ERRO);
+        assertThat(cpf.estado()).isEqualTo(EstadoCampo.NAO_CONVERTE);
+        assertThat(cpf.valorEncontrado()).isEqualTo("11.222.333/0001-81");
+        assertThat(cpf.valorEsperado()).isEqualTo("CPF com 11 digitos e digito verificador valido");
+        assertThat(cpf.mensagem()).endsWith("CPF invalido: 14 digitos, parece um CNPJ");
+    }
+
+    @Test
     void manifestoComZeroAEsquerdaViraOMesmoId() throws IOException {
-        ResultadoParse resultado = parse("00123;01/04/2026;12345678901;ABC1D23;100;5;10,00");
+        ResultadoParse resultado = parse("00123;01/04/2026;12345678909;ABC1D23;100;5;10,00");
 
         assertThat(resultado.linhas().get(0).idManifesto()).isEqualTo(123);
     }
@@ -107,7 +125,7 @@ class CsvManifestoParserTest {
 
     @Test
     void arquivoSemCabecalhoERecusado() {
-        assertThatThrownBy(() -> verificar("123;01/04/2026;12345678901;ABC1D23\n456;02/04/2026;;XYZ9A87\n"))
+        assertThatThrownBy(() -> verificar("123;01/04/2026;12345678909;ABC1D23\n456;02/04/2026;;XYZ9A87\n"))
                 .isInstanceOf(ArquivoInvalidoException.class)
                 .hasMessageContaining("falta o cabecalho");
     }
@@ -135,7 +153,7 @@ class CsvManifestoParserTest {
 
     @Test
     void arquivoComCabecalhoEDadosPassa() {
-        assertThatCode(() -> verificar(CABECALHO + "\n123;01/04/2026;12345678901;ABC1D23;100;5;10,00\n"))
+        assertThatCode(() -> verificar(CABECALHO + "\n123;01/04/2026;12345678909;ABC1D23;100;5;10,00\n"))
                 .doesNotThrowAnyException();
     }
 }

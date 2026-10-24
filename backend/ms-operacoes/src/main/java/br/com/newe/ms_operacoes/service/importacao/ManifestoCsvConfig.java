@@ -208,16 +208,6 @@ public final class ManifestoCsvConfig {
         return texto.isEmpty() ? null : texto;
     }
 
-    /** So os digitos: serve para CPF, CNPJ, PIS e CEP, que vem formatados de formas diferentes. */
-    public static String digitosOuNulo(String valor) {
-        String texto = textoOuNulo(valor);
-        if (texto == null) {
-            return null;
-        }
-        String digitos = texto.replaceAll("\\D", "");
-        return digitos.isEmpty() ? null : digitos;
-    }
-
     /**
      * Le como decimal antes de truncar: colunas de contagem (Coletas, Entregas, ...)
      * vem com casas decimais no CSV, e um replaceAll de nao-digitos transformaria

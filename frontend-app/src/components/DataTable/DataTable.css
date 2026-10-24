@@ -2,6 +2,7 @@
   overflow: auto;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
+  background: #ffffff;
   scrollbar-width: thin;
   scrollbar-color: rgba(37, 99, 235, 0.85) #e2e8f0;
 }
@@ -28,28 +29,67 @@
   font-size: 13px;
 }
 
+/* Cabeçalho no padrão da tela de Operação Mensal: sem caixa alta */
 .data-table th {
   position: sticky;
   top: 0;
   z-index: 1;
+  padding: 0;
   text-align: left;
-  padding: 8px 12px;
   background: #f1f5f9;
-  color: #64748b;
+  color: #475569;
   font-size: 11px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   white-space: nowrap;
+}
+
+.data-table-titulo {
+  display: inline-flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 10px 12px;
+}
+
+.data-table-ordenar {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.data-table-ordenar:hover,
+.data-table-ordenar:focus-visible {
+  background: #e2e8f0;
+  color: #1d4ed8;
+}
+
+.data-table-ordenar:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
 }
 
 .data-table td {
   height: 44px;
   padding: 0 12px;
   border-top: 1px solid #e2e8f0;
+  background: #ffffff;
   color: #334155;
   font-weight: 500;
   white-space: nowrap;
+}
+
+.data-table th.data-table-direita,
+.data-table td.data-table-direita {
+  text-align: right;
+}
+
+.data-table th.data-table-direita .data-table-titulo {
+  justify-content: flex-end;
 }
 
 /* Primeira coluna fixa: continua visível ao rolar para a direita */
@@ -66,5 +106,121 @@
 
 .data-table td:first-child {
   z-index: 1;
-  background: #ffffff;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+/* Layout fixo: as larguras das colunas mandam e o texto longo corta com reticências */
+.data-table--fixo {
+  min-width: 0;
+  table-layout: fixed;
+}
+
+.data-table--fixo td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.data-table-linha-link {
+  cursor: pointer;
+}
+
+.data-table-linha-link:hover td {
+  background: #f8fafc;
+}
+
+.data-table-linha-link:hover {
+  outline: 2px solid #2563eb;
+  outline-offset: -2px;
+}
+
+.data-table-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.data-table-link:hover,
+.data-table-link:focus-visible {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.data-table-vazio {
+  padding: 32px 0;
+  color: #64748b;
+  font-size: 14px;
+  text-align: center;
+}
+
+.data-table-cards {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .data-table-wrap--cards-mobile {
+    display: none;
+  }
+
+  .data-table-cards {
+    display: grid;
+    gap: 12px;
+  }
+
+  .data-table-card {
+    display: block;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    color: inherit;
+    text-decoration: none;
+    background: #ffffff;
+  }
+
+  .data-table-card--link:hover,
+  .data-table-card--link:focus-visible {
+    border-color: #93c5fd;
+    background: #f8fafc;
+    outline: 2px solid #2563eb;
+    outline-offset: 1px;
+  }
+
+  .data-table-card-titulo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    color: #1e293b;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .data-table-card-titulo > span {
+    color: #64748b;
+    font-size: 24px;
+    line-height: 1;
+  }
+
+  .data-table-card-campos {
+    display: grid;
+    gap: 8px;
+  }
+
+  .data-table-card-campo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 12px;
+  }
+
+  .data-table-card-campo > span {
+    color: #64748b;
+  }
+
+  .data-table-card-campo > strong {
+    color: #334155;
+    font-weight: 600;
+    text-align: right;
+  }
 }

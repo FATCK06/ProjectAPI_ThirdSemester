@@ -24,6 +24,12 @@ api.interceptors.request.use(
     (error) => Promise.reject(error),
 );
 
+/**
+ * Disparado quando o gateway responde 403. Este arquivo vive fora do React e não
+ * alcança o toast; o DefaultLayout escuta o evento e mostra o aviso.
+ */
+export const EVENTO_ACESSO_NEGADO = 'api:acesso-negado';
+
 // Se o gateway responder 401 (token expirado ou inválido), limpa a sessão e
 // volta para o login. O login em si é ignorado: senha errada também dá 401.
 api.interceptors.response.use(
@@ -34,6 +40,11 @@ api.interceptors.response.use(
         if (error.response?.status === 401 && !ehLogin) {
             logout();
             window.location.href = '/login';
+        }
+
+        // Logado, mas sem permissão: a sessão continua válida, só avisa.
+        if (error.response?.status === 403 && !ehLogin) {
+            window.dispatchEvent(new CustomEvent(EVENTO_ACESSO_NEGADO));
         }
 
         return Promise.reject(error);

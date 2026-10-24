@@ -1,0 +1,51 @@
+.paginacao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.paginacao-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.paginacao button {
+  min-height: 36px;
+  font-family: inherit;
+  font-size: 13px;
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+}
+
+.paginacao button:disabled {
+  color: #94a3b8;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+@media (max-width: 520px) {
+  .paginacao {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .paginacao-controles {
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .paginacao-controles button {
+    padding-inline: 9px;
+  }
+}

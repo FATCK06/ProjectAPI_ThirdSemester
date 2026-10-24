@@ -44,16 +44,10 @@ echo  JDK: %JAVA_HOME%
 REM ─────────────────────────────────────────────────────────────
 REM 2. Credenciais locais (nao versionadas)
 REM ─────────────────────────────────────────────────────────────
-set FALTA=0
-call :checa_dev "ms-usuarios\ms-usuarios"
-call :checa_dev "ms-frota"
-call :checa_dev "ms-operacoes"
-call :checa_dev "api-gateway"
-
-if %FALTA% NEQ 0 (
+if not exist ".env" (
     echo.
-    echo  Copie cada application-dev.properties.example para application-dev.properties
-    echo  e preencha com os dados do time. Veja docs\task\onboarding.md
+    echo  [FALTA] backend\.env
+    echo  Copie o .env.example para .env e preencha com os dados do time.
     echo.
     pause
     exit /b 1
@@ -86,7 +80,7 @@ REM 4. Sobe
 REM ─────────────────────────────────────────────────────────────
 echo.
 echo  Subindo ms-usuarios  :8081
-start "ms-usuarios"  cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-usuarios\ms-usuarios && mvnw.cmd spring-boot:run"
+start "ms-usuarios"  cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-usuarios && mvnw.cmd spring-boot:run"
 
 echo  Subindo ms-frota     :8082
 start "ms-frota"     cmd /k "set JAVA_HOME=%JAVA_HOME%&& cd /d %~dp0ms-frota && mvnw.cmd spring-boot:run"
@@ -107,10 +101,3 @@ echo  Depois abra http://localhost:5173
 echo  Para derrubar tudo: parar-tudo.cmd
 echo.
 exit /b 0
-
-:checa_dev
-if not exist "%~1\src\main\resources\application-dev.properties" (
-    echo  [FALTA] %~1\src\main\resources\application-dev.properties
-    set FALTA=1
-)
-goto :eof

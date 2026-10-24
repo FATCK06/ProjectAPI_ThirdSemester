@@ -21,7 +21,7 @@ public record UsuarioResponse(
                 usuario.getIdUsuario(),
                 usuario.getNome(),
                 usuario.getEmail(),
-                usuario.getPerfilAcesso(),
+                usuario.getPerfilAcesso().name(),
                 usuario.getStatusAtivo()
         );
     }

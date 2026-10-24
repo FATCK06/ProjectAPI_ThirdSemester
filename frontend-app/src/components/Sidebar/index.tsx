@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Users, TrendingUp } from 'lucide-react';
+import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Gauge, TrendingUp } from 'lucide-react';
 import neweLogo from '../../assets/image 3.png';
 import './sidebar.css';
 import { useState } from 'react';
-import { ehAdministrador, logout, usuarioLogado } from '../../services/auth';
+import { logout, rotuloPerfil, temPermissao, usuarioLogado } from '../../services/auth';
 
 interface SidebarProps {
   isMinimized: boolean;
@@ -14,7 +14,8 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
   const [isImportOpen, setIsImportOpen] = useState(false);
   const navigate = useNavigate();
   const usuario = usuarioLogado();
-  const admin = ehAdministrador();
+  const podeGerenciarUsuarios = temPermissao('GERENCIAR_USUARIOS');
+  const podeVerStatus = temPermissao('VER_STATUS_SERVICO');
 
   const handleLogout = () => {
     logout();
@@ -51,17 +52,17 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
         </NavLink>
 
         <NavLink
-          to="/motoristas"
+          to="/operacao-mensal"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-          title="Motoristas"
+          title="Operação Mensal"
         >
-          <Users size={20} />
-          {!isMinimized && <span>Motoristas</span>}
+          <Gauge size={20} />
+          {!isMinimized && <span>Operação Mensal</span>}
         </NavLink>
 
         <NavLink to="/ranking" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} title="Ranking mensal">
           <TrendingUp size={20} />
-          {!isMinimized && <span>Ranking mensal</span>}
+          {!isMinimized && <span>Ranking Mensal</span>}
         </NavLink>
 
         <div className="nav-accordion">
@@ -123,26 +124,26 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
 
         {/* Itens de administração. Esconder é só conveniência visual — quem
             barra de fato é o gateway, que confere o perfil dentro do token. */}
-        {admin && (
-          <>
-            <NavLink
-              to="/usuarios/novo"
-              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-              title="Cadastrar usuário"
-            >
-              <UserPlus size={20} />
-              {!isMinimized && <span>Cadastrar usuário</span>}
-            </NavLink>
+        {podeGerenciarUsuarios && (
+          <NavLink
+            to="/usuarios/novo"
+            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+            title="Cadastrar usuário"
+          >
+            <UserPlus size={20} />
+            {!isMinimized && <span>Cadastrar usuário</span>}
+          </NavLink>
+        )}
 
-            <NavLink
-              to="/status"
-              className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-              title="Status dos serviços"
-            >
-              <Activity size={20} />
-              {!isMinimized && <span>Status dos serviços</span>}
-            </NavLink>
-          </>
+        {podeVerStatus && (
+          <NavLink
+            to="/status"
+            className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
+            title="Status dos serviços"
+          >
+            <Activity size={20} />
+            {!isMinimized && <span>Status dos serviços</span>}
+          </NavLink>
         )}
 
       </nav>
@@ -151,7 +152,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
         {!isMinimized && usuario && (
           <div className="usuario-info">
             <span className="usuario-nome">{usuario.nome || 'Usuário'}</span>
-            <span className="usuario-perfil">{usuario.perfil}</span>
+            <span className="usuario-perfil">{rotuloPerfil(usuario.perfil)}</span>
           </div>
         )}
 

@@ -79,5 +79,5 @@ class ImportacaoControllerTest {
 
     // Mesmo formato minimo do CsvManifestoParserTest: so as colunas obrigatorias.
     private static final byte[] CSV_UMA_LINHA = ("Manifesto;Data;CPF;Veículo;Km saída;Serviços;Kg Real\n"
-            + "123;01/07/2026;12345678901;ABC1D23;100;5;10,00\n").getBytes(ManifestoCsvConfig.CHARSET);
+            + "123;01/07/2026;12345678909;ABC1D23;100;5;10,00\n").getBytes(ManifestoCsvConfig.CHARSET);
 }
