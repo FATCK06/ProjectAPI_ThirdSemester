@@ -80,6 +80,14 @@ public class DashboardFrotaController {
         return ResponseEntity.ok(motoristasMesService.listar(mesReferencia, pagina));
     }
 
+    @GetMapping("/motoristas/{motoristaId}")
+    public ResponseEntity<MotoristaMesDTO> motoristaMes(
+            @org.springframework.web.bind.annotation.PathVariable UUID motoristaId,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia) {
+        MotoristaMesDTO motorista = motoristasMesService.buscar(motoristaId, mesReferencia);
+        return motorista == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(motorista);
+    }
+
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
     public ResponseEntity<List<RankingMotoristaDTO>> rankingMotoristas(
             @RequestParam("mesReferencia") @MesReferencia String mesReferencia,

@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { buscarRankingMensal, type RankingMensalMotorista } from '../../../services/Ranking';
 import { TableSkeleton } from '../../../components/SkeletonLoader/TableSkeleton';
 import { Aviso, AVISO_CUSTOS_NAO_INFORMADOS, AVISO_SEM_PERMISSAO_FINANCEIRO, AVISO_SEM_VIAGENS_MEDIA } from '../../../components/Aviso/Aviso';
@@ -7,14 +8,20 @@ import { mesAtual } from '../../../utils/datas';
 import { formatarMoeda, formatarPercentual, SEM_VALOR } from '../../../utils/formatacao';
 import './ranking.css';
 import { PageHeader } from '../../../components/PageHeader';
-import { DataTable, type ColunaTabela } from '../../../components/DataTable/DataTable';
+import { DataTable, type ColunaTabela, type OrdenacaoTabela } from '../../../components/DataTable/DataTable';
 
 type Linha = RankingMensalMotorista;
+type RestauracaoTabela = {
+  pagina?: number;
+  ordenacao?: OrdenacaoTabela | null;
+  scrollY?: number;
+};
 const NAO_INFORMADO = 'N\u00e3o informado';
 
 const COLUNAS_OPERACIONAIS: ColunaTabela<Linha>[] = [
   { chave: 'nome', titulo: 'Motorista', render: (l) => l.nome || l.motorista || NAO_INFORMADO, ordenarPor: (l) => l.nome || l.motorista },
   { chave: 'tipoVeiculo', titulo: 'Tipo de veículo', render: (l) => l.tipoVeiculo || NAO_INFORMADO, ordenarPor: (l) => l.tipoVeiculo },
+  { chave: 'placa', titulo: 'Placa', render: (l) => l.placa || NAO_INFORMADO, ordenarPor: (l) => l.placa },
   { chave: 'numeroViagens', titulo: 'N\u00famero de Viagens', render: (l) => l.numeroViagens, ordenarPor: (l) => l.numeroViagens },
   { chave: 'utilizacao', titulo: 'Utilização', render: (l) => formatarPercentual(l.utilizacao), ordenarPor: (l) => l.utilizacao },
 ];
@@ -36,12 +43,27 @@ const COLUNAS_FINANCEIRAS: ColunaTabela<Linha>[] = [
 ];
 
 export function Ranking() {
+  const location = useLocation();
+  const restauracao = (location.state as { restauracao?: RestauracaoTabela } | null)?.restauracao;
+  const [searchParams, setSearchParams] = useSearchParams();
   const financeiro = podeVerDadosFinanceiros();
-  const [mes, setMes] = useState(mesAtual);
+  const parametroMes = searchParams.get('mes');
+  const mes = parametroMes && /^\d{4}-(0[1-9]|1[0-2])$/.test(parametroMes) ? parametroMes : mesAtual();
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
   const [tentativa, setTentativa] = useState(0);
+  const scrollRestaurado = useRef(false);
+
+  useEffect(() => {
+    if (parametroMes !== mes) {
+      setSearchParams((atual) => {
+        const parametros = new URLSearchParams(atual);
+        parametros.set('mes', mes);
+        return parametros;
+      }, { replace: true });
+    }
+  }, [mes, parametroMes, setSearchParams]);
 
   useEffect(() => {
     let cancelado = false;
@@ -54,6 +76,12 @@ export function Ranking() {
     return () => { cancelado = true; };
   }, [mes, tentativa]);
 
+  useEffect(() => {
+    if (carregando || restauracao?.scrollY === undefined || scrollRestaurado.current) return;
+    scrollRestaurado.current = true;
+    requestAnimationFrame(() => window.scrollTo(0, restauracao.scrollY ?? 0));
+  }, [carregando, restauracao]);
+
   // Mês sem nenhuma viagem apurável: o back soma custo zero para todos.
   const custosNaoInformados = financeiro && linhas.length > 0 && linhas.every((linha) => !linha.custoTotal);
   const colunas = financeiro ? [...COLUNAS_OPERACIONAIS, ...COLUNAS_FINANCEIRAS] : COLUNAS_OPERACIONAIS;
@@ -62,7 +90,14 @@ export function Ranking() {
     <div className="ranking-page">
       <PageHeader titulo="Ranking Mensal" subtitulo="Compare o desempenho dos motoristas no período selecionado">
         <label htmlFor="ranking-page-mes">Mês de referência
-          <input id="ranking-page-mes" type="month" value={mes} onChange={(event) => setMes(event.target.value)} />
+          <input id="ranking-page-mes" type="month" value={mes} onChange={(event) => {
+            if (!event.target.value) return;
+            setSearchParams((atual) => {
+              const parametros = new URLSearchParams(atual);
+              parametros.set('mes', event.target.value);
+              return parametros;
+            });
+          }} />
         </label>
       </PageHeader>
 
@@ -77,7 +112,15 @@ export function Ranking() {
           colunas={colunas}
           linhas={linhas}
           chaveLinha={(linha) => linha.motoristaId}
-          ordenacaoInicial={{ chave: financeiro ? 'rentabilidade' : 'numeroViagens', direcao: 'desc' }}
+          linkLinha={(linha) => `/motoristas/${linha.motoristaId}/historico?mes=${encodeURIComponent(mes)}&origem=ranking`}
+          estadoNavegacaoLinha={(_, estado) => ({
+            retorno: {
+              destino: `/ranking?mes=${encodeURIComponent(mes)}`,
+              restauracao: { ...estado, scrollY: window.scrollY },
+            },
+          })}
+          ordenacaoInicial={restauracao?.ordenacao ?? { chave: financeiro ? 'rentabilidade' : 'numeroViagens', direcao: 'desc' }}
+          paginaInicial={restauracao?.pagina ?? 1}
           cardsNoMobile
           itensPorPagina={20}
         />

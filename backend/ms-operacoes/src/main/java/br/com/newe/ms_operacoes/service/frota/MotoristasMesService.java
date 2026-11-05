@@ -85,4 +85,29 @@ public class MotoristasMesService {
                     linha.getAvaliacaoMedia());
         });
     }
+
+    public MotoristaMesDTO buscar(UUID motoristaId, String mesReferencia) {
+        List<MotoristaMesView> linhas = viagemRepository.resumoMotoristaMes(motoristaId, mesReferencia);
+        if (linhas.isEmpty()) return null;
+
+        MotoristaMesView linha = linhas.get(0);
+        MotoristaResumo motorista = frotaClient.buscarMotoristas(List.of(motoristaId)).stream().findFirst().orElse(null);
+        UUID veiculoId = linha.getVeiculoId();
+        YearMonth mes = YearMonth.parse(mesReferencia);
+        long diasNoMes = mes.lengthOfMonth();
+        long diasDisponiveis = IndicadoresService.diasDisponiveis(mes);
+        return new MotoristaMesDTO(
+                motoristaId,
+                veiculoId,
+                motorista != null && motorista.nome() != null ? motorista.nome() : NAO_INFORMADO,
+                frotaClient.buscarPlacas(List.of(veiculoId)).getOrDefault(veiculoId, NAO_INFORMADO),
+                frotaClient.buscarTiposVeiculo(List.of(veiculoId)).getOrDefault(veiculoId, NAO_INFORMADO),
+                frotaClient.buscarModelos(List.of(veiculoId)).getOrDefault(veiculoId, NAO_INFORMADO),
+                linha.getViagensNoMes(),
+                linha.getDiasEmOperacao(),
+                diasDisponiveis,
+                CalculoIndicadores.disponibilidade(diasDisponiveis, diasNoMes),
+                CalculoIndicadores.utilizacao(linha.getDiasEmOperacao(), diasNoMes),
+                linha.getAvaliacaoMedia());
+    }
 }

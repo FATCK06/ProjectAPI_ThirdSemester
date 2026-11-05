@@ -6,6 +6,7 @@ export interface RankingMensalMotorista {
   // Compatibilidade com versões da API que serializavam o nome como "motorista".
   motorista?: string | null;
   tipoVeiculo: string | null;
+  placa?: string | null;
   numeroViagens: number;
   viagens?: number;
   disponibilidade: number;

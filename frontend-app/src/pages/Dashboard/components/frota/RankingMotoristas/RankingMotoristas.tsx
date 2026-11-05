@@ -143,6 +143,7 @@ export function RankingMotoristas({ mesReferencia, indicadores }: PropsRankingMo
           colunas={colunas}
           linhas={itens}
           chaveLinha={(l) => l.motoristaId}
+          linkLinha={(l) => `/motoristas/${l.motoristaId}/historico?mes=${encodeURIComponent(mesReferencia)}&origem=dashboard`}
           alturaMaxima={232}
         />
       )}

@@ -47,11 +47,27 @@ export interface MotoristaFicha {
 export async function buscarMotoristasMes(
   mesReferencia: string,
   pagina: number,
+  tamanho = 20,
 ): Promise<MotoristasMesPage> {
   const { data } = await api.get<MotoristasMesPage>("/dashboard/motoristas", {
-    params: { mesReferencia, page: pagina - 1, size: 20 },
+    params: { mesReferencia, page: pagina - 1, size: tamanho },
   });
   return data;
+}
+
+export async function buscarMotoristaNoMes(motoristaId: string, mesReferencia: string): Promise<MotoristaMes | null> {
+  try {
+    const { data } = await api.get<MotoristaMes>(`/dashboard/motoristas/${motoristaId}`, {
+      params: { mesReferencia },
+    });
+    return data;
+  } catch (erro) {
+    if (typeof erro === "object" && erro !== null && "response" in erro) {
+      const resposta = (erro as { response?: { status?: number } }).response;
+      if (resposta?.status === 404) return null;
+    }
+    throw erro;
+  }
 }
 
 export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {

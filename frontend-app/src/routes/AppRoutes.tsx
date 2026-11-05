@@ -11,6 +11,7 @@ import { OperacaoMensal } from '../pages/Frota/OperacaoMensal';
 import { FichaMotorista } from '../pages/Frota/OperacaoMensal/FichaMotorista';
 import { PrivateRoute } from './PrivateRoute';
 import { Ranking } from '../pages/Frota/Ranking';
+import { HistoricoMotorista } from '../pages/Frota/HistoricoMotorista';
 import { RotaComPermissao } from './RotaComPermissao';
 
 export function AppRoutes() {
@@ -28,6 +29,7 @@ export function AppRoutes() {
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/operacao-mensal" element={<OperacaoMensal />} />
           <Route path="/operacao-mensal/motoristas/:motoristaId" element={<FichaMotorista />} />
+          <Route path="/motoristas/:motoristaId/historico" element={<HistoricoMotorista />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/importacoes/veiculos" element={<VeiculosImport />} />
           <Route path="/importacoes/historico" element={<HistoricoImport />} />

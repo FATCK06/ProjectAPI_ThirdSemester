@@ -337,7 +337,7 @@ export function Motoristas() {
                   </thead>
                   <tbody>
                     {motoristasOrdenados.map((motorista) => {
-                      const destino = `/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`;
+                      const destino = `/motoristas/${motorista.motoristaId}/historico?mes=${encodeURIComponent(mes)}&origem=motoristas`;
                       return (
                         <tr
                           key={`${motorista.motoristaId}-${motorista.veiculoId}`}
@@ -369,7 +369,7 @@ export function Motoristas() {
                 {motoristasOrdenados.map((motorista) => (
                   <Link
                     key={`${motorista.motoristaId}-${motorista.veiculoId}`}
-                    to={`/motoristas/${motorista.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
+                    to={`/motoristas/${motorista.motoristaId}/historico?mes=${encodeURIComponent(mes)}&origem=motoristas`}
                     className="motorista-mobile-card"
                   >
                     <span className="motorista-mobile-name">
