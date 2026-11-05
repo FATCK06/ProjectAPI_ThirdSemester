@@ -111,6 +111,10 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.mesReferencia, v.idMotorista")
     List<SomaMotoristaMesView> somasPorMotoristaNosMeses(@Param("meses") Collection<String> meses);
 
+    /** Meses com ao menos uma viagem importada, do mais antigo ao mais novo. */
+    @Query("select distinct v.mesReferencia from Viagem v order by v.mesReferencia")
+    List<String> buscarMesesImportados();
+
     /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "
             + "count(v) as numeroViagens, "

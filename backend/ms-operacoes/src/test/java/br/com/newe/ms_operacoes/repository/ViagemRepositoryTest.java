@@ -91,6 +91,15 @@ class ViagemRepositoryTest {
         assertThat(abril.getCustoTotal()).isEqualByComparingTo("630.75");
     }
 
+    @Test
+    void mesesImportadosSemRepetirEmOrdemCrescente() {
+        gravar(17001, 5, 5, "300.00", "100.00", UUID.randomUUID());
+        gravar(16882, 1, "1226.21", "430.75", UUID.randomUUID());
+        gravar(16883, 2, "500.00", "200.00", UUID.randomUUID());
+
+        assertThat(repository.buscarMesesImportados()).containsExactly("2026-04", "2026-05");
+    }
+
     private void gravar(int manifesto, int dia, String valorFretes, String valeFrete, UUID agregado) {
         gravar(manifesto, 4, dia, valorFretes, valeFrete, agregado);
     }
