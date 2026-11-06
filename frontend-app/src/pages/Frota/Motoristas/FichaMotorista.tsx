@@ -4,6 +4,7 @@ import {
   buscarFichaMotorista,
   type MotoristaFicha as MotoristaFichaDados,
 } from "../../../services/Motoristas";
+import { formatarCep, formatarCpf } from "../../../utils/formatacao";
 import "./motoristas.css";
 
 type Status = "loading" | "success" | "error";
@@ -93,7 +94,7 @@ export function FichaMotorista() {
           <section className="ficha-secao" aria-labelledby="ficha-dados-pessoais">
             <h2 id="ficha-dados-pessoais">Dados pessoais</h2>
             <dl className="ficha-grid">
-              <div><dt>CPF</dt><dd>{motorista.cpf}</dd></div>
+              <div><dt>CPF</dt><dd>{formatarCpf(motorista.cpf)}</dd></div>
               <div><dt>PIS</dt><dd>{valorOuAusente(motorista.pis)}</dd></div>
               <div><dt>Data de nascimento</dt><dd>{formatarData(motorista.dataNascimento)}</dd></div>
             </dl>
@@ -102,11 +103,11 @@ export function FichaMotorista() {
           <section className="ficha-secao" aria-labelledby="ficha-endereco">
             <h2 id="ficha-endereco">Endereço</h2>
             <dl className="ficha-grid">
-              <div><dt>CEP</dt><dd>{valorOuAusente(motorista.cep)}</dd></div>
+              <div><dt>CEP</dt><dd>{formatarCep(motorista.cep)}</dd></div>
               <div><dt>Logradouro</dt><dd>{valorOuAusente(motorista.logradouro)}</dd></div>
               <div><dt>Número</dt><dd>{valorOuAusente(motorista.numero)}</dd></div>
               <div><dt>Bairro</dt><dd>{valorOuAusente(motorista.bairro)}</dd></div>
-              <div><dt>ID da cidade</dt><dd>{valorOuAusente(motorista.idCidade)}</dd></div>
+              <div><dt>Cidade</dt><dd>{valorOuAusente(motorista.nomeCidade)}</dd></div>
             </dl>
           </section>
         </>

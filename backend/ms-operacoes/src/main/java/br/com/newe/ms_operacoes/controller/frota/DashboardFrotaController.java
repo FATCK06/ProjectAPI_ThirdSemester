@@ -1,16 +1,24 @@
 package br.com.newe.ms_operacoes.controller.frota;
 
+import java.io.IOException;
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +33,7 @@ import br.com.newe.ms_operacoes.dto.frota.RankingMotoristaDTO;
 import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
+import br.com.newe.ms_operacoes.service.exportacao.CsvExportacao;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
 import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService;
 import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisLonga;
@@ -63,6 +72,8 @@ public class DashboardFrotaController {
     @GetMapping("/motoristas")
     public ResponseEntity<Page<MotoristaMesDTO>> motoristasMes(
             @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
+            @RequestParam(value = "busca", defaultValue = "") String busca,
+            @RequestParam(value = "tipoVeiculo", defaultValue = "") String tipoVeiculo,
             Pageable pageable) {
         // Página e ordenação limitadas para evitar consultas inválidas ou páginas
         // excessivamente grandes.
@@ -73,11 +84,45 @@ public class DashboardFrotaController {
             throw new DadoInvalidoException("sort", "coluna inválida");
         }
 
+        if (!busca.isBlank() || !tipoVeiculo.isBlank()) {
+            String termo = normalizarBusca(busca);
+            String placaTermo = termo.replaceAll("[^a-z0-9]", "");
+            List<MotoristaMesDTO> filtrados = motoristasMesService
+                    .listar(mesReferencia, Pageable.unpaged())
+                    .getContent()
+                    .stream()
+                    .filter(motorista -> correspondeBusca(motorista, termo, placaTermo))
+                    .filter(motorista -> tipoVeiculo.isBlank() || motorista.tipoVeiculo().equals(tipoVeiculo))
+                    .sorted(comparadorOrdenacaoMensal(pageable.getSort()))
+                    .toList();
+            int inicio = (int) Math.min(pageable.getOffset(), filtrados.size());
+            int fim = (int) Math.min((long) inicio + pageable.getPageSize(), filtrados.size());
+            return ResponseEntity.ok(new PageImpl<>(filtrados.subList(inicio, fim), pageable, filtrados.size()));
+        }
+
         // Uma ordenação determinística evita mudanças arbitrárias entre páginas.
         Pageable pagina = pageable.getSort().isUnsorted()
                 ? PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("motoristaId"))
                 : pageable;
         return ResponseEntity.ok(motoristasMesService.listar(mesReferencia, pagina));
+    }
+
+    @GetMapping(value = "/motoristas/csv", produces = "text/csv")
+    public ResponseEntity<byte[]> exportarMotoristasMesCsv(
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
+            @RequestParam(value = "busca", defaultValue = "") String busca,
+            @RequestParam(value = "tipoVeiculo", defaultValue = "") String tipoVeiculo) throws IOException {
+        List<MotoristaMesDTO> motoristas = motoristasMesService.listar(mesReferencia, Pageable.unpaged()).getContent();
+        String termo = normalizarBusca(busca);
+        String placaTermo = termo.replaceAll("[^a-z0-9]", "");
+        List<? extends List<?>> linhas = motoristas.stream()
+                .filter(motorista -> correspondeBusca(motorista, termo, placaTermo))
+                .filter(motorista -> tipoVeiculo.isBlank() || motorista.tipoVeiculo().equals(tipoVeiculo))
+                .map(DashboardFrotaController::linhaCsv)
+                .toList();
+        return respostaCsv("mensal_" + mesReferencia.replace('-', '_') + ".csv", List.of(
+                "Motorista", "Tipo de veículo", "Modelo", "Placa", "Viagens",
+                "Dias em operação", "Disponibilidade", "Utilização", "Efetividade"), linhas);
     }
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"
@@ -137,5 +182,62 @@ public class DashboardFrotaController {
             case "motoristaId", "veiculoId", "viagensNoMes", "diasEmOperacao" -> true;
             default -> false;
         });
+    }
+
+    private static Comparator<MotoristaMesDTO> comparadorOrdenacaoMensal(Sort sort) {
+        Comparator<MotoristaMesDTO> comparador = (a, b) -> 0;
+        for (Sort.Order ordem : sort) {
+            Comparator<MotoristaMesDTO> porCampo = switch (ordem.getProperty()) {
+                case "motoristaId" -> Comparator.comparing(MotoristaMesDTO::motoristaId);
+                case "veiculoId" -> Comparator.comparing(MotoristaMesDTO::veiculoId);
+                case "viagensNoMes" -> Comparator.comparingLong(MotoristaMesDTO::viagensNoMes);
+                case "diasEmOperacao" -> Comparator.comparingLong(MotoristaMesDTO::diasUtilizados);
+                default -> throw new DadoInvalidoException("sort", "coluna inválida");
+            };
+            comparador = comparador.thenComparing(ordem.isDescending() ? porCampo.reversed() : porCampo);
+        }
+        return comparador;
+    }
+
+    private static boolean correspondeBusca(MotoristaMesDTO motorista, String termo, String placaTermo) {
+        if (termo.isEmpty()) {
+            return true;
+        }
+        String nome = normalizarBusca(motorista.nomeMotorista());
+        String placa = motorista.placa().toLowerCase(Locale.forLanguageTag("pt-BR"))
+                .replaceAll("[^a-z0-9]", "");
+        return nome.contains(termo) || (!placaTermo.isEmpty() && placa.contains(placaTermo));
+    }
+
+    private static String normalizarBusca(String valor) {
+        return Normalizer.normalize(valor, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}", "")
+                .toLowerCase(Locale.forLanguageTag("pt-BR"))
+                .trim();
+    }
+
+    private static List<?> linhaCsv(MotoristaMesDTO motorista) {
+        return List.of(
+                valorOuVazio(motorista.nomeMotorista()),
+                valorOuVazio(motorista.tipoVeiculo()),
+                valorOuVazio(motorista.modelo()),
+                valorOuVazio(motorista.placa()),
+                motorista.viagensNoMes(),
+                motorista.diasUtilizados(),
+                valorOuVazio(motorista.disponibilidade()),
+                valorOuVazio(motorista.utilizacao()),
+                valorOuVazio(motorista.percentualEfetividade()));
+    }
+
+    private static Object valorOuVazio(Object valor) {
+        return valor == null ? "" : valor;
+    }
+
+    private static ResponseEntity<byte[]> respostaCsv(String nomeArquivo, List<String> cabecalho,
+            List<? extends List<?>> linhas) throws IOException {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(new MediaType("text", "csv", java.nio.charset.StandardCharsets.UTF_8));
+        headers.setContentDisposition(ContentDisposition.attachment().filename(nomeArquivo).build());
+        return ResponseEntity.ok().headers(headers).body(CsvExportacao.gerar(cabecalho, linhas));
     }
 }

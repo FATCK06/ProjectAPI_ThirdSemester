@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { buscarRankingMensal, type RankingMensalMotorista } from '../../../services/Ranking';
+import { baixarRankingMensalCsv, buscarRankingMensal, type RankingMensalMotorista } from '../../../services/Ranking';
 import { TableSkeleton } from '../../../components/SkeletonLoader/TableSkeleton';
 import { Aviso, AVISO_CUSTOS_NAO_INFORMADOS, AVISO_SEM_PERMISSAO_FINANCEIRO, AVISO_SEM_VIAGENS_MEDIA } from '../../../components/Aviso/Aviso';
 import { podeVerDadosFinanceiros } from '../../../services/auth';
@@ -8,6 +8,8 @@ import { formatarMoeda, formatarPercentual, SEM_VALOR } from '../../../utils/for
 import './ranking.css';
 import { PageHeader } from '../../../components/PageHeader';
 import { DataTable, type ColunaTabela } from '../../../components/DataTable/DataTable';
+import { ExportarCsvButton } from '../../../components/ExportarCsvButton/ExportarCsvButton';
+import type { OrdenacaoTabela } from '../../../components/DataTable/DataTable';
 
 type Linha = RankingMensalMotorista;
 const NAO_INFORMADO = 'N\u00e3o informado';
@@ -38,6 +40,11 @@ const COLUNAS_FINANCEIRAS: ColunaTabela<Linha>[] = [
 export function Ranking() {
   const financeiro = podeVerDadosFinanceiros();
   const [mes, setMes] = useState(mesAtual);
+  const ordenacaoInicial: OrdenacaoTabela = {
+    chave: financeiro ? 'rentabilidade' : 'numeroViagens',
+    direcao: 'desc',
+  };
+  const [ordenacao, setOrdenacao] = useState(ordenacaoInicial);
   const [linhas, setLinhas] = useState<Linha[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -64,6 +71,16 @@ export function Ranking() {
         <label htmlFor="ranking-page-mes">Mês de referência
           <input id="ranking-page-mes" type="month" value={mes} onChange={(event) => setMes(event.target.value)} />
         </label>
+        <ExportarCsvButton
+          nomeArquivo={`ranking_${mes.replace("-", "_")}.csv`}
+          baixarCsv={(aoProgredir) => baixarRankingMensalCsv(
+            mes,
+            ordenacao.chave,
+            ordenacao.direcao,
+            aoProgredir,
+          )}
+          disabled={carregando || erro || linhas.length === 0}
+        />
       </PageHeader>
 
       {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
@@ -77,7 +94,8 @@ export function Ranking() {
           colunas={colunas}
           linhas={linhas}
           chaveLinha={(linha) => linha.motoristaId}
-          ordenacaoInicial={{ chave: financeiro ? 'rentabilidade' : 'numeroViagens', direcao: 'desc' }}
+          ordenacao={ordenacao}
+          aoOrdenar={setOrdenacao}
           cardsNoMobile
           itensPorPagina={20}
         />

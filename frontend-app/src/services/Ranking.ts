@@ -29,3 +29,17 @@ export async function buscarRankingMensal(mesReferencia: string) {
     custoTotal: linha.custoTotal ?? linha.custos,
   }));
 }
+
+export async function baixarRankingMensalCsv(
+  mesReferencia: string,
+  ordenarPor: string,
+  direcao: 'asc' | 'desc',
+  aoProgredir: (progresso?: number) => void,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>('/ranking/mensal/csv', {
+    params: { mesReferencia, ordenarPor, direcao },
+    responseType: 'blob',
+    onDownloadProgress: (evento) => aoProgredir(evento.progress),
+  });
+  return data;
+}
