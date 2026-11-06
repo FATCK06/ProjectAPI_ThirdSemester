@@ -16,6 +16,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import br.com.newe.ms_frota.dto.MotoristaFichaDTO;
 import br.com.newe.ms_frota.dto.MotoristaLoteItem;
 import br.com.newe.ms_frota.dto.MotoristaResumo;
 import br.com.newe.ms_frota.models.Motorista;
@@ -43,9 +44,21 @@ public class MotoristaController {
     }
 
     @GetMapping("/id/{id}")
-    public ResponseEntity<Motorista> buscarPorId(@PathVariable UUID id) {
-        return service.buscarPorId(id)
-                .map(ResponseEntity::ok)
+    public ResponseEntity<MotoristaFichaDTO> buscarPorId(@PathVariable UUID id) {
+        return service.buscarPorIdComCidade(id)
+                .map(motorista -> ResponseEntity.ok(new MotoristaFichaDTO(
+                        motorista.getIdMotorista(),
+                        motorista.getNome(),
+                        motorista.getCpf(),
+                        motorista.getPis(),
+                        motorista.getDataNascimento(),
+                        motorista.getCep(),
+                        motorista.getLogradouro(),
+                        motorista.getNumero(),
+                        motorista.getBairro(),
+                        motorista.getIdCidade(),
+                        motorista.getCidade() != null ? motorista.getCidade().getNomeCidade() : null,
+                        motorista.getCriadoEm())))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

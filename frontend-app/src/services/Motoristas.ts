@@ -41,15 +41,32 @@ export interface MotoristaFicha {
   numero: string | null;
   bairro: string | null;
   idCidade: number | null;
+  nomeCidade: string | null;
   criadoEm: string | null;
 }
 
 export async function buscarMotoristasMes(
   mesReferencia: string,
   pagina: number,
+  busca = "",
+  tipoVeiculo = "",
 ): Promise<MotoristasMesPage> {
   const { data } = await api.get<MotoristasMesPage>("/dashboard/motoristas", {
-    params: { mesReferencia, page: pagina - 1, size: 20 },
+    params: { mesReferencia, page: pagina - 1, size: 20, busca, tipoVeiculo },
+  });
+  return data;
+}
+
+export async function baixarOperacaoMensalCsv(
+  mesReferencia: string,
+  busca: string,
+  tipoVeiculo: string,
+  aoProgredir: (progresso?: number) => void,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>("/dashboard/motoristas/csv", {
+    params: { mesReferencia, busca, tipoVeiculo },
+    responseType: "blob",
+    onDownloadProgress: (evento) => aoProgredir(evento.progress),
   });
   return data;
 }
