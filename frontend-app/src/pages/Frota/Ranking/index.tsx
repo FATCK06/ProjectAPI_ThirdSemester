@@ -21,7 +21,6 @@ const NAO_INFORMADO = 'N\u00e3o informado';
 const COLUNAS_OPERACIONAIS: ColunaTabela<Linha>[] = [
   { chave: 'nome', titulo: 'Motorista', render: (l) => l.nome || l.motorista || NAO_INFORMADO, ordenarPor: (l) => l.nome || l.motorista },
   { chave: 'tipoVeiculo', titulo: 'Tipo de veículo', render: (l) => l.tipoVeiculo || NAO_INFORMADO, ordenarPor: (l) => l.tipoVeiculo },
-  { chave: 'placa', titulo: 'Placa', render: (l) => l.placa || NAO_INFORMADO, ordenarPor: (l) => l.placa },
   { chave: 'numeroViagens', titulo: 'N\u00famero de Viagens', render: (l) => l.numeroViagens, ordenarPor: (l) => l.numeroViagens },
   { chave: 'utilizacao', titulo: 'Utilização', render: (l) => formatarPercentual(l.utilizacao), ordenarPor: (l) => l.utilizacao },
 ];
@@ -112,13 +111,6 @@ export function Ranking() {
           colunas={colunas}
           linhas={linhas}
           chaveLinha={(linha) => linha.motoristaId}
-          linkLinha={(linha) => `/motoristas/${linha.motoristaId}/historico?mes=${encodeURIComponent(mes)}&origem=ranking`}
-          estadoNavegacaoLinha={(_, estado) => ({
-            retorno: {
-              destino: `/ranking?mes=${encodeURIComponent(mes)}`,
-              restauracao: { ...estado, scrollY: window.scrollY },
-            },
-          })}
           ordenacaoInicial={restauracao?.ordenacao ?? { chave: financeiro ? 'rentabilidade' : 'numeroViagens', direcao: 'desc' }}
           paginaInicial={restauracao?.pagina ?? 1}
           cardsNoMobile

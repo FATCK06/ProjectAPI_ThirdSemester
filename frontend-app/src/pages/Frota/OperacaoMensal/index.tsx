@@ -296,7 +296,7 @@ export function OperacaoMensal() {
               linhas={motoristasFiltrados}
               chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
               linkLinha={(m) =>
-                `/motoristas/${m.motoristaId}/historico?mes=${encodeURIComponent(mes)}&origem=operacao-mensal`}
+                `/operacao-mensal/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
               estadoNavegacaoLinha={() => ({
                 retorno: {
                   destino: `/operacao-mensal?mes=${encodeURIComponent(mes)}&page=${pagina}`,

@@ -1,4 +1,5 @@
 import api from "./api";
+import type { IndicadoresMotorista } from "./Dashboard";
 
 export interface MotoristaMes {
   motoristaId: string;
@@ -68,6 +69,23 @@ export async function buscarMotoristaNoMes(motoristaId: string, mesReferencia: s
     }
     throw erro;
   }
+}
+
+export interface IndicadorMotoristaMes {
+  mesReferencia: string;
+  indicadores: IndicadoresMotorista | null;
+}
+
+export async function buscarHistoricoMotorista(
+  motoristaId: string,
+  inicio: string,
+  fim: string,
+): Promise<IndicadorMotoristaMes[]> {
+  const { data } = await api.get<IndicadorMotoristaMes[]>(
+    `/dashboard/motoristas/${motoristaId}/historico`,
+    { params: { inicio, fim } },
+  );
+  return data;
 }
 
 export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {

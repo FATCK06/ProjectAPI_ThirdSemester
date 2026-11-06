@@ -6,6 +6,7 @@ import { buscarFichaMotorista, buscarMotoristaNoMes, type MotoristaFicha, type M
 import { podeVerDadosFinanceiros } from "../../../services/auth";
 import { formatarMoeda, formatarPercentual, SEM_VALOR } from "../../../utils/formatacao";
 import "./historicoMotorista.css";
+import "../FichaMotorista.css";
 
 type DadosHistorico = { motorista: MotoristaFicha; veiculo: MotoristaMes | null; indicadores: IndicadoresMotorista | null };
 type Resultado = { chave: string; dados: DadosHistorico } | { chave: string; erro: true };
@@ -32,6 +33,7 @@ export function HistoricoMotorista() {
   const [retorno] = useState(() => (location.state as { retorno?: { destino?: string; restauracao?: unknown } } | null)?.retorno);
   const destinoVolta = retorno?.destino ?? (origem === "ranking" ? "/ranking" : origem === "dashboard" ? "/dashboard" : origem === "motoristas" ? "/motoristas" : "/operacao-mensal");
   const estadoVolta = retorno?.restauracao ? { restauracao: retorno.restauracao } : undefined;
+  const destinoFicha = `/operacao-mensal/motoristas/${motoristaId}${mes ? `?mes=${encodeURIComponent(mes)}` : ""}`;
 
   useEffect(() => {
     let cancelado = false;
@@ -109,6 +111,7 @@ export function HistoricoMotorista() {
             <div><dt>Placa</dt><dd>{dados.veiculo?.placa ?? "Sem veículo no período"}</dd></div>
             <div><dt>Tipo de veículo</dt><dd>{dados.veiculo?.tipoVeiculo ?? "Sem veículo no período"}</dd></div>
           </dl>
+          <Link className="historico-motorista-voltar" to={destinoFicha}>Ver ficha cadastral</Link>
           {dados.indicadores ? (
             <div className="historico-motorista-indicadores">
               <article><span>Viagens</span><strong>{dados.indicadores.numeroViagens}</strong></article>
