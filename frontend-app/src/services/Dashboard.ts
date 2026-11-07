@@ -91,6 +91,11 @@ export async function buscarMesesReferencia(): Promise<MesesReferencia> {
   return data;
 }
 
+export async function buscarMesesImportados(): Promise<string[]> {
+  const { data } = await api.get<string[]>("/dashboard/meses-importados");
+  return data;
+}
+
 export async function buscarIndicadores(
   mesReferencia: string,
 ): Promise<IndicadoresMes> {

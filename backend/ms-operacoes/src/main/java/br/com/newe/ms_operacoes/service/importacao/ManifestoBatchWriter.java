@@ -62,12 +62,10 @@ public class ManifestoBatchWriter {
             Viagem viagem = montarViagem(linha, importacaoId, referencias);
             entityManager.persist(viagem);
 
-            // id_viagem e IDENTITY: o persist acima ja trouxe a chave.
+            // A sequence entrega a chave antes do flush, permitindo agrupar os inserts de viagens e custos.
             gravarCustos(viagem, linha, tiposCusto);
 
-            // id_viagem e IDENTITY, entao o Hibernate nao consegue agrupar os inserts
-            // (precisa da chave de volta a cada um). O flush periodico serve para
-            // limitar memoria, nao para ganhar batching.
+            // O flush periodico grava os lotes e limita o uso de memoria durante a importacao.
             if (++contador % ManifestoCsvConfig.TAMANHO_CHUNK == 0) {
                 entityManager.flush();
                 entityManager.clear();

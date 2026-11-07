@@ -45,6 +45,11 @@ public class DashboardController {
         return new MesesReferenciaDTO(atual.toString(), atual.minusMonths(1).toString());
     }
 
+    @GetMapping("/meses-importados")
+    public List<String> mesesImportados() {
+        return indicadoresService.mesesImportados();
+    }
+
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
     public ResponseEntity<IndicadoresMes> indicadores(
             @RequestParam("mesReferencia") @MesReferencia String mesReferencia,

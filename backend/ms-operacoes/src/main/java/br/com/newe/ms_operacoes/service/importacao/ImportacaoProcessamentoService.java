@@ -146,7 +146,6 @@ public class ImportacaoProcessamentoService {
         Long id = importacao.getId();
 
         try {
-            parser.verificarEstrutura(importacao.getArquivoConteudo());
             ResultadoParse resultado = parser.parse(importacao.getArquivoConteudo());
 
             if (resultado.temErro()) {

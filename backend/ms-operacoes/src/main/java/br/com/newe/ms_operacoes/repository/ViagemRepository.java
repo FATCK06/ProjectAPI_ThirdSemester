@@ -15,6 +15,9 @@ import br.com.newe.ms_operacoes.models.Viagem;
 
 public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
 
+    @Query("select distinct v.mesReferencia from Viagem v where v.mesReferencia is not null order by v.mesReferencia desc")
+    List<String> mesesImportados();
+
     List<Viagem> findByImportacaoId(Long importacaoId);
 
     List<Viagem> findByMesReferencia(String mesReferencia);
@@ -60,6 +63,15 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
     Page<MotoristaMesView> motoristasPorMes(
             @Param("mesReferencia") String mesReferencia,
             Pageable pageable);
+
+    @Query("select v.idMotorista as motoristaId, v.idVeiculo as veiculoId, "
+            + "count(v) as viagensNoMes, count(distinct v.dataViagem) as diasEmOperacao, "
+            + "avg(v.percentualEfetividade) as avaliacaoMedia "
+            + "from Viagem v where v.mesReferencia = :mesReferencia and v.idMotorista = :motoristaId "
+            + "group by v.idMotorista, v.idVeiculo order by count(v) desc")
+    List<MotoristaMesView> resumoMotoristaMes(
+            @Param("motoristaId") UUID motoristaId,
+            @Param("mesReferencia") String mesReferencia);
 
     @Query("select v.idMotorista as motoristaId, v.idVeiculo as veiculoId, v.kmSaida as kmSaida, v.kmChegada as kmChegada "
             + "from Viagem v "
@@ -110,6 +122,20 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "where v.mesReferencia in :meses "
             + "group by v.mesReferencia, v.idMotorista")
     List<SomaMotoristaMesView> somasPorMotoristaNosMeses(@Param("meses") Collection<String> meses);
+
+    @Query("select v.mesReferencia as mesReferencia, "
+            + "v.idMotorista as motoristaId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
+            + "from Viagem v "
+            + "where v.idMotorista = :motoristaId and v.mesReferencia in :meses "
+            + "group by v.mesReferencia, v.idMotorista")
+    List<SomaMotoristaMesView> somasMotoristaNosMeses(
+            @Param("motoristaId") UUID motoristaId,
+            @Param("meses") Collection<String> meses);
 
     /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "

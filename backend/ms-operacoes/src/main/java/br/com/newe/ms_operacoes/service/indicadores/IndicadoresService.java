@@ -32,6 +32,10 @@ public class IndicadoresService {
         this.frotaClient = frotaClient;
     }
 
+    public List<String> mesesImportados() {
+        return viagemRepository.mesesImportados();
+    }
+
     /** @param mesReferencia "yyyy-MM" */
     public IndicadoresMes calcular(String mesReferencia) {
         YearMonth mes = YearMonth.parse(mesReferencia);
@@ -54,6 +58,28 @@ public class IndicadoresService {
 
         return new IndicadoresMes(mesReferencia, diasNoMes, diasDisponiveis, totais(motoristas, diasDisponiveis),
                 motoristas);
+    }
+
+    public List<IndicadorMotoristaMes> historicoMotorista(UUID motoristaId, String inicio, String fim) {
+        YearMonth primeiro = YearMonth.parse(inicio);
+        YearMonth ultimo = YearMonth.parse(fim);
+        List<YearMonth> meses = new ArrayList<>();
+        for (YearMonth mes = primeiro; !mes.isAfter(ultimo); mes = mes.plusMonths(1)) {
+            meses.add(mes);
+        }
+
+        Map<String, SomaMotoristaView> somas = viagemRepository
+                .somasMotoristaNosMeses(motoristaId, meses.stream().map(YearMonth::toString).toList()).stream()
+                .collect(Collectors.toMap(ViagemRepository.SomaMotoristaMesView::getMesReferencia,
+                        Function.identity()));
+
+        return meses.stream().map(mes -> {
+            SomaMotoristaView soma = somas.get(mes.toString());
+            long diasNoMes = mes.lengthOfMonth();
+            IndicadoresMotorista indicadores = soma == null ? null
+                    : indicadoresDe(soma, null, diasDisponiveis(mes), diasNoMes);
+            return new IndicadorMotoristaMes(mes.toString(), indicadores);
+        }).toList();
     }
 
     /**
