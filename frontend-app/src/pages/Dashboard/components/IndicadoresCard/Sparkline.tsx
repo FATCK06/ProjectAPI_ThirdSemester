@@ -7,6 +7,7 @@ interface PropsSparkline {
   largura?: number;
   altura?: number;
   animada?: boolean;
+  posicaoPontoUnico?: number;
 }
 
 export function Sparkline({
@@ -15,10 +16,25 @@ export function Sparkline({
   largura = 140,
   altura = 48,
   animada = false,
+  posicaoPontoUnico = 0.5,
 }: PropsSparkline) {
   const idGradiente = useId().replace(/:/g, "");
 
-  if (valores.length < 2) return null; // com menos de 2 pontos não há tendência
+  if (valores.length === 1) {
+    const margem = 4;
+    const x = margem + Math.max(0, Math.min(1, posicaoPontoUnico)) * (largura - margem * 2);
+    const y = altura / 2;
+    return (
+      <svg className={`sparkline sparkline--unico${animada ? " sparkline--animada" : ""}`} width={largura} height={altura}
+        viewBox={`0 0 ${largura} ${altura}`} preserveAspectRatio="xMidYMid meet"
+        {...(titulo ? { role: "img", "aria-label": titulo } : { "aria-hidden": true })}>
+        {titulo && <title>{titulo}</title>}
+        <circle className="sparkline-dot sparkline-dot--atual" cx={x} cy={y} r="3.5" />
+      </svg>
+    );
+  }
+
+  if (valores.length < 1) return null;
 
   const min = Math.min(...valores);
   const max = Math.max(...valores);
@@ -51,6 +67,7 @@ export function Sparkline({
       width={largura}
       height={altura}
       viewBox={`0 0 ${largura} ${altura}`}
+      preserveAspectRatio="xMidYMid meet"
       {...(titulo ? { role: "img", "aria-label": titulo } : { "aria-hidden": true })}
     >
       {titulo && <title>{titulo}</title>}

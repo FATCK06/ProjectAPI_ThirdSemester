@@ -16,13 +16,13 @@
 
 .comparativo-motorista-grade {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .comparativo-motorista-card {
   min-width: 0;
-  padding: 14px 16px;
+  padding: 16px;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;
@@ -73,8 +73,25 @@
 .comparativo-motorista-card .sparkline {
   display: block;
   width: 100%;
-  height: 72px;
+  height: auto;
+  aspect-ratio: 5 / 1;
   overflow: visible;
+}
+
+.comparativo-motorista-card .sparkline--unico {
+  width: 40px;
+  height: 28px;
+  margin-inline: auto;
+}
+
+.comparativo-motorista-sem-tendencia {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 5 / 1;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 12px;
 }
 
 .comparativo-motorista-card .sparkline-line {
@@ -138,32 +155,58 @@
 }
 
 .comparativo-motorista-valores {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.comparativo-motorista-card[data-resultado-unico="true"] .comparativo-motorista-valores {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 100px;
+  margin: 6px auto 0;
 }
 
 .comparativo-motorista-valores span {
   display: flex;
   min-width: 0;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
 }
 
-.comparativo-motorista-valores span:last-child {
-  text-align: right;
+.comparativo-motorista-valores span {
+  text-align: center;
+}
+
+.comparativo-motorista-valores span[data-indisponivel="true"] strong {
+  color: #cbd5e1;
+  font-weight: 500;
 }
 
 .comparativo-motorista-valores small {
   color: #64748b;
   font-size: 11px;
+  line-height: 1.2;
   text-transform: capitalize;
+  white-space: nowrap;
 }
 
 .comparativo-motorista-valores strong {
   color: #0f172a;
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .comparativo-motorista-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .comparativo-motorista-card {
+    padding: 14px;
+  }
 }
 
 .comparativo-motorista-sem-dados {

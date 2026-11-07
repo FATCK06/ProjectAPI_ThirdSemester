@@ -22,13 +22,15 @@ type ResultadoMes =
   | { chave: string; status: "success"; veiculo: MotoristaMes | null }
   | { chave: string; status: "error" };
 type ResultadoComparacao =
-  | { chave: string; status: "success"; historico: IndicadorMotoristaMes[]; veiculoAnterior: MotoristaMes | null; veiculoAtual: MotoristaMes | null }
+  | { chave: string; status: "success"; historico: IndicadorMotoristaMes[]; veiculoAnterior: MotoristaMes | null; veiculoIntermediario: MotoristaMes | null; veiculoAtual: MotoristaMes | null }
   | { chave: string; status: "error" };
 
-function mesAnteriorA(mes: string) {
+function mesesDaComparacao(mes: string) {
   const [ano, numero] = mes.split("-").map(Number);
-  const anterior = new Date(ano, numero - 2, 1);
-  return `${anterior.getFullYear()}-${String(anterior.getMonth() + 1).padStart(2, "0")}`;
+  return [2, 1, 0].map((deslocamento) => {
+    const data = new Date(ano, numero - 1 - deslocamento, 1);
+    return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, "0")}`;
+  });
 }
 
 function rotuloMes(mes: string) {
@@ -72,8 +74,8 @@ export function FichaMotorista() {
     : null;
   const carregandoMes = Boolean(motoristaId && mes && resultadoMes?.chave !== chaveMes);
   const erroMes = resultadoMes?.chave === chaveMes && resultadoMes.status === "error";
-  const mesAnterior = mes ? mesAnteriorA(mes) : "";
-  const chaveComparacao = `${motoristaId ?? ""}|${mesAnterior}|${mes ?? ""}`;
+  const mesesComparacao = mes ? mesesDaComparacao(mes) : [];
+  const chaveComparacao = `${motoristaId ?? ""}|${mesesComparacao.join("|")}`;
   const comparacao = resultadoComparacao?.chave === chaveComparacao && resultadoComparacao.status === "success"
     ? resultadoComparacao
     : null;
@@ -141,21 +143,24 @@ export function FichaMotorista() {
   useEffect(() => {
     let cancelado = false;
     if (!motoristaId || !mes || !meses.includes(mes)) return;
-    const anterior = mesAnteriorA(mes);
+    const mesesHistorico = mesesDaComparacao(mes);
+    const [mesInicial, mesIntermediario] = mesesHistorico;
     Promise.all([
-      buscarHistoricoMotorista(motoristaId, anterior, mes),
-      buscarMotoristaNoMes(motoristaId, anterior),
+      buscarHistoricoMotorista(motoristaId, mesInicial, mes),
+      buscarMotoristaNoMes(motoristaId, mesInicial),
+      buscarMotoristaNoMes(motoristaId, mesIntermediario),
       buscarMotoristaNoMes(motoristaId, mes),
-    ]).then(([historico, veiculoAnterior, veiculoAtual]) => {
+    ]).then(([historico, veiculoAnterior, veiculoIntermediario, veiculoAtual]) => {
       if (!cancelado) setResultadoComparacao({
-        chave: `${motoristaId}|${anterior}|${mes}`,
+        chave: `${motoristaId}|${mesesHistorico.join("|")}`,
         status: "success",
         historico,
         veiculoAnterior,
+        veiculoIntermediario,
         veiculoAtual,
       });
     }).catch(() => {
-      if (!cancelado) setResultadoComparacao({ chave: `${motoristaId}|${anterior}|${mes}`, status: "error" });
+      if (!cancelado) setResultadoComparacao({ chave: `${motoristaId}|${mesesHistorico.join("|")}`, status: "error" });
     });
     return () => { cancelado = true; };
   }, [motoristaId, mes, meses]);
@@ -243,18 +248,19 @@ export function FichaMotorista() {
           </section>
 
           {mes && comparacao && (() => {
-            const dadosAnterior = comparacao.historico.find((item) => item.mesReferencia === mesAnterior)?.indicadores;
-            const dadosAtual = comparacao.historico.find((item) => item.mesReferencia === mes)?.indicadores;
+            const indicadores = mesesComparacao.map((mesHistorico) =>
+              comparacao.historico.find((item) => item.mesReferencia === mesHistorico)?.indicadores,
+            );
             return (
               <ComparativoMotorista
-                mesAnterior={mesAnterior}
-                mesAtual={mes}
-                utilizacaoAnterior={dadosAnterior?.utilizacao}
-                utilizacaoAtual={dadosAtual?.utilizacao}
-                efetividadeAnterior={comparacao.veiculoAnterior?.percentualEfetividade}
-                efetividadeAtual={comparacao.veiculoAtual?.percentualEfetividade}
-                financeirosAnterior={dadosAnterior ?? undefined}
-                financeirosAtual={dadosAtual ?? undefined}
+                meses={mesesComparacao}
+                utilizacao={indicadores.map((item) => item?.utilizacao)}
+                efetividade={[
+                  comparacao.veiculoAnterior?.percentualEfetividade,
+                  comparacao.veiculoIntermediario?.percentualEfetividade,
+                  comparacao.veiculoAtual?.percentualEfetividade,
+                ]}
+                financeiros={indicadores}
                 mostrarFinanceiros={podeVerDadosFinanceiros()}
               />
             );
