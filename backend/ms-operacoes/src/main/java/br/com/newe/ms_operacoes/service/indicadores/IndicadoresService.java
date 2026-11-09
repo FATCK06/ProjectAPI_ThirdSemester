@@ -39,10 +39,6 @@ public class IndicadoresService {
         this.frotaClient = frotaClient;
     }
 
-    public List<String> mesesImportados() {
-        return viagemRepository.mesesImportados();
-    }
-
     /** @param mesReferencia "yyyy-MM" */
     public IndicadoresMes calcular(String mesReferencia) {
         YearMonth mes = YearMonth.parse(mesReferencia);

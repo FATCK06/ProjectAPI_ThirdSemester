@@ -47,7 +47,7 @@ public class DashboardController {
     }
 
     @GetMapping("/meses-importados")
-    public List<String> mesesImportados() {
+    public List<String> mesesImportados1() {
         return indicadoresService.mesesImportados();
     }
 
