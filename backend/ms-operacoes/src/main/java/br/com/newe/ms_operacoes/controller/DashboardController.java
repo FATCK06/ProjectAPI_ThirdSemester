@@ -16,6 +16,7 @@ import br.com.newe.ms_operacoes.security.Permissao;
 import br.com.newe.ms_operacoes.service.indicadores.HistoricoMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
+import br.com.newe.ms_operacoes.service.indicadores.SerieMes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -75,5 +76,26 @@ public class DashboardController {
             historico = historico.stream().map(HistoricoMes::semValoresFinanceiros).toList();
         }
         return ResponseEntity.ok(historico);
+    }
+
+    /** Meses que o seletor do comparativo pode oferecer, em AAAA-MM crescente. */
+    @GetMapping("/indicadores/meses-importados")
+    public List<String> mesesImportados() {
+        return indicadoresService.mesesImportados();
+    }
+
+    /**
+     * Comparativo geral entre os meses escolhidos. Opcional para que a falta do
+     * parametro caia na mesma mensagem de quem pede menos de dois meses.
+     */
+    @GetMapping("/indicadores/serie") // "/api/dashboard/indicadores/serie?meses=2026-05&meses=2026-06"
+    public ResponseEntity<List<SerieMes>> serie(
+            @RequestParam(value = "meses", required = false) List<@MesReferencia String> meses,
+            HttpServletRequest request) {
+        List<SerieMes> serie = indicadoresService.serie(meses);
+        if (!perfilResolver.possui(request, Permissao.VER_DADOS_FINANCEIROS)) {
+            serie = serie.stream().map(SerieMes::semValoresFinanceiros).toList();
+        }
+        return ResponseEntity.ok(serie);
     }
 }

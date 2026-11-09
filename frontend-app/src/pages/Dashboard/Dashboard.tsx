@@ -13,6 +13,7 @@ import {
 } from "./components/IndicadoresCard/selecao";
 import GraficoMotoristas from "./components/frota/GraficoRentabilidadeMotoristas/GraficoMotoristas";
 import GraficoModelos from "./components/frota/GraficoModelos/GraficoModelos";
+import { ComparativoMensal } from "./components/ComparativoMensal/ComparativoMensal";
 import { SeletorMes } from "./components/SeletorMes/SeletorMes";
 import { useDashboard } from "./useDashboard";
 import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
@@ -132,14 +133,17 @@ export function Dashboard() {
 
           {/* Os dois gráficos são de rentabilidade: o operador vê o aviso no lugar */}
           {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
-
-          {mesReferencia && (
-            <RankingMotoristas
-              mesReferencia={mesReferencia}
-              indicadores={isLoading ? undefined : dados?.indicadores.motoristas}
-            />
-          )}
         </>
+      )}
+
+      {/* Fora do bloco acima: não depende do mês da página e mantém a seleção se ele falhar */}
+      <ComparativoMensal />
+
+      {!mensagemErro && mesReferencia && (
+        <RankingMotoristas
+          mesReferencia={mesReferencia}
+          indicadores={isLoading ? undefined : dados?.indicadores.motoristas}
+        />
       )}
     </div>
   );

@@ -1,0 +1,45 @@
+.comparativo-meses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.comparativo-meses:empty {
+  margin-bottom: 0;
+}
+
+.comparativo-meses button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.comparativo-meses button:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.comparativo-meses button[aria-pressed="true"] {
+  border-color: #334155;
+  background: #334155;
+  color: #ffffff;
+}
+
+.comparativo-meses button:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.comparativo-limite {
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #64748b;
+}

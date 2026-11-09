@@ -2,10 +2,13 @@ package br.com.newe.ms_operacoes.service.indicadores;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -14,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
+import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaMotoristaView;
 
@@ -23,6 +27,9 @@ import br.com.newe.ms_operacoes.repository.ViagemRepository.SomaMotoristaView;
  */
 @Service
 public class IndicadoresService {
+
+    private static final int MAXIMO_MESES_SERIE = 12;
+    private static final DateTimeFormatter MES_NA_MENSAGEM = DateTimeFormatter.ofPattern("MM/yyyy");
 
     private final ViagemRepository viagemRepository;
     private final FrotaClient frotaClient;
@@ -109,6 +116,53 @@ public class IndicadoresService {
             historico.add(new HistoricoMes(mes.toString(), totais(motoristas, diasDisponiveis)));
         }
         return historico;
+    }
+
+    /** Meses com viagem, em AAAA-MM crescente. A coluna aceita nulo, que nao e um mes. */
+    public List<String> mesesImportados() {
+        return viagemRepository.buscarMesesImportados().stream().filter(Objects::nonNull).toList();
+    }
+
+    /**
+     * Totais gerais de cada mes pedido; mes sem viagem fica "sem dados", nunca
+     * zerado. Uma consulta so e sem ms-frota: os totais nao usam nome.
+     *
+     * @param meses "yyyy-MM"; repetidos contam uma vez e a resposta sai em ordem crescente
+     */
+    public List<SerieMes> serie(List<String> meses) {
+        TreeSet<YearMonth> pedidos = new TreeSet<>();
+        if (meses != null) {
+            meses.forEach(mes -> pedidos.add(YearMonth.parse(mes)));
+        }
+        if (pedidos.size() < 2) {
+            throw new DadoInvalidoException("meses", "Selecione ao menos dois meses para comparar.");
+        }
+        if (pedidos.size() > MAXIMO_MESES_SERIE) {
+            throw new DadoInvalidoException("meses", "de 2 a 12");
+        }
+
+        Map<String, List<ViagemRepository.SomaMotoristaMesView>> somasPorMes = viagemRepository
+                .somasPorMotoristaNosMeses(pedidos.stream().map(YearMonth::toString).toList()).stream()
+                .collect(Collectors.groupingBy(ViagemRepository.SomaMotoristaMesView::getMesReferencia));
+
+        List<SerieMes> serie = new ArrayList<>(pedidos.size());
+        for (YearMonth mes : pedidos) {
+            List<ViagemRepository.SomaMotoristaMesView> somas = somasPorMes.get(mes.toString());
+            serie.add(somas == null
+                    ? new SerieMes(mes.toString(), true, "Sem dados para " + mes.format(MES_NA_MENSAGEM) + ".", null)
+                    : new SerieMes(mes.toString(), false, null, totaisDaSerie(somas, mes)));
+        }
+        return serie;
+    }
+
+    private static SerieMes.Totais totaisDaSerie(List<ViagemRepository.SomaMotoristaMesView> somas, YearMonth mes) {
+        long diasNoMes = mes.lengthOfMonth();
+        long diasDisponiveis = diasDisponiveis(mes);
+        IndicadoresMes.Totais totais = totais(
+                somas.stream().map(soma -> indicadoresDe(soma, null, diasDisponiveis, diasNoMes)).toList(),
+                diasDisponiveis);
+        return new SerieMes.Totais(totais.numeroViagens(), totais.utilizacaoMedia(), totais.valorFrete(),
+                totais.custoTotal(), totais.rentabilidade());
     }
 
     /**
