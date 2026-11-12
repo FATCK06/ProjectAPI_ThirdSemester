@@ -7,9 +7,16 @@ interface PropsPasso6 {
     validacao: ResultadoValidacao | null;
     linhasGravadas: number;
     aoRecomecar: () => void;
+    rotuloGravadas?: string;
 }
 
-export function Step6Resultado({ importacao, validacao, linhasGravadas, aoRecomecar }: PropsPasso6) {
+export function Step6Resultado({
+    importacao,
+    validacao,
+    linhasGravadas,
+    aoRecomecar,
+    rotuloGravadas = 'viagens gravadas',
+}: PropsPasso6) {
     const lidas = validacao?.linhasValidas ?? linhasGravadas;
     // id_manifesto é UNIQUE: reimportar o mesmo arquivo pula o que já entrou.
     const ignoradas = Math.max(0, lidas - linhasGravadas);
@@ -31,7 +38,7 @@ export function Step6Resultado({ importacao, validacao, linhasGravadas, aoRecome
             <div className="resultado-numeros">
                 <div className="resultado-card destaque">
                     <span className="resultado-valor">{linhasGravadas}</span>
-                    <span className="resultado-rotulo">viagens gravadas</span>
+                    <span className="resultado-rotulo">{rotuloGravadas}</span>
                 </div>
                 <div className="resultado-card">
                     <span className="resultado-valor">{lidas}</span>

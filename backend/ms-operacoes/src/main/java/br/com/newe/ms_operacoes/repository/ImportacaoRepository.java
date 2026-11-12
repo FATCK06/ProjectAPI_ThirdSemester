@@ -76,7 +76,7 @@ public interface ImportacaoRepository extends JpaRepository<Importacao, Long> {
 
     @Query("""
         select new br.com.newe.ms_operacoes.dto.ImportacaoResumoDTO(
-            i.id, i.arquivoNome, i.dataImportacao, i.usuarioResponsavel, i.status
+            i.id, i.arquivoNome, i.dataImportacao, i.usuarioResponsavel, i.status, i.tipo
         )
         from Importacao i
         order by i.dataImportacao desc    

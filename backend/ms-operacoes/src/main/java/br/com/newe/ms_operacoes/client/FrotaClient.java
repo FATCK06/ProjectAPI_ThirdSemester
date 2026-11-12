@@ -18,6 +18,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import br.com.newe.ms_operacoes.dto.AgregadoLoteItem;
 import br.com.newe.ms_operacoes.dto.MotoristaLoteItem;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
+import br.com.newe.ms_operacoes.dto.ProblemaImportacao;
+import br.com.newe.ms_operacoes.dto.ResultadoImportacaoVeiculos;
+import br.com.newe.ms_operacoes.dto.VeiculoImportacaoItem;
 import br.com.newe.ms_operacoes.dto.VeiculoLoteItem;
 
 /**
@@ -36,6 +39,12 @@ public class FrotaClient {
     };
 
     private static final ParameterizedTypeReference<List<MotoristaResumo>> LISTA_MOTORISTAS = new ParameterizedTypeReference<>() {
+    };
+
+    private static final ParameterizedTypeReference<List<ProblemaImportacao>> LISTA_PROBLEMAS = new ParameterizedTypeReference<>() {
+    };
+
+    private static final ParameterizedTypeReference<List<List<Integer>>> LISTA_ROTAS = new ParameterizedTypeReference<>() {
     };
 
     private static final ParameterizedTypeReference<Map<UUID, String>> MAPA_ID_PLACA = new ParameterizedTypeReference<>() {
@@ -82,6 +91,46 @@ public class FrotaClient {
     /** @return placa (normalizada pelo ms-frota) -> id. */
     public Map<String, UUID> upsertVeiculos(List<VeiculoLoteItem> itens) {
         return postLote("/api/veiculos/lote", itens);
+    }
+
+    /** Id da cidade de cada parada, na mesma posicao; null quando nao achou ou ficou ambiguo. */
+    public List<List<Integer>> resolverRotas(List<List<String>> rotas) {
+        if (rotas.isEmpty()) {
+            return List.of();
+        }
+        List<List<Integer>> resposta = restClient.post()
+                .uri("/api/cidades/rotas")
+                .body(rotas)
+                .retrieve()
+                .body(LISTA_ROTAS);
+        return resposta != null ? resposta : List.of();
+    }
+
+    /** Confere o lote contra o cadastro, sem gravar. */
+    public List<ProblemaImportacao> conferirVeiculos(List<VeiculoImportacaoItem> itens) {
+        if (itens.isEmpty()) {
+            return List.of();
+        }
+        List<ProblemaImportacao> resposta = restClient.post()
+                .uri("/api/veiculos/importacao/conferir")
+                .body(itens)
+                .retrieve()
+                .body(LISTA_PROBLEMAS);
+        return resposta != null ? resposta : List.of();
+    }
+
+    /**
+     * Grava o lote inteiro ou nada. O 422 (cadastro mudou desde a validacao) volta
+     * como resultado com os problemas, em vez de excecao, para o chamador explicar.
+     */
+    public ResultadoImportacaoVeiculos importarVeiculos(List<VeiculoImportacaoItem> itens) {
+        return restClient.post()
+                .uri("/api/veiculos/importacao")
+                .body(itens)
+                .retrieve()
+                .onStatus(status -> status.value() == 422, (request, response) -> {
+                })
+                .body(ResultadoImportacaoVeiculos.class);
     }
 
     /** Nome e CPF dos motoristas informados (os nao encontrados ficam de fora). */
