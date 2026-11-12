@@ -39,6 +39,12 @@ public class CsvManifestoParser {
      * @throws ArquivoInvalidoException com o motivo, pronto para a tela
      */
     public void verificarEstrutura(byte[] conteudo) throws IOException {
+        verificarEstrutura(conteudo, ManifestoCsvConfig.COLUNAS_ESPERADAS);
+    }
+
+    /** Mesma checagem para outro tipo de arquivo: o de veiculos usa o mesmo formato de CSV. */
+    public void verificarEstrutura(byte[] conteudo, List<ManifestoCsvConfig.ColunaEsperada> colunasEsperadas)
+            throws IOException {
         List<String> cabecalho = lerCabecalhoTolerante(conteudo);
 
         if (cabecalho.stream().allMatch(c -> c == null || c.isBlank())) {
@@ -48,12 +54,14 @@ public class CsvManifestoParser {
 
         Set<String> presentes = new HashSet<>();
         cabecalho.stream().filter(Objects::nonNull).map(CsvManifestoParser::normalizar).forEach(presentes::add);
-        boolean reconhecido = ManifestoCsvConfig.COLUNAS_ESPERADAS.stream()
+        boolean reconhecido = colunasEsperadas.stream()
                 .anyMatch(c -> presentes.contains(normalizar(c.nome())));
         if (!reconhecido) {
+            String exemplo = colunasEsperadas.stream().limit(4).map(ManifestoCsvConfig.ColunaEsperada::nome)
+                    .reduce((a, b) -> a + ";" + b).orElse("");
             throw new ArquivoInvalidoException(
                     "O arquivo nao pode ser importado pois falta o cabecalho. A primeira linha deve "
-                            + "conter os nomes das colunas separados por ';' (ex.: Manifesto;Data;CPF;Veículo).");
+                            + "conter os nomes das colunas separados por ';' (ex.: " + exemplo + ").");
         }
 
         try (CSVParser parser = abrir(conteudo, ManifestoCsvConfig.CSV_FORMAT)) {

@@ -22,6 +22,8 @@ public interface MotoristaRepository extends JpaRepository<Motorista, UUID> {
     @Query("select m.cpf as cpf, m.idMotorista as id from Motorista m where m.cpf in :cpfs")
     List<MotoristaCpfId> buscarIdsPorCpf(@Param("cpfs") Collection<String> cpfs);
 
+    List<Motorista> findByCpfInAndCidadeIsNull(Collection<String> cpfs);
+
     interface MotoristaCpfId {
         String getCpf();
         UUID getId();

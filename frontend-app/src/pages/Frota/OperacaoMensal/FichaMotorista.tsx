@@ -84,7 +84,7 @@ export function FichaMotorista() {
   const queryVolta = new URLSearchParams();
   if (mes) queryVolta.set("mes", mes);
   if (pagina) queryVolta.set("page", pagina);
-  const destinoVolta = `/operacao-mensal${queryVolta.size ? `?${queryVolta}` : ""}`;
+  const destinoVolta = `/motoristas${queryVolta.size ? `?${queryVolta}` : ""}`;
   const retorno = (location.state as { retorno?: { destino?: string; restauracao?: unknown } } | null)?.retorno;
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export function FichaMotorista() {
     <section className="ficha-motorista-painel">
       <Link className="ficha-motorista-voltar" to={retorno?.destino ?? destinoVolta}
         state={retorno?.restauracao ? { restauracao: retorno.restauracao } : undefined}>
-        <span aria-hidden="true">←</span> Voltar para Operação Mensal
+        <span aria-hidden="true">←</span> Voltar para motoristas
       </Link>
 
       {status === "loading" && (

@@ -22,8 +22,8 @@ public record ResultadoValidacao(
         Pagina pagina,
         /** So as linhas com problema, da pagina pedida. */
         List<LinhaComProblema> problemas,
-        /** Primeiras linhas validas, para o passo de revisao. */
-        List<LinhaPreview> amostra
+        /** Primeiras linhas validas, para o passo de revisao (LinhaPreview ou VeiculoImportacaoItem, conforme o tipo). */
+        List<?> amostra
 ) {
 
     public record Pagina(int numero, int tamanho, int totalElementos) {
