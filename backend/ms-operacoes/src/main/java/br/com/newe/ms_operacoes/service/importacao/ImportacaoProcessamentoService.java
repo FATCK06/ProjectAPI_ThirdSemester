@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import br.com.newe.ms_operacoes.models.Importacao;
+import br.com.newe.ms_operacoes.models.enums.TipoImportacaoEnum;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
 import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
@@ -46,19 +47,25 @@ public class ImportacaoProcessamentoService {
     private final ManifestoBatchWriter batchWriter;
     private final ImportacaoService importacaoService;
     private final SituacaoMotoristaService situacaoMotoristaService;
+    private final ImportacaoVeiculoProcessamento veiculos;
+    private final DestinosViagemService destinosViagem;
 
     public ImportacaoProcessamentoService(
             CsvManifestoParser parser,
             ResolvedorFrota resolvedorFrota,
             ManifestoBatchWriter batchWriter,
             ImportacaoService importacaoService,
-            SituacaoMotoristaService situacaoMotoristaService
+            SituacaoMotoristaService situacaoMotoristaService,
+            ImportacaoVeiculoProcessamento veiculos,
+            DestinosViagemService destinosViagem
     ) {
+        this.destinosViagem = destinosViagem;
         this.parser = parser;
         this.resolvedorFrota = resolvedorFrota;
         this.batchWriter = batchWriter;
         this.importacaoService = importacaoService;
         this.situacaoMotoristaService = situacaoMotoristaService;
+        this.veiculos = veiculos;
     }
 
     /**
@@ -70,22 +77,36 @@ public class ImportacaoProcessamentoService {
     public ResultadoValidacao validar(Importacao importacao, int pagina, int tamanho, Severidade severidade)
             throws IOException {
         byte[] conteudo = importacao.getArquivoConteudo();
-        // Arquivos guardados antes da checagem no upload tambem passam por aqui.
-        parser.verificarEstrutura(conteudo);
-
-        ResultadoParse resultado = parser.parse(conteudo);
         List<String> colunas = parser.lerColunas(conteudo);
 
-        importacaoService.marcarValidado(
-                importacao.getId(),
-                resultado.totalLinhas(),
-                resultado.linhas().size(),
-                resultado.linhasInvalidas());
+        if (importacao.getTipo() == TipoImportacaoEnum.VEICULO) {
+            ImportacaoVeiculoProcessamento.Leitura leitura = veiculos.ler(conteudo);
+            return montarValidacao(importacao, pagina, tamanho, severidade,
+                    leitura.totalLinhas(), leitura.validos().size(), leitura.invalidas(), leitura.comPendencia(),
+                    leitura.problemas(), colunas, CsvVeiculoParser.COLUNAS_ESPERADAS,
+                    leitura.validos().stream().limit(TAMANHO_AMOSTRA).toList());
+        }
+
+        // Arquivos guardados antes da checagem no upload tambem passam por aqui.
+        parser.verificarEstrutura(conteudo);
+        ResultadoParse resultado = parser.parse(conteudo);
+
+        return montarValidacao(importacao, pagina, tamanho, severidade,
+                resultado.totalLinhas(), resultado.linhas().size(), resultado.linhasInvalidas(),
+                resultado.linhasComPendencia(), resultado.problemas(), colunas, ManifestoCsvConfig.COLUNAS_ESPERADAS,
+                resultado.linhas().stream().limit(TAMANHO_AMOSTRA).map(LinhaPreview::de).toList());
+    }
+
+    private ResultadoValidacao montarValidacao(Importacao importacao, int pagina, int tamanho, Severidade severidade,
+            int total, int validas, int invalidas, int comPendencia, List<LinhaComProblema> problemas,
+            List<String> colunas, List<ManifestoCsvConfig.ColunaEsperada> esperadas, List<?> amostra) {
+
+        importacaoService.marcarValidado(importacao.getId(), total, validas, invalidas);
 
         // Erros antes de pendencias, e so depois pagina: senao, num arquivo cheio de
         // avisos, a linha que bloqueia a importacao cai numa pagina que ninguem abre.
         // Sort estavel: dentro de cada grupo segue a ordem das linhas.
-        List<LinhaComProblema> todos = resultado.problemas().stream()
+        List<LinhaComProblema> todos = problemas.stream()
                 .filter(l -> severidade == null || l.severidade() == severidade)
                 .sorted(Comparator.comparing((LinhaComProblema l) -> !l.bloqueia()))
                 .toList();
@@ -95,29 +116,30 @@ public class ImportacaoProcessamentoService {
         return new ResultadoValidacao(
                 importacao.getId(),
                 importacao.getArquivoNome(),
-                resultado.totalLinhas(),
-                resultado.linhas().size(),
-                resultado.linhasInvalidas(),
-                resultado.linhasComPendencia(),
+                total,
+                validas,
+                invalidas,
+                comPendencia,
                 colunas,
-                mapear(colunas),
+                mapear(colunas, esperadas),
                 new ResultadoValidacao.Pagina(pagina, tamanho, todos.size()),
                 todos.subList(de, ate),
-                resultado.linhas().stream().limit(TAMANHO_AMOSTRA).map(LinhaPreview::de).toList());
+                amostra);
     }
 
     /**
      * Confronta o cabecalho do arquivo com as colunas que o parser procura.
      * Comparacao sem diferenciar caixa nem espacos nas pontas, igual ao CSVFormat.
      */
-    private List<MapeamentoColuna> mapear(List<String> colunasDoArquivo) {
+    private List<MapeamentoColuna> mapear(List<String> colunasDoArquivo,
+            List<ManifestoCsvConfig.ColunaEsperada> esperadas) {
         // Chave normalizada -> grafia original, para a tela mostrar o cabecalho como o usuario escreveu.
         Map<String, String> presentes = new HashMap<>();
         colunasDoArquivo.stream()
                 .filter(Objects::nonNull)
                 .forEach(c -> presentes.putIfAbsent(normalizarColuna(c), c.trim()));
 
-        return ManifestoCsvConfig.COLUNAS_ESPERADAS.stream()
+        return esperadas.stream()
                 .map(esperada -> {
                     String noArquivo = presentes.get(normalizarColuna(esperada.nome()));
                     return new MapeamentoColuna(
@@ -166,6 +188,7 @@ public class ImportacaoProcessamentoService {
             importacaoService.marcarConcluido(id, gravadas);
 
             recalcularSituacao(id, resultado.linhas());
+            preencherDestinos(id);
 
             return gravadas;
 
@@ -196,6 +219,18 @@ public class ImportacaoProcessamentoService {
             situacaoMotoristaService.recalcularMeses(meses);
         } catch (Exception e) {
             log.error("Importacao {}: falha ao recalcular controle_disponibilidade nos meses {}", id, meses, e);
+        }
+    }
+
+    /**
+     * Paradas de cada viagem (viagem_destinos). Como o recalculo acima, roda com as
+     * viagens ja commitadas e nao desfaz a importacao se falhar: a proxima completa.
+     */
+    private void preencherDestinos(Long id) {
+        try {
+            log.info("Importacao {}: {} paradas gravadas em viagem_destinos", id, destinosViagem.preencherPendentes());
+        } catch (Exception e) {
+            log.error("Importacao {}: falha ao preencher viagem_destinos", id, e);
         }
     }
 

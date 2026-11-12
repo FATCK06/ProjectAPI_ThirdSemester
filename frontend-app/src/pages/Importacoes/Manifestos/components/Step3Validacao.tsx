@@ -18,7 +18,17 @@ interface PropsPasso3 {
     /** Filtro com que a lista atual foi carregada. */
     filtro: FiltroProblemas;
     aoConsultar: (pagina: number, filtro: FiltroProblemas) => void;
+    /** Como a lista nomeia cada linha. Padrão: manifesto e motorista. */
+    identificarLinha?: IdentificarLinha;
 }
+
+/** `titulo` vai na lista ("Manifesto 123"); `detalhe` complementa no card da linha. */
+export type IdentificarLinha = (valores: Record<string, string | null>) => { titulo: string; detalhe: string };
+
+const identificarManifesto: IdentificarLinha = (valores) => ({
+    titulo: `Manifesto ${valores.Manifesto?.trim() || '—'}`,
+    detalhe: valores.Motorista?.trim() || 'Motorista não informado',
+});
 
 const COLUNA_ERRO_GERAL = 'Erro de validação';
 
@@ -101,7 +111,13 @@ function problemasExibidos(linha: LinhaComProblema): ProblemaCelula[] {
     return linhaBloqueia(linha) ? linha.problemas.filter((p) => p.severidade === 'ERRO') : linha.problemas;
 }
 
-export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: PropsPasso3) {
+export function Step3Validacao({
+    validacao,
+    carregando,
+    filtro,
+    aoConsultar,
+    identificarLinha = identificarManifesto,
+}: PropsPasso3) {
     const [linhaSelecionadaNumero, setLinhaSelecionadaNumero] = useState<number | null>(null);
 
     if (!validacao) {
@@ -249,11 +265,11 @@ export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: P
                                             type="button"
                                             className={`erro-linha-item ${selecionada ? 'selecionada' : ''}`}
                                             aria-pressed={selecionada}
-                                            title={`Mostrar erros e avisos do manifesto ${linha.valores.Manifesto?.trim() || 'sem número'}`}
+                                            title={`Mostrar erros e avisos de ${identificarLinha(linha.valores).titulo}`}
                                             onClick={() => setLinhaSelecionadaNumero(linha.numeroLinha)}
                                         >
                                             <span className="erro-linha-identificacao">
-                                                <strong>Manifesto {linha.valores.Manifesto?.trim() || '—'}</strong>
+                                                <strong>{identificarLinha(linha.valores).titulo}</strong>
                                                 <strong>Linha {linha.numeroLinha}</strong>
                                             </span>
                                             <span className="erro-linha-colunas">
@@ -272,8 +288,8 @@ export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: P
                                 <>
                                     <h4>Erros da linha {linhaSelecionada.numeroLinha}</h4>
                                     <p className="erro-detalhes-identificacao">
-                                        Manifesto {linhaSelecionada.valores.Manifesto?.trim() || '—'} ·{' '}
-                                        {linhaSelecionada.valores.Motorista?.trim() || 'Motorista não informado'}
+                                        {identificarLinha(linhaSelecionada.valores).titulo} ·{' '}
+                                        {identificarLinha(linhaSelecionada.valores).detalhe}
                                     </p>
                                     <ul className="erro-detalhes-lista">
                                         {linhaSelecionada.problemas.map((problema, indice) => (
@@ -309,7 +325,7 @@ export function Step3Validacao({ validacao, carregando, filtro, aoConsultar }: P
                             ) : (
                                 <>
                                     <h4>Detalhes da linha</h4>
-                                    <p>Selecione um manifesto na lista para ver todos os erros e avisos da linha.</p>
+                                    <p>Selecione uma linha na lista para ver todos os erros e avisos dela.</p>
                                 </>
                             )}
                         </aside>
