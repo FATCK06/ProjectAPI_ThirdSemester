@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,7 +18,6 @@ import br.com.newe.ms_frota.dto.MotoristaLoteItem;
 import br.com.newe.ms_frota.dto.MotoristaResumo;
 import br.com.newe.ms_frota.models.Cidade;
 import br.com.newe.ms_frota.models.Motorista;
-import br.com.newe.ms_frota.repository.CidadeRepository;
 import br.com.newe.ms_frota.repository.MotoristaRepository;
 import br.com.newe.ms_frota.repository.MotoristaRepository.MotoristaCpfId;
 
@@ -27,11 +27,11 @@ public class MotoristaService {
     private static final Logger log = LoggerFactory.getLogger(MotoristaService.class);
 
     private final MotoristaRepository motoristaRepository;
-    private final CidadeRepository cidadeRepository;
+    private final ResolvedorCidade resolvedorCidade;
 
-    public MotoristaService(MotoristaRepository motoristaRepository, CidadeRepository cidadeRepository) {
+    public MotoristaService(MotoristaRepository motoristaRepository, ResolvedorCidade resolvedorCidade) {
         this.motoristaRepository = motoristaRepository;
-        this.cidadeRepository = cidadeRepository;
+        this.resolvedorCidade = resolvedorCidade;
     }
 
     public Optional<Motorista> buscarPorCpf(String cpf) {
@@ -54,7 +54,7 @@ public class MotoristaService {
 
     /**
      * Cria quem ainda nao existe e devolve o mapa cpf -> id para todos os CPFs
-     * recebidos. Quem ja existe nao e alterado: o manifesto e fonte de operacao,
+     * recebidos. Quem ja existe nao e alterado (so ganha cidade, se nao tiver): o manifesto e fonte de operacao,
      * nao de cadastro, e sobrescrever apagaria dado melhor vindo do CRUD.
      */
     @Transactional
@@ -74,11 +74,22 @@ public class MotoristaService {
             cpfParaId.put(existente.getCpf(), existente.getId());
         }
 
-        Map<String, Cidade> cacheCidades = new HashMap<>();
+        Map<String, Cidade> cidades = resolvedorCidade.carregar(
+                porCpf.values().stream().map(MotoristaLoteItem::estado).filter(Objects::nonNull).toList());
+
+        // Única exceção ao "não altera quem já existe": cidade vazia não é dado do
+        // CRUD a preservar. Até a V12 a tabela de cidades estava vazia e todo
+        // motorista ficou sem; o próximo manifesto completa.
+        if (!cpfParaId.isEmpty()) {
+            for (Motorista semCidade : motoristaRepository.findByCpfInAndCidadeIsNull(cpfParaId.keySet())) {
+                semCidade.setCidade(resolverCidade(porCpf.get(semCidade.getCpf()), cidades));
+            }
+        }
+
         List<Motorista> novos = new ArrayList<>();
         for (Map.Entry<String, MotoristaLoteItem> entrada : porCpf.entrySet()) {
             if (!cpfParaId.containsKey(entrada.getKey())) {
-                novos.add(montar(entrada.getValue(), cacheCidades));
+                novos.add(montar(entrada.getValue(), cidades));
             }
         }
 
@@ -89,7 +100,7 @@ public class MotoristaService {
         return cpfParaId;
     }
 
-    private Motorista montar(MotoristaLoteItem item, Map<String, Cidade> cacheCidades) {
+    private Motorista montar(MotoristaLoteItem item, Map<String, Cidade> cidades) {
         EnderecoPartes endereco = EnderecoPartes.de(item.endereco());
 
         Motorista motorista = new Motorista();
@@ -101,7 +112,7 @@ public class MotoristaService {
         motorista.setLogradouro(endereco.logradouro());
         motorista.setNumero(endereco.numero());
         motorista.setBairro(item.bairro());
-        motorista.setCidade(resolverCidade(item.cidade(), item.estado(), cacheCidades));
+        motorista.setCidade(resolverCidade(item, cidades));
         return motorista;
     }
 
@@ -110,21 +121,15 @@ public class MotoristaService {
      * de derrubar a linha: id_cidade e opcional, e perder o endereco vale menos
      * que perder a viagem inteira.
      */
-    private Cidade resolverCidade(String nome, String uf, Map<String, Cidade> cache) {
-        if (nome == null || nome.isBlank() || uf == null || uf.isBlank()) {
+    private Cidade resolverCidade(MotoristaLoteItem item, Map<String, Cidade> cidades) {
+        String chave = ResolvedorCidade.chave(item.cidade(), item.estado());
+        if (chave == null) {
             return null;
         }
-
-        String chave = nome.trim().toUpperCase() + "|" + uf.trim().toUpperCase();
-        if (cache.containsKey(chave)) {
-            return cache.get(chave);
-        }
-
-        Cidade cidade = cidadeRepository.buscarPorNomeEUf(nome, uf).orElse(null);
+        Cidade cidade = cidades.get(chave);
         if (cidade == null) {
-            log.warn("Cidade nao encontrada no cadastro: {}/{}", nome, uf);
+            log.warn("Cidade nao encontrada no cadastro: {}/{}", item.cidade(), item.estado());
         }
-        cache.put(chave, cidade);
         return cidade;
     }
 }
