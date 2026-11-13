@@ -91,6 +91,7 @@ export async function buscarMesesReferencia(): Promise<MesesReferencia> {
   return data;
 }
 
+// Só os meses com viagem importada, do mais antigo ao mais novo
 export async function buscarMesesImportados(): Promise<string[]> {
   const { data } = await api.get<string[]>("/dashboard/meses-importados");
   return data;
@@ -119,7 +120,53 @@ export async function buscarHistorico(
   return data;
 }
 
-// Só os meses com viagem importada, do mais antigo ao mais novo
+// Financeiros ausentes para quem não tem VER_DADOS_FINANCEIROS
+export interface TotaisSerie {
+  numeroViagens: number;
+  utilizacaoMedia: number;
+  valorFrete?: number;
+  custoTotal?: number;
+  rentabilidade?: number;
+}
+
+// diferenca = atual − anterior (utilização em p.p.); percentual ausente quando o anterior é 0
+export interface VariacaoIndicador {
+  diferenca: number;
+  percentual?: number;
+}
+
+// Indicador ausente = sem variação (um dos meses sem dados), nunca 0.
+// Financeiros ausentes para quem não tem VER_DADOS_FINANCEIROS.
+export interface VariacoesSerie {
+  numeroViagens?: VariacaoIndicador;
+  utilizacaoMedia?: VariacaoIndicador;
+  valorFrete?: VariacaoIndicador;
+  custoTotal?: VariacaoIndicador;
+  rentabilidade?: VariacaoIndicador;
+}
+
+// Mês sem importação vem com semDados = true e sem totais: nunca zero.
+// A variação é sempre contra mesAnterior, o mês imediatamente anterior do calendário.
+export interface SerieMes {
+  mesReferencia: string;
+  semDados: boolean;
+  mensagem?: string;
+  totais?: TotaisSerie;
+  mesAnterior?: string;
+  mesAnteriorSemDados?: boolean;
+  variacoes?: VariacoesSerie;
+}
+
+// Totais gerais dos meses pedidos (2 a 12), em ordem crescente
+export async function buscarSerie(meses: string[]): Promise<SerieMes[]> {
+  const { data } = await api.get<SerieMes[]>("/dashboard/indicadores/serie", {
+    params: { meses },
+    // O back espera meses=a&meses=b, não o meses[]=a padrão do axios
+    paramsSerializer: { indexes: null },
+  });
+  return data;
+}
+
 export async function buscarIndicadoresPorModelo(
   mesReferencia: string,
 ): Promise<IndicadoresPorModelo[]> {

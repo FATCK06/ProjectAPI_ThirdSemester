@@ -1,15 +1,17 @@
 import { Aviso } from "../../../../components/Aviso/Aviso";
 import { Card } from "../../../../components/Card/Card";
-import { EmDesenvolvimento } from "../../../../components/EmDesenvolvimento";
 import { GraficoSkeleton } from "../../../../components/SkeletonLoader/GraficoSkeleton";
 import { formatarMesCurto } from "../../../../utils/datas";
+import { CardsIndicadores } from "./CardsIndicadores";
+import { GraficoEvolucao } from "./GraficoEvolucao";
 import { MAXIMO_MESES, MINIMO_MESES, useComparativoMensal } from "./useComparativoMensal";
 import "./ComparativoMensal.css";
 
 const AVISO_MINIMO_MESES = "Selecione ao menos dois meses para comparar.";
 
 export function ComparativoMensal() {
-  const { meses, erroMeses, selecionados, alternarMes } = useComparativoMensal();
+  const { meses, erroMeses, selecionados, alternarMes, serie, carregandoSerie, erroSerie } =
+    useComparativoMensal();
   const noLimite = selecionados.length >= MAXIMO_MESES;
 
   if (erroMeses) {
@@ -46,7 +48,18 @@ export function ComparativoMensal() {
       {selecionados.length < MINIMO_MESES ? (
         <Aviso mensagem={AVISO_MINIMO_MESES} />
       ) : (
-        <EmDesenvolvimento mensagem="O gráfico e os cards de comparação estarão disponíveis em breve." />
+        carregandoSerie ? (
+          <GraficoSkeleton altura={240} barras={6} />
+        ) : erroSerie ? (
+          <p className="dashboard-erro">{erroSerie}</p>
+        ) : (
+          serie && (
+            <>
+              <CardsIndicadores serie={serie} />
+              <GraficoEvolucao serie={serie} />
+            </>
+          )
+        )
       )}
     </Card>
   );

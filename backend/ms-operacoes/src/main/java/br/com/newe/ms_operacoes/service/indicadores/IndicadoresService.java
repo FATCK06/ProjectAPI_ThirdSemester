@@ -137,21 +137,36 @@ public class IndicadoresService {
             throw new DadoInvalidoException("meses", "de 2 a 12");
         }
 
+        // Cada mes pedido mais o anterior dele, para a variacao: ainda uma consulta so
+        TreeSet<YearMonth> consultados = new TreeSet<>(pedidos);
+        pedidos.forEach(mes -> consultados.add(mes.minusMonths(1)));
+
         Map<String, List<ViagemRepository.SomaMotoristaMesView>> somasPorMes = viagemRepository
-                .somasPorMotoristaNosMeses(pedidos.stream().map(YearMonth::toString).toList()).stream()
+                .somasPorMotoristaNosMeses(consultados.stream().map(YearMonth::toString).toList()).stream()
                 .collect(Collectors.groupingBy(ViagemRepository.SomaMotoristaMesView::getMesReferencia));
 
         List<SerieMes> serie = new ArrayList<>(pedidos.size());
         for (YearMonth mes : pedidos) {
-            List<ViagemRepository.SomaMotoristaMesView> somas = somasPorMes.get(mes.toString());
-            serie.add(somas == null
-                    ? new SerieMes(mes.toString(), true, "Sem dados para " + mes.format(MES_NA_MENSAGEM) + ".", null)
-                    : new SerieMes(mes.toString(), false, null, totaisDaSerie(somas, mes)));
+            YearMonth anterior = mes.minusMonths(1);
+            SerieMes.Totais totais = totaisDaSerie(somasPorMes.get(mes.toString()), mes);
+            SerieMes.Totais totaisAnterior = totaisDaSerie(somasPorMes.get(anterior.toString()), anterior);
+            serie.add(new SerieMes(
+                    mes.toString(),
+                    totais == null,
+                    totais == null ? "Sem dados para " + mes.format(MES_NA_MENSAGEM) + "." : null,
+                    totais,
+                    anterior.toString(),
+                    totaisAnterior == null,
+                    SerieMes.Variacoes.entre(totais, totaisAnterior)));
         }
         return serie;
     }
 
+    /** Nulo quando o mes nao tem viagem: "sem dados", nunca zero. */
     private static SerieMes.Totais totaisDaSerie(List<ViagemRepository.SomaMotoristaMesView> somas, YearMonth mes) {
+        if (somas == null || somas.isEmpty()) {
+            return null;
+        }
         long diasNoMes = mes.lengthOfMonth();
         long diasDisponiveis = diasDisponiveis(mes);
         IndicadoresMes.Totais totais = totais(
