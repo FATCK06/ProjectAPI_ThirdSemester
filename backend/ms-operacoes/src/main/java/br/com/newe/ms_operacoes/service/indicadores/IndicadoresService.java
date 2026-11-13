@@ -63,6 +63,28 @@ public class IndicadoresService {
                 motoristas);
     }
 
+    public List<IndicadorMotoristaMes> historicoMotorista(UUID motoristaId, String inicio, String fim) {
+        YearMonth primeiro = YearMonth.parse(inicio);
+        YearMonth ultimo = YearMonth.parse(fim);
+        List<YearMonth> meses = new ArrayList<>();
+        for (YearMonth mes = primeiro; !mes.isAfter(ultimo); mes = mes.plusMonths(1)) {
+            meses.add(mes);
+        }
+
+        Map<String, SomaMotoristaView> somas = viagemRepository
+                .somasMotoristaNosMeses(motoristaId, meses.stream().map(YearMonth::toString).toList()).stream()
+                .collect(Collectors.toMap(ViagemRepository.SomaMotoristaMesView::getMesReferencia,
+                        Function.identity()));
+
+        return meses.stream().map(mes -> {
+            SomaMotoristaView soma = somas.get(mes.toString());
+            long diasNoMes = mes.lengthOfMonth();
+            IndicadoresMotorista indicadores = soma == null ? null
+                    : indicadoresDe(soma, null, diasDisponiveis(mes), diasNoMes);
+            return new IndicadorMotoristaMes(mes.toString(), indicadores);
+        }).toList();
+    }
+
     /**
      * Totais dos {@code quantidade} meses terminados em mesReferencia, do mais
      * antigo ao mais novo. Uma consulta so e sem ms-frota: os totais nao usam nome.

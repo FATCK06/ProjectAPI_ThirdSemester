@@ -149,7 +149,7 @@ class DashboardSerieControllerTest {
     void mesesImportadosEmOrdemCrescente() throws Exception {
         when(repository.buscarMesesImportados()).thenReturn(List.of("2026-03", "2026-04"));
 
-        mvc().perform(get("/api/dashboard/indicadores/meses-importados"))
+        mvc().perform(get("/api/dashboard/meses-importados"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0]").value("2026-03"))
                 .andExpect(jsonPath("$[1]").value("2026-04"));

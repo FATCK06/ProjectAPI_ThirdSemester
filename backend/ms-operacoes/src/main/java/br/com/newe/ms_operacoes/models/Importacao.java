@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_operacoes.models.enums.TipoImportacaoEnum;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,7 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 /**
- * Uma execucao de importacao de manifestos.
+ * Uma execucao de importacao, de manifestos ou de veiculos (ver {@link #tipo}).
  *
  * Guarda o arquivo enquanto ele passa pelas etapas da tela. O conteudo so vira
  * viagens quando o usuario confirma - ate la o registro fica em AGUARDANDO ou
@@ -69,7 +70,19 @@ public class Importacao {
     @Column(name = "processamento_iniciado_em")
     private LocalDateTime processamentoIniciadoEm;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false)
+    private TipoImportacaoEnum tipo = TipoImportacaoEnum.MANIFESTO;
+
     public Importacao() {
+    }
+
+    public TipoImportacaoEnum getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoImportacaoEnum tipo) {
+        this.tipo = tipo;
     }
 
     public Long getId() {

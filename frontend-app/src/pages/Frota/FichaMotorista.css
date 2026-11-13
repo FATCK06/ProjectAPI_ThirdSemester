@@ -1,0 +1,129 @@
+.ficha-motorista-painel,
+.historico-motorista-page {
+  min-width: 0;
+  padding: 20px 24px 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+}
+
+.ficha-motorista-voltar,
+.historico-motorista-voltar {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  color: #1d4ed8;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ficha-motorista-voltar:hover,
+.historico-motorista-voltar:hover {
+  text-decoration: underline;
+}
+
+.ficha-motorista-cabecalho,
+.ficha-motorista-painel .page-header,
+.historico-motorista-page .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ficha-motorista-titulo,
+.ficha-motorista-painel .page-header h1,
+.historico-motorista-page .page-header h1 {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.ficha-motorista-subtitulo,
+.ficha-motorista-painel .page-header p,
+.historico-motorista-page .page-header p {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ficha-motorista-secao {
+  margin-top: 24px;
+}
+
+.ficha-motorista-secao h2 {
+  margin-bottom: 12px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.ficha-motorista-grade,
+.historico-motorista-identificacao,
+.historico-motorista-indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.historico-motorista-identificacao,
+.historico-motorista-indicadores {
+  margin-top: 16px;
+}
+
+.ficha-motorista-grade > div,
+.historico-motorista-identificacao > div,
+.historico-motorista-indicadores article {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.ficha-motorista-grade dt,
+.historico-motorista-identificacao dt,
+.historico-motorista-indicadores article span {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.ficha-motorista-grade dd,
+.historico-motorista-identificacao dd,
+.historico-motorista-indicadores article strong {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .ficha-motorista-painel,
+  .historico-motorista-page {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .ficha-motorista-painel,
+  .historico-motorista-page {
+    padding: 16px 12px;
+    border-radius: 12px;
+  }
+
+  .ficha-motorista-cabecalho,
+  .ficha-motorista-painel .page-header,
+  .historico-motorista-page .page-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

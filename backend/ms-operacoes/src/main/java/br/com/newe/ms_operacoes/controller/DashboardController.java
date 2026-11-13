@@ -46,6 +46,11 @@ public class DashboardController {
         return new MesesReferenciaDTO(atual.toString(), atual.minusMonths(1).toString());
     }
 
+    @GetMapping("/meses-importados")
+    public List<String> mesesImportados1() {
+        return indicadoresService.mesesImportados();
+    }
+
     @GetMapping("/indicadores") // "/api/dashboard/indicadores?mesReferencia=2026-04"
     public ResponseEntity<IndicadoresMes> indicadores(
             @RequestParam("mesReferencia") @MesReferencia String mesReferencia,
@@ -71,12 +76,6 @@ public class DashboardController {
             historico = historico.stream().map(HistoricoMes::semValoresFinanceiros).toList();
         }
         return ResponseEntity.ok(historico);
-    }
-
-    /** Meses que o seletor do comparativo pode oferecer, em AAAA-MM crescente. */
-    @GetMapping("/indicadores/meses-importados")
-    public List<String> mesesImportados() {
-        return indicadoresService.mesesImportados();
     }
 
     /**
