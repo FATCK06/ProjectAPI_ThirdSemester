@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import br.com.newe.ms_operacoes.service.frota.TipoVeiculoRotulos;
 import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.erro.DadoInvalidoException;
@@ -256,7 +257,7 @@ public class IndicadoresService {
         // Agrupa as somas por veiculo em somas por modelo, ja que varios veiculos
         // podem compartilhar o mesmo modelo.
         Map<String, List<ViagemRepository.SomaVeiculoView>> porModelo = somas.stream()
-                .collect(Collectors.groupingBy(s -> tiposVeiculo.getOrDefault(s.getVeiculoId(), "Não informado")));
+                .collect(Collectors.groupingBy(s -> tiposVeiculo.getOrDefault(s.getVeiculoId(), TipoVeiculoRotulos.NAO_IDENTIFICADO)));
 
         List<IndicadoresPorModelo> resultado = new ArrayList<>();
         for (Map.Entry<String, List<ViagemRepository.SomaVeiculoView>> entrada : porModelo.entrySet()) {

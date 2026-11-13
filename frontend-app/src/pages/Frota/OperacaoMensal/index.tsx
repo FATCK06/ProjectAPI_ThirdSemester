@@ -242,7 +242,7 @@ export function OperacaoMensal() {
                 </option>
               )}
               {tiposVeiculo.map((tipo) => (
-                <option key={tipo.idTipo} value={tipo.descricao}>{tipo.descricao}</option>
+                <option key={tipo.idCategoria} value={tipo.descricao}>{tipo.descricao}</option>
               ))}
             </select>
           </div>

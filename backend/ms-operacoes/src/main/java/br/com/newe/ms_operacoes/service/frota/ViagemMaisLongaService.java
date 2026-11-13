@@ -25,7 +25,7 @@ import br.com.newe.ms_operacoes.repository.ViagemRepository.ViagemKmView;
 @Service
 public class ViagemMaisLongaService {
 
-    static final String TIPO_NAO_INFORMADO = "Não informado";
+    static final String TIPO_NAO_IDENTIFICADO = TipoVeiculoRotulos.NAO_IDENTIFICADO;
 
     public record ViagemMaisLonga(String tipoVeiculo, UUID veiculoId, Integer distanciaKm) {
     }
@@ -53,7 +53,7 @@ public class ViagemMaisLongaService {
 
         Map<UUID, ViagemMaisLonga> resultado = new HashMap<>();
         maisLonga.forEach((motoristaId, viagem) -> resultado.put(motoristaId, new ViagemMaisLonga(
-                tipos.getOrDefault(viagem.getVeiculoId(), TIPO_NAO_INFORMADO),
+                tipos.getOrDefault(viagem.getVeiculoId(), TIPO_NAO_IDENTIFICADO),
                 viagem.getVeiculoId(),
                 distancia(viagem))));
         return resultado;
