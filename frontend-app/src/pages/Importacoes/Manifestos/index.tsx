@@ -55,6 +55,8 @@ export interface ConfigImportacao {
     rotuloGravadas?: string;
     /** Texto do modal antes de gravar. */
     confirmacao: (validacao: ResultadoValidacao) => string;
+    /** Passo 6: bloco extra abaixo do resultado (ex.: cruzamento dos veículos com os manifestos). */
+    Complemento?: () => ReactElement;
 }
 
 export function ManifestosImport() {
@@ -79,6 +81,7 @@ export function ImportacaoWizard({
     identificarLinha,
     rotuloGravadas,
     confirmacao,
+    Complemento,
 }: ConfigImportacao) {
     const [passoAtual, setPassoAtual] = useState(PASSO_UPLOAD);
     const [importacao, setImportacao] = useState<ImportacaoCriada | null>(null);
@@ -282,7 +285,9 @@ export function ImportacaoWizard({
                         linhasGravadas={linhasGravadas}
                         aoRecomecar={recomecar}
                         rotuloGravadas={rotuloGravadas}
-                    />
+                    >
+                        {Complemento && <Complemento />}
+                    </Step6Resultado>
                 )}
             </div>
 
