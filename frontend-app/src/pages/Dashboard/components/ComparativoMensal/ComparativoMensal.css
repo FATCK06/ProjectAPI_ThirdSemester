@@ -71,3 +71,16 @@
 .comparativo-evolucao .ui-aviso + .ui-aviso {
   margin-top: 8px;
 }
+
+.comparativo-cards-titulo {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.comparativo-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}

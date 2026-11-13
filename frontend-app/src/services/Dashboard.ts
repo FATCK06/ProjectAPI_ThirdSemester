@@ -129,12 +129,32 @@ export interface TotaisSerie {
   rentabilidade?: number;
 }
 
-// Mês sem importação vem com semDados = true e sem totais: nunca zero
+// diferenca = atual − anterior (utilização em p.p.); percentual ausente quando o anterior é 0
+export interface VariacaoIndicador {
+  diferenca: number;
+  percentual?: number;
+}
+
+// Indicador ausente = sem variação (um dos meses sem dados), nunca 0.
+// Financeiros ausentes para quem não tem VER_DADOS_FINANCEIROS.
+export interface VariacoesSerie {
+  numeroViagens?: VariacaoIndicador;
+  utilizacaoMedia?: VariacaoIndicador;
+  valorFrete?: VariacaoIndicador;
+  custoTotal?: VariacaoIndicador;
+  rentabilidade?: VariacaoIndicador;
+}
+
+// Mês sem importação vem com semDados = true e sem totais: nunca zero.
+// A variação é sempre contra mesAnterior, o mês imediatamente anterior do calendário.
 export interface SerieMes {
   mesReferencia: string;
   semDados: boolean;
   mensagem?: string;
   totais?: TotaisSerie;
+  mesAnterior?: string;
+  mesAnteriorSemDados?: boolean;
+  variacoes?: VariacoesSerie;
 }
 
 // Totais gerais dos meses pedidos (2 a 12), em ordem crescente

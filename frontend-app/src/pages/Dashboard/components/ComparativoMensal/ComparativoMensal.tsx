@@ -1,8 +1,8 @@
 import { Aviso } from "../../../../components/Aviso/Aviso";
 import { Card } from "../../../../components/Card/Card";
-import { EmDesenvolvimento } from "../../../../components/EmDesenvolvimento";
 import { GraficoSkeleton } from "../../../../components/SkeletonLoader/GraficoSkeleton";
 import { formatarMesCurto } from "../../../../utils/datas";
+import { CardsIndicadores } from "./CardsIndicadores";
 import { GraficoEvolucao } from "./GraficoEvolucao";
 import { MAXIMO_MESES, MINIMO_MESES, useComparativoMensal } from "./useComparativoMensal";
 import "./ComparativoMensal.css";
@@ -48,17 +48,18 @@ export function ComparativoMensal() {
       {selecionados.length < MINIMO_MESES ? (
         <Aviso mensagem={AVISO_MINIMO_MESES} />
       ) : (
-        <>
-          {/* Placeholder dos cards de variação (SCRUM-140) */}
-          <EmDesenvolvimento mensagem="Os cards de variação em relação ao mês anterior estarão disponíveis em breve." />
-          {carregandoSerie ? (
-            <GraficoSkeleton altura={240} barras={6} />
-          ) : erroSerie ? (
-            <p className="dashboard-erro">{erroSerie}</p>
-          ) : (
-            serie && <GraficoEvolucao serie={serie} />
-          )}
-        </>
+        carregandoSerie ? (
+          <GraficoSkeleton altura={240} barras={6} />
+        ) : erroSerie ? (
+          <p className="dashboard-erro">{erroSerie}</p>
+        ) : (
+          serie && (
+            <>
+              <CardsIndicadores serie={serie} />
+              <GraficoEvolucao serie={serie} />
+            </>
+          )
+        )
       )}
     </Card>
   );
