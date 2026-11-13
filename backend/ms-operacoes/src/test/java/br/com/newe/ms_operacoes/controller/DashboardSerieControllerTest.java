@@ -72,6 +72,59 @@ class DashboardSerieControllerTest {
     }
 
     @Test
+    void operadorNaoRecebeVariacoesFinanceirasNoJson() {
+        dadoMarcoEAbrilComDados();
+
+        JsonNode variacoes = json(List.of("2026-03", "2026-04"), comPerfil("OPERADOR")).get(1).get("variacoes");
+
+        assertThat(variacoes.get("numeroViagens").get("percentual").decimalValue()).isEqualByComparingTo("20.00");
+        assertThat(variacoes.has("utilizacaoMedia")).isTrue();
+        for (String campo : FINANCEIROS) {
+            assertThat(variacoes.has(campo)).as(campo).isFalse();
+        }
+    }
+
+    @Test
+    void gestorRecebeVariacoesFinanceirasNoJson() {
+        dadoMarcoEAbrilComDados();
+
+        JsonNode abril = json(List.of("2026-03", "2026-04"), comPerfil("GESTOR")).get(1);
+
+        assertThat(abril.get("mesAnterior").asString()).isEqualTo("2026-03");
+        assertThat(abril.get("mesAnteriorSemDados").asBoolean()).isFalse();
+        for (String campo : FINANCEIROS) {
+            assertThat(abril.get("variacoes").has(campo)).as(campo).isTrue();
+        }
+        // 400 -> 150
+        assertThat(abril.get("variacoes").get("rentabilidade").get("diferenca").decimalValue())
+                .isEqualByComparingTo("-250.00");
+    }
+
+    @Test
+    void anteriorZeroNaoTemPercentualNoJson() {
+        when(repository.somasPorMotoristaNosMeses(anyCollection())).thenReturn(List.of(
+                soma("2026-03", 10, "0.00", "0.00"),
+                soma("2026-04", 12, "750.00", "600.00")));
+
+        JsonNode frete = json(List.of("2026-03", "2026-04"), comPerfil("GESTOR")).get(1)
+                .get("variacoes").get("valorFrete");
+
+        assertThat(frete.get("diferenca").decimalValue()).isEqualByComparingTo("750.00");
+        assertThat(frete.has("percentual")).isFalse();
+    }
+
+    @Test
+    void anteriorSemDadosTemVariacoesVaziasNoJson() {
+        dadoMarcoEAbrilComDados();
+
+        JsonNode marco = json(List.of("2026-03", "2026-04"), comPerfil("GESTOR")).get(0);
+
+        assertThat(marco.get("mesAnterior").asString()).isEqualTo("2026-02");
+        assertThat(marco.get("mesAnteriorSemDados").asBoolean()).isTrue();
+        assertThat(marco.get("variacoes").isEmpty()).isTrue();
+    }
+
+    @Test
     void mesSemDadosNaoTemNenhumNumeroNoJson() {
         dadoMarcoEAbrilComDados();
 
