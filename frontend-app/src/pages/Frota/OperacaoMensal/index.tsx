@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { TableSkeleton } from "../../../components/SkeletonLoader/TableSkeleton";
 import { PageHeader } from "../../../components/PageHeader";
 import { Paginacao } from "../../../components/Paginacao";
@@ -27,6 +27,12 @@ type EstadoTiposVeiculo =
   | { status: "loading" }
   | { status: "success"; tipos: TipoVeiculo[] | null }
   | { status: "error" };
+type RestauracaoTabela = {
+  busca?: string;
+  tipoVeiculo?: string;
+  ordenacao?: OrdenacaoTabela | null;
+  scrollY?: number;
+};
 function paginaDaUrl(valor: string | null) {
   if (!valor || !/^\d+$/.test(valor)) return 1;
   const pagina = Number(valor);
@@ -96,6 +102,8 @@ const COLUNAS: ColunaTabela<MotoristaMes>[] = [
 ];
 
 export function OperacaoMensal() {
+  const location = useLocation();
+  const restauracao = (location.state as { restauracao?: RestauracaoTabela } | null)?.restauracao;
   const [searchParams, setSearchParams] = useSearchParams();
   const mesParametro = searchParams.get("mes");
   const mes = mesParametro && /^\d{4}-(0[1-9]|1[0-2])$/.test(mesParametro)
@@ -103,14 +111,15 @@ export function OperacaoMensal() {
     : mesAtual();
   const paginaParametro = searchParams.get("page");
   const pagina = paginaDaUrl(paginaParametro);
-  const [busca, setBusca] = useState("");
-  const [tipoVeiculo, setTipoVeiculo] = useState("");
+  const [busca, setBusca] = useState(restauracao?.busca ?? "");
+  const [tipoVeiculo, setTipoVeiculo] = useState(restauracao?.tipoVeiculo ?? "");
   const [estadoTiposVeiculo, setEstadoTiposVeiculo] =
     useState<EstadoTiposVeiculo>({ status: "loading" });
   // Fica na página para a ordenação continuar ao trocar de página ou de mês
-  const [ordenacao, setOrdenacao] = useState<OrdenacaoTabela | null>(null);
+  const [ordenacao, setOrdenacao] = useState<OrdenacaoTabela | null>(restauracao?.ordenacao ?? null);
   const [resultado, setResultado] = useState<ResultadoBusca | null>(null);
   const [tentativa, setTentativa] = useState(0);
+  const scrollRestaurado = useRef(false);
   const chaveConsulta = `${mes}|${pagina}|${tentativa}`;
   const status: Status = resultado?.chave === chaveConsulta
     ? resultado.status
@@ -169,6 +178,12 @@ export function OperacaoMensal() {
       cancelado = true;
     };
   }, [chaveConsulta, mes, pagina, setSearchParams]);
+
+  useEffect(() => {
+    if (status !== "success" || restauracao?.scrollY === undefined || scrollRestaurado.current) return;
+    scrollRestaurado.current = true;
+    requestAnimationFrame(() => window.scrollTo(0, restauracao.scrollY ?? 0));
+  }, [status, restauracao]);
 
   useEffect(() => {
     let cancelado = false;
@@ -280,8 +295,6 @@ export function OperacaoMensal() {
               colunas={COLUNAS}
               linhas={motoristasFiltrados}
               chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
-              linkLinha={(m) =>
-                `/operacao-mensal/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
               cardsNoMobile
               ordenacao={ordenacao}
               aoOrdenar={setOrdenacao}

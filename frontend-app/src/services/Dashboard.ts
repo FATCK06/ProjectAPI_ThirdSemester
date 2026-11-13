@@ -91,6 +91,11 @@ export async function buscarMesesReferencia(): Promise<MesesReferencia> {
   return data;
 }
 
+export async function buscarMesesImportados(): Promise<string[]> {
+  const { data } = await api.get<string[]>("/dashboard/meses-importados");
+  return data;
+}
+
 export async function buscarIndicadores(
   mesReferencia: string,
 ): Promise<IndicadoresMes> {
@@ -115,11 +120,6 @@ export async function buscarHistorico(
 }
 
 // Só os meses com viagem importada, do mais antigo ao mais novo
-export async function buscarMesesImportados(): Promise<string[]> {
-  const { data } = await api.get<string[]>("/dashboard/indicadores/meses-importados");
-  return data;
-}
-
 export async function buscarIndicadoresPorModelo(
   mesReferencia: string,
 ): Promise<IndicadoresPorModelo[]> {

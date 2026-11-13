@@ -11,6 +11,11 @@ export interface OrdenacaoTabela {
   direcao: DirecaoOrdenacao;
 }
 
+export interface EstadoNavegacaoTabela {
+  pagina: number;
+  ordenacao: OrdenacaoTabela | null;
+}
+
 export interface ColunaTabela<T> {
   chave: string;
   titulo: string;
@@ -32,6 +37,7 @@ interface PropsDataTable<T> {
   larguraMinima?: number | string;
   // A linha inteira leva a este endereço; a primeira célula vira um link acessível
   linkLinha?: (linha: T) => string;
+  estadoNavegacaoLinha?: (linha: T, estado: EstadoNavegacaoTabela) => unknown;
   // Abaixo de 900px troca a tabela por cards (título = primeira coluna)
   cardsNoMobile?: boolean;
   mensagemVazia?: ReactNode;
@@ -41,6 +47,7 @@ interface PropsDataTable<T> {
   aoOrdenar?: (ordenacao: OrdenacaoTabela) => void;
   // Paginação no front, depois da ordenação; para listas que já vêm paginadas do backend use <Paginacao />
   itensPorPagina?: number;
+  paginaInicial?: number;
 }
 
 // Nulos vão sempre para o fim, independente da direção
@@ -71,16 +78,18 @@ export function DataTable<T>({
   layoutFixo = false,
   larguraMinima,
   linkLinha,
+  estadoNavegacaoLinha,
   cardsNoMobile = false,
   mensagemVazia,
   ordenacaoInicial = null,
   ordenacao: ordenacaoControlada,
   aoOrdenar,
   itensPorPagina,
+  paginaInicial = 1,
 }: PropsDataTable<T>) {
   const navigate = useNavigate();
   const [ordenacaoInterna, setOrdenacaoInterna] = useState(ordenacaoInicial);
-  const [paginaEscolhida, setPaginaEscolhida] = useState(1);
+  const [paginaEscolhida, setPaginaEscolhida] = useState(paginaInicial);
   const ordenacao = ordenacaoControlada !== undefined ? ordenacaoControlada : ordenacaoInterna;
   const colunaOrdenada = colunas.find((coluna) => coluna.chave === ordenacao?.chave);
 
@@ -181,11 +190,12 @@ export function DataTable<T>({
           <tbody>
             {linhasVisiveis.map((linha) => {
               const destino = linkLinha?.(linha);
+              const estadoNavegacao = estadoNavegacaoLinha?.(linha, { pagina, ordenacao });
               return (
                 <tr
                   key={chaveLinha(linha)}
                   className={destino ? "data-table-linha-link" : undefined}
-                  onClick={destino ? () => navigate(destino) : undefined}
+                  onClick={destino ? () => navigate(destino, { state: estadoNavegacao }) : undefined}
                 >
                   {colunas.map((coluna, indice) => (
                     <td
@@ -195,6 +205,7 @@ export function DataTable<T>({
                       {destino && indice === 0 ? (
                         <Link
                           to={destino}
+                          state={estadoNavegacao}
                           className="data-table-link"
                           onClick={(event) => event.stopPropagation()}
                         >
@@ -214,6 +225,7 @@ export function DataTable<T>({
         <div className="data-table-cards">
           {linhasVisiveis.map((linha) => {
             const destino = linkLinha?.(linha);
+            const estadoNavegacao = estadoNavegacaoLinha?.(linha, { pagina, ordenacao });
             const [primeira, ...demais] = colunas;
             const conteudo = (
               <>
@@ -232,7 +244,7 @@ export function DataTable<T>({
               </>
             );
             return destino ? (
-              <Link key={chaveLinha(linha)} to={destino} className="data-table-card data-table-card--link">
+              <Link key={chaveLinha(linha)} to={destino} state={estadoNavegacao} className="data-table-card data-table-card--link">
                 {conteudo}
               </Link>
             ) : (
