@@ -12,3 +12,17 @@ export function formatarPercentual(valor: number | null | undefined): string {
   if (valor === null || valor === undefined) return SEM_VALOR;
   return `${valor.toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`;
 }
+
+export function formatarCpf(valor: string | null | undefined): string {
+  if (!valor) return "Não informado";
+  const digitos = valor.replace(/\D/g, "");
+  if (digitos.length !== 11) return valor;
+  return digitos.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+}
+
+export function formatarCep(valor: string | null | undefined): string {
+  if (!valor) return "Não informado";
+  const digitos = valor.replace(/\D/g, "");
+  if (digitos.length !== 8) return valor;
+  return digitos.replace(/(\d{5})(\d{3})/, "$1-$2");
+}

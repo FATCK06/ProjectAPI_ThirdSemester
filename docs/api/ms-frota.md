@@ -7,6 +7,7 @@ Todas as rotas exigem `Authorization: Bearer <token>` quando chamadas pelo gatew
 | Método | Rota | Descrição |
 |---|---|---|
 | `GET` | `/api/motoristas/{cpf}` | Busca motorista por CPF |
+| `GET` | `/api/motoristas/id/{id}` | Busca ficha do motorista por id, incluindo nome da cidade |
 | `POST` | `/api/motoristas/resumos` | Nome e CPF de vários motoristas por id |
 | `POST` | `/api/motoristas/lote` | Upsert em lote por CPF |
 | `GET` | `/api/veiculos/{placa}` | Busca veículo por placa |
@@ -47,6 +48,12 @@ Todas as rotas exigem `Authorization: Bearer <token>` quando chamadas pelo gatew
 ```
 
 **Erros:** `404` se o CPF não existir.
+
+### `GET /api/motoristas/id/{id}`
+
+Busca os dados cadastrais do motorista pelo UUID. A resposta inclui `idCidade` e `nomeCidade`; o nome vem vazio quando o motorista não tem cidade cadastrada.
+
+**Erros:** `404` se o id não existir.
 
 ### `POST /api/motoristas/resumos`
 

@@ -42,6 +42,10 @@ public class MotoristaService {
         return motoristaRepository.findById(id);
     }
 
+    public Optional<Motorista> buscarPorIdComCidade(UUID id) {
+        return motoristaRepository.buscarPorIdComCidade(id);
+    }
+
     /** Nome e CPF de varios motoristas de uma vez, para quem so guarda o id (ms-operacoes). */
     public List<MotoristaResumo> buscarResumos(List<UUID> ids) {
         if (ids.isEmpty()) {
