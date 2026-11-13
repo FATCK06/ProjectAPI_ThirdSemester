@@ -23,9 +23,9 @@ import { mesAtual } from "../../utils/datas";
 import "./dashboard.css";
 
 // Enquanto false, o card mostra o aviso de "Em desenvolvimento" no lugar do gráfico
-// e o endpoint por modelo nem é chamado. Mudar para true quando os dados por tipo
-// de veículo estiverem prontos.
-const GRAFICO_MODELOS_DISPONIVEL = false;
+// e o endpoint por modelo nem é chamado. Ligado com a categoria de veículo (SCRUM-126):
+// as barras são as sete categorias, mais "Não identificado" e "Não classificado".
+const GRAFICO_MODELOS_DISPONIVEL = true;
 
 export function Dashboard() {
   const [meses, setMeses] = useState<MesesReferencia | null>(null);
