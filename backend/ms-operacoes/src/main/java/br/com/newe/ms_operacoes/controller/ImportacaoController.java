@@ -35,6 +35,7 @@ import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService.ArquivoComErroException;
+import br.com.newe.ms_operacoes.service.importacao.ResolvedorFrota.CadastroRecusadoException;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -172,6 +173,10 @@ public class ImportacaoController {
 
         } catch (ArquivoComErroException e) {
             // Quantas linhas estao invalidas: o usuario precisa saber para corrigir.
+            return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
+
+        } catch (CadastroRecusadoException e) {
+            // O ms-frota recusou um cadastro do arquivo: o motivo vai junto para o usuario.
             return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
         // Falha na gravacao (ImportacaoFalhouException) carrega o erro do banco na

@@ -5,8 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 
 import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.AgregadoLoteItem;
@@ -34,10 +37,48 @@ public class ResolvedorFrota {
 
     public ReferenciasFrota resolver(List<LinhaManifesto> linhas) {
         return new ReferenciasFrota(
-                frotaClient.upsertMotoristas(motoristasDistintos(linhas)),
-                frotaClient.upsertAgregados(agregadosDistintos(linhas)),
-                frotaClient.upsertVeiculos(veiculosDistintos(linhas))
+                recusaComo("motoristas", () -> frotaClient.upsertMotoristas(motoristasDistintos(linhas))),
+                recusaComo("agregados", () -> frotaClient.upsertAgregados(agregadosDistintos(linhas))),
+                recusaComo("veiculos", () -> frotaClient.upsertVeiculos(veiculosDistintos(linhas)))
         );
+    }
+
+    /**
+     * 400 do ms-frota e dado do arquivo que a conferencia deixou passar, nao falha
+     * do servidor: vira CadastroRecusadoException com o motivo, para o usuario
+     * saber o que corrigir. Qualquer outro erro (401, 5xx, timeout) segue como esta.
+     */
+    private static <T> T recusaComo(String cadastro, Supplier<T> chamada) {
+        try {
+            return chamada.get();
+        } catch (HttpClientErrorException.BadRequest e) {
+            throw new CadastroRecusadoException(cadastro, motivos(e), e);
+        }
+    }
+
+    /** Os motivos de "campos" no corpo de erro do ms-frota; null se o corpo veio em outro formato. */
+    static String motivos(HttpClientErrorException e) {
+        try {
+            Map<?, ?> corpo = e.getResponseBodyAs(Map.class);
+            if (corpo != null && corpo.get("campos") instanceof Map<?, ?> campos && !campos.isEmpty()) {
+                return campos.values().stream()
+                        .map(String::valueOf)
+                        .distinct()
+                        .collect(Collectors.joining("; "));
+            }
+        } catch (RuntimeException ignorada) {
+            // Sem como ler o corpo: a mensagem sai sem o motivo, e o detalhe fica no log.
+        }
+        return null;
+    }
+
+    /** O ms-frota recusou um dos lotes. Nenhuma viagem foi gravada ainda. */
+    public static class CadastroRecusadoException extends RuntimeException {
+        public CadastroRecusadoException(String cadastro, String motivo, Throwable causa) {
+            super("O cadastro de " + cadastro + " da frota recusou dados deste arquivo"
+                    + (motivo == null ? "" : " (" + motivo + ")")
+                    + ". Corrija o arquivo e envie novamente; nenhuma viagem foi gravada.", causa);
+        }
     }
 
     /** Placa e chave: precisa casar com a normalizacao que o ms-frota aplica. */
