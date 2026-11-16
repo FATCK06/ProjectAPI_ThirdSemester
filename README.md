@@ -425,7 +425,7 @@ Principais tecnologias utilizadas no projeto:
 
 Antes de iniciar, certifique-se de ter instalado:
 
-- JDK 17
+- JDK 17 (para desenvolver o backend) ou Docker (para apenas rodá-lo, ver [Subir o backend](#3-subir-o-backend))
 - Node.js 18 ou superior
 - npm ou yarn
 - PostgreSQL (banco hospedado no Supabase)
@@ -468,6 +468,34 @@ O `backend/.env` já está no `.gitignore`, então não corre risco de ser commi
 | `api-gateway`  | `backend/api-gateway`  | 8080  |
 
 ### 3. Subir o backend
+
+Há duas formas. Use uma ou outra, **nunca as duas ao mesmo tempo**: cada serviço ocupa até 3 conexões do pooler do Supabase, que tem limite e é dividido por todo o time.
+
+#### Opção A: Docker (para rodar)
+
+Indicada para quem vai trabalhar no frontend ou só precisa do backend no ar. Exige apenas o Docker (Docker Desktop no Windows e no macOS); não é preciso ter JDK instalado. O `backend/.env` do passo 2 continua sendo necessário.
+
+```bash
+cd backend
+docker compose up -d --build --wait
+```
+
+Na primeira vez, o build baixa as dependências e leva alguns minutos. Nas seguintes, só o que mudou é recompilado. O comando termina quando os quatro serviços estiverem prontos.
+
+| Quero...                                    | Comando (na pasta `backend`)          |
+| ------------------------------------------- | ------------------------------------- |
+| subir, ou atualizar depois de um `git pull` | `docker compose up -d --build --wait` |
+| ver se está tudo no ar                      | `docker compose ps`                   |
+| acompanhar o log de um serviço              | `docker compose logs -f ms-operacoes` |
+| derrubar                                    | `docker compose down`                 |
+
+Só o gateway fica acessível, em `http://localhost:8080`. Os demais serviços são alcançados apenas por ele, dentro da rede do Docker.
+
+O container não enxerga alterações feitas no código depois do build. Para que uma mudança passe a valer, rode de novo `docker compose up -d --build --wait` (ou `docker compose up -d --build ms-frota` para atualizar só um serviço).
+
+#### Opção B: pela IDE ou terminal (para desenvolver o backend)
+
+Se os containers estiverem no ar, derrube-os antes com `docker compose down`.
 
 Não é necessário instalar o Maven: cada serviço inclui o Maven Wrapper. Abra um terminal na pasta do serviço (consulte a tabela acima) e execute:
 
