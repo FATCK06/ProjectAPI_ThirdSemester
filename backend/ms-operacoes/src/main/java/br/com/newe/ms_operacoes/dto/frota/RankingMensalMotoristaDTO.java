@@ -16,6 +16,7 @@ public record RankingMensalMotoristaDTO(
         UUID motoristaId,
         String nome,
         String tipoVeiculo,
+        String placa,
         long numeroViagens,
         BigDecimal disponibilidade,
         BigDecimal utilizacao,
@@ -26,11 +27,18 @@ public record RankingMensalMotoristaDTO(
 
     private static final String NAO_INFORMADO = "N\u00e3o informado";
 
-    public static RankingMensalMotoristaDTO de(IndicadoresMotorista i, String tipoVeiculo) {
+    public static RankingMensalMotoristaDTO de(IndicadoresMotorista i, String tipoVeiculo, String placa) {
         String nome = i.nome() == null || i.nome().isBlank() ? NAO_INFORMADO : i.nome();
         String tipo = tipoVeiculo == null || tipoVeiculo.isBlank() ? NAO_INFORMADO : tipoVeiculo;
-        return new RankingMensalMotoristaDTO(i.motoristaId(), nome, tipo, i.numeroViagens(),
+        return new RankingMensalMotoristaDTO(i.motoristaId(), nome, tipo, placa, i.numeroViagens(),
                 i.disponibilidade(), i.utilizacao(), i.valorFrete(), i.custoTotal(), i.rentabilidade(),
                 i.rentabilidadeMediaViagem());
+    }
+
+    public RankingMensalMotoristaDTO(UUID motoristaId, String nome, String tipoVeiculo, long numeroViagens,
+            BigDecimal disponibilidade, BigDecimal utilizacao, BigDecimal valorFrete, BigDecimal custoTotal,
+            BigDecimal rentabilidade, BigDecimal rentabilidadeMediaViagem) {
+        this(motoristaId, nome, tipoVeiculo, null, numeroViagens, disponibilidade, utilizacao, valorFrete,
+                custoTotal, rentabilidade, rentabilidadeMediaViagem);
     }
 }

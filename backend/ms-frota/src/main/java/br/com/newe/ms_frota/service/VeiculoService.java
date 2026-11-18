@@ -96,7 +96,7 @@ public class VeiculoService {
     private Veiculo montar(String placa, VeiculoLoteItem item) {
         Veiculo veiculo = new Veiculo();
         veiculo.setPlaca(placa);
-        veiculo.setCapacidade(item.capacidade());
+        veiculo.setCapacidadeLotacao(item.capacidadeLotacao());
         veiculo.setNomeAgregado(item.nomeAgregado());
         veiculo.setStatusVeiculo(Veiculo.STATUS_ATIVO);
         return veiculo;

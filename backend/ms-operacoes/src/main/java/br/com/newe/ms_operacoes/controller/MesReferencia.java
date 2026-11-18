@@ -14,7 +14,7 @@ import jakarta.validation.constraints.Pattern;
 @Pattern(regexp = "\\d{4}-(0[1-9]|1[0-2])")
 @ReportAsSingleViolation
 @Constraint(validatedBy = {})
-@Target({ ElementType.PARAMETER, ElementType.FIELD })
+@Target({ ElementType.PARAMETER, ElementType.FIELD, ElementType.TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MesReferencia {
 

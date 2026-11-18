@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactElement } from 'react';
 import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight, AlertTriangle } from 'lucide-react';
 import { Step1Upload } from './components/Step1Upload';
 import { Step2Mapeamento } from './components/Step2Mapeamento';
-import { Step3Validacao } from './components/Step3Validacao';
+import { Step3Validacao, type IdentificarLinha } from './components/Step3Validacao';
 import { Step4Revisao } from './components/Step4Revisao';
 import { Step5Execucao } from './components/Step5Execucao';
 import { Step6Resultado } from './components/Step6Resultado';
@@ -17,6 +17,7 @@ import {
     type ImportacaoCriada,
     type ImportacaoEmAndamento,
     type ResultadoValidacao,
+    type TipoImportacao,
 } from '../../../services/importacao';
 import { useToast } from '../../../components/Toast';
 import './manifestos.css';
@@ -43,7 +44,42 @@ function horaDe(iso: string | null): string | null {
     return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+/** O que muda entre os tipos de arquivo; o fluxo de 6 passos é o mesmo. */
+export interface ConfigImportacao {
+    tipo: TipoImportacao;
+    titulo: string;
+    subtitulo: string;
+    /** Passo 4: a prévia mostra colunas diferentes por tipo. */
+    Revisao: (props: { validacao: ResultadoValidacao | null }) => ReactElement;
+    identificarLinha?: IdentificarLinha;
+    rotuloGravadas?: string;
+    /** Texto do modal antes de gravar. */
+    confirmacao: (validacao: ResultadoValidacao) => string;
+}
+
 export function ManifestosImport() {
+    return (
+        <ImportacaoWizard
+            tipo="MANIFESTO"
+            titulo="Importação de Manifestos"
+            subtitulo="Envie o CSV de manifestos, confira o mapeamento e valide os dados antes de gravar"
+            Revisao={Step4Revisao}
+            confirmacao={(v) =>
+                `${v.linhasValidas} viagens serão gravadas a partir de ${v.arquivoNome}. Até aqui nada foi gravado. Esta é a etapa que grava.`
+            }
+        />
+    );
+}
+
+export function ImportacaoWizard({
+    tipo,
+    titulo,
+    subtitulo,
+    Revisao,
+    identificarLinha,
+    rotuloGravadas,
+    confirmacao,
+}: ConfigImportacao) {
     const [passoAtual, setPassoAtual] = useState(PASSO_UPLOAD);
     const [importacao, setImportacao] = useState<ImportacaoCriada | null>(null);
     const [validacao, setValidacao] = useState<ResultadoValidacao | null>(null);
@@ -171,7 +207,7 @@ export function ManifestosImport() {
 
     return (
         <div className="importacao-container">
-            <PageHeader titulo="Importação de Manifestos" subtitulo="Envie o CSV de manifestos, confira o mapeamento e valide os dados antes de gravar" />
+            <PageHeader titulo={titulo} subtitulo={subtitulo} />
             <div className="stepper-wrapper">
                 {STEPS.map((step, index) => {
                     const stepNumber = index + 1;
@@ -212,6 +248,7 @@ export function ManifestosImport() {
             <div className="step-content">
                 {passoAtual === 1 && (
                     <Step1Upload
+                        tipo={tipo}
                         importacao={importacao}
                         aoImportar={setImportacao}
                         aoRemover={() => {
@@ -227,9 +264,10 @@ export function ManifestosImport() {
                         carregando={carregando}
                         filtro={filtroProblemas}
                         aoConsultar={(pagina, filtro) => importacao && carregarValidacao(importacao.id, pagina, filtro)}
+                        identificarLinha={identificarLinha}
                     />
                 )}
-                {passoAtual === 4 && <Step4Revisao validacao={validacao} />}
+                {passoAtual === 4 && <Revisao validacao={validacao} />}
                 {passoAtual === 5 && importacao && (
                     <Step5Execucao
                         importacaoId={importacao.id}
@@ -243,6 +281,7 @@ export function ManifestosImport() {
                         validacao={validacao}
                         linhasGravadas={linhasGravadas}
                         aoRecomecar={recomecar}
+                        rotuloGravadas={rotuloGravadas}
                     />
                 )}
             </div>
@@ -269,7 +308,7 @@ export function ManifestosImport() {
             {confirmando && validacao && (
                 <ModalConfirmacao
                     titulo="Enviar os dados para o banco?"
-                    mensagem={`${validacao.linhasValidas} viagens serão gravadas a partir de ${validacao.arquivoNome}. Até aqui nada foi gravado. Esta é a etapa que grava.`}
+                    mensagem={confirmacao(validacao)}
                     textoConfirmar="Sim, enviar"
                     aoConfirmar={() => {
                         setConfirmando(false);

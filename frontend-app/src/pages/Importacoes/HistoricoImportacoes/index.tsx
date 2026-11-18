@@ -15,6 +15,7 @@ interface ImportacaoArquivo {
 
 const colunas: ColunaTabela<ImportacaoArquivo>[] = [
   { chave: "nomeArquivo", titulo: "Arquivo", render: (l) => l.nomeArquivo },
+  { chave: "tipo", titulo: "Tipo", render: (l) => (l.tipo === "VEICULO" ? "Veículos" : "Manifestos") },
   {
     chave: "dataImportacao",
     titulo: "Data",

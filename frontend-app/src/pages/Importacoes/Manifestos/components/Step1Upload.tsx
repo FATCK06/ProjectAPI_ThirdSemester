@@ -7,6 +7,7 @@ import {
     EXTENSOES_ACEITAS,
     TAMANHO_MAXIMO_BYTES,
     type ImportacaoCriada,
+    type TipoImportacao,
 } from '../../../../services/importacao';
 import { useToast } from '../../../../components/Toast';
 import './step1.css';
@@ -14,6 +15,7 @@ import './step1.css';
 type Situacao = 'ocioso' | 'enviando' | 'concluido' | 'erro';
 
 interface PropsPasso1 {
+    tipo?: TipoImportacao;
     importacao: ImportacaoCriada | null;
     aoImportar: (importacao: ImportacaoCriada) => void;
     /** O arquivo foi descartado: o fluxo não pode seguir com a importação anterior. */
@@ -36,7 +38,7 @@ function validar(arquivo: File): string | null {
     return null;
 }
 
-export function Step1Upload({ importacao, aoImportar, aoRemover }: PropsPasso1) {
+export function Step1Upload({ importacao, aoImportar, aoRemover, tipo }: PropsPasso1) {
     const [arquivo, setArquivo] = useState<File | null>(null);
     const [progresso, setProgresso] = useState(0);
     const [situacao, setSituacao] = useState<Situacao>(importacao ? 'concluido' : 'ocioso');
@@ -77,7 +79,7 @@ export function Step1Upload({ importacao, aoImportar, aoRemover }: PropsPasso1) 
         setProgresso(0);
 
         try {
-            const criada = await enviarArquivo(alvo, setProgresso);
+            const criada = await enviarArquivo(alvo, setProgresso, tipo);
             setSituacao('concluido');
             aoImportar(criada);
             toast.sucesso(`${alvo.name} recebido. Nada foi gravado ainda — avance para conferir os dados.`, {

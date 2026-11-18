@@ -469,16 +469,18 @@ O `backend/.env` já está no `.gitignore`, então não corre risco de ser commi
 
 ### 3. Subir o backend
 
-Não é preciso instalar o Maven: cada serviço tem o Maven Wrapper. Abra um terminal por serviço, entre na pasta dele (tabela acima) e rode:
+Não é necessário instalar o Maven: cada serviço inclui o Maven Wrapper. Abra um terminal na pasta do serviço (consulte a tabela acima) e execute:
 
 ```bash
 ./mvnw spring-boot:run      # Linux e macOS
 mvnw.cmd spring-boot:run    # Windows
 ```
 
-O serviço está no ar quando aparece `Started ...Application` no terminal. Se preferir, dá para rodar pela IDE, executando a classe `*Application` de cada serviço.
+O serviço estará no ar quando aparecer `Started ...Application` no terminal. Você também pode iniciá-lo pela IDE, executando a classe `*Application` de cada serviço.
 
-No Windows, o `backend/subir-tudo.cmd` sobe os quatro de uma vez (cada um na sua janela) e o `backend/parar-tudo.cmd` derruba todos.
+No Windows, para iniciar os quatro serviços de uma vez, execute `backend\subir-tudo.cmd` a partir da raiz do projeto. O script verifica se há um JDK, se o arquivo `backend/.env` existe e se as portas 8080 a 8083 estão livres; depois, abre uma janela para cada serviço. Para encerrar os serviços, execute `backend\parar-tudo.cmd`.
+
+No VS Code, também é possível iniciar as aplicações pelo Spring Boot Dashboard, disponível na extensão Spring Boot da Microsoft.
 
 ### 4. Subir o frontend
 
@@ -539,6 +541,10 @@ git checkout -b feat/pagina-login
 
 ## Estrutura do Projeto
 
+<details>
+<summary><b> Visualizar </b></summary>
+</br>
+
 ```
 ProjectAPI_ThirdSemester                    | Sistema de gestão logística
 ├─ backend/                                 | Serviços do sistema
@@ -567,29 +573,50 @@ ProjectAPI_ThirdSemester                    | Sistema de gestão logística
       ├─ assets/                            | Recursos visuais
       │  └─ images/                         | Imagens
       ├─ components/                        | Componentes da interface
-      │  ├─ Loading/                        | Carregamento
-      │  ├─ RankingMotoristas/              | Ranking de motoristas
-      │  ├─ Sidebar/                        | Navegação lateral
-      │  ├─ SkeletonLoader/                 | Esqueletos de carregamento
-      │  │  ├─ CardSkeleton/                | Esqueleto de cartão
-      │  │  └─ TableSkeleton/               | Esqueleto de tabela
-      │  └─ Toast/                          | Notificações
-      ├─ contexts/                          | Contextos compartilhados
+      │  ├─ AcessoNegado/                   | Acesso negado
+      │  ├─ Aviso/                          | Avisos da interface
+      │  ├─ Card/                            | Cartões de informação
+      │  ├─ DataTable/                       | Tabelas de dados
+      │  ├─ EmDesenvolvimento/              | Recursos em desenvolvimento
+      │  ├─ Loading/                         | Carregamento
+      │  ├─ PageHeader/                      | Cabeçalho das páginas
+      │  ├─ Paginacao/                       | Paginação de listas
+      │  ├─ Sidebar/                         | Navegação lateral
+      │  ├─ SkeletonLoader/                  | Esqueletos de carregamento
+      │  │  ├─ CardSkeleton/                 | Esqueleto de cartão
+      │  │  ├─ GraficoSkeleton/              | Esqueleto de gráfico
+      │  │  ├─ IndicadoresSkeleton/          | Esqueleto de indicadores
+      │  │  ├─ SkeletonBloco/                | Esqueleto de bloco
+      │  │  ├─ SkeletonCard/                 | Esqueleto de cartão
+      │  │  └─ TableSkeleton/                | Esqueleto de tabela
+      │  └─ Toast/                           | Notificações
       ├─ layouts/                           | Layouts das páginas
       ├─ pages/                             | Páginas da aplicação
       │  ├─ Dashboard/                      | Painel principal
       │  │  └─ components/                  | Componentes do painel
-      │  ├─ Importacoes/                    | Importação de dados
+      │  │     ├─ frota/                     | Gráficos e ranking da frota
+      │  │     ├─ IndicadoresCard/           | Cartões de indicadores
+      │  │     └─ SeletorMes/                | Seleção do mês
+      │  ├─ Frota/                           | Gestão da frota
+      │  │  ├─ HistoricoMotorista/           | Histórico do motorista
+      │  │  ├─ Motoristas/                   | Listagem de motoristas
+      │  │  ├─ OperacaoMensal/               | Operação mensal
+      │  │  └─ Ranking/                      | Ranking da frota
+      │  ├─ Importacoes/                     | Importação de dados
+      │  │  ├─ HistoricoImportacoes/         | Histórico das importações
       │  │  ├─ Manifestos/                  | Importação de manifestos
       │  │  │  └─ components/               | Componentes de manifestos
       │  │  └─ Veiculos/                    | Importação de veículos
-      │  ├─ Login/                          | Autenticação
-      │  ├─ Status/                         | Status dos serviços
-      │  └─ Usuarios/                       | Gestão de usuários
+      │  ├─ Login/                           | Autenticação
+      │  ├─ Ranking/                         | Ranking de motoristas
+      │  ├─ Status/                          | Status dos serviços
+      │  └─ Usuarios/                        | Gestão de usuários
       │     └─ Cadastro/                    | Cadastro de usuários
       ├─ routes/                            | Rotas da aplicação
-      └─ services/                          | Comunicação com as APIs
+      ├─ services/                          | Comunicação com as APIs
+      └─ utils/                             | Funções auxiliares
 ```
+</details>
 
 ## Documentações
 
@@ -601,10 +628,10 @@ ProjectAPI_ThirdSemester                    | Sistema de gestão logística
 
 |                                                                                                                                       Foto                                                                                                                                        |      Função       |                  Nome                  |                                                                                                                                                                                                Links                                                                                                                                                                                                |
 | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------: | :------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFQwd80LGjHEw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727568322525?e=1792022400&v=beta&t=pKoLDrqXsgJxefBp-RnfL7OyJwYBLZQPsBAVVd7rbA8" width="60" height="60" style="border-radius:12px"/> | **Product Owner** |       Vinicius Konishi Gregório        | <a href="https://github.com/vinicius-konishi"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
-|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQHccwKf0_ByzQ/profile-displayphoto-scale_200_200/B4DZ6qNcd9H0Ac-/0/1780972112691?e=1792022400&v=beta&t=6IanZd98GvHubQmO8wItDwYg9SyLhw_XnNl5NIdBsX0" width="60" height="60" style="border-radius:12px"/>            | **Scrum Master**  |          Vinicius Silva Lopes          |   <a href="https://github.com/viniciuslopes2"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |
-|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQFRtAeSxgrHNw/profile-displayphoto-scale_200_200/B4DZjYj0RDHwAY-/0/1755979928269?e=1792022400&v=beta&t=XzmsQz-FtEFux0n2a_akNIXhV5EL9fcHj-jMl2KTr-U" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    |       Caio Rodrigues de Almeida        |               <a href="https://github.com/Caio-Almeida4"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/caio-rodri1/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
-|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQHZ36h5L5A2XA/profile-displayphoto-scale_200_200/B4DZjKEYgfHYAY-/0/1755736806626?e=1792022400&v=beta&t=K6V2GUziqsgtPGinMf-5t1Welcc4pFdXx_yZZClf9BE" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    | Guilherme Fernando Portela de Oliveira |   <a href="https://github.com/guilhermefpo/guilhermefpo"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/guilhermefernandoportela/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |
-| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEw9VDUxHOlQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1678970447839?e=1792022400&v=beta&t=QtT0Wfw3H8FFdUg8w4562eNRvFQzfP4-guqcDc-9QNs" width="60" height="60" style="border-radius:12px"/> |   **Dev Team**    |              Igor Martins              |               <a href="https://github.com/IgorMartins0729"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/igormrtns/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
-|            <img src="https://media.licdn.com/dms/image/v2/D4D03AQEKrsk9CXyjxA/profile-displayphoto-crop_800_800/B4DZzIlYwdJ4AI-/0/1772891772140?e=1792022400&v=beta&t=NkRoHvhMEF-QlS-WIzYRXSCJ_Tlbk1RkOfCjNZj3vrE" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    |       Rodolfo Ferreira Venâncio        |               <a href="https://github.com/Clown0o0"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/rodolfo-ferreir4/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
-| <img src="https://media.licdn.com/dms/image/v2/D4E03AQHiYzkTmAZtlg/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1714513797011?e=1792022400&v=beta&t=X74wb5Hj30kwV8tMretJMJfgcTpF64RVwOhHTz3no8s" width="60" height="60" style="border-radius:12px"/> |   **Dev Team**    |     Yoseph Levi Rodrigues de Lima      |   <a href="https://github.com/YosephLima"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/yoseph-levi-rodrigues-de-lima-7020b324a/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQFQwd80LGjHEw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1727568322525?e=1795651200&v=beta&t=hSTMPQDiEWx8mBaTX42ntFh1vIP_oVt2m6uFFPcu8hg" width="60" height="60" style="border-radius:12px"/> | **Product Owner** |       Vinicius Konishi Gregório        | <a href="https://github.com/vinicius-konishi"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-greg%C3%B3rio-406640232/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base%3BfwAzeR9OS72OJC9ubxgCWg%3D%3D" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a> |
+|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQHccwKf0_ByzQ/profile-displayphoto-scale_400_400/B4DZ6qNcd9H0Ag-/0/1780972112692?e=1795651200&v=beta&t=Y6nZ9GIfbAJJ5px6j431WX_6ww8h0r0JxUqAGaPU0mM" width="60" height="60" style="border-radius:12px"/>            | **Scrum Master**  |          Vinicius Silva Lopes          |   <a href="https://github.com/viniciuslopes2"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/vin%C3%ADcius-silva-lopes-976217296/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |
+|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQFRtAeSxgrHNw/profile-displayphoto-crop_800_800/B4DZjYj0RDHwAI-/0/1755979928154?e=1795651200&v=beta&t=FpGmEAiQmxJJ7xQsaFRE5gAhAlTcn7zGxgpHUm0FglE" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    |       Caio Rodrigues de Almeida        |               <a href="https://github.com/Caio-Almeida4"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/caio-rodri1/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
+|           <img src="https://media.licdn.com/dms/image/v2/D4D03AQHZ36h5L5A2XA/profile-displayphoto-scale_400_400/B4DZjKEYgfHYAg-/0/1755736806626?e=1795651200&v=beta&t=Qu4q3_k8PkYHPW48KH9PanzC5zE9k_uoafPsQ3pJsoc" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    | Guilherme Fernando Portela de Oliveira |   <a href="https://github.com/guilhermefpo/guilhermefpo"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/guilhermefernandoportela/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |
+| <img src="https://media.licdn.com/dms/image/v2/D4D03AQEw9VDUxHOlQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1678970447839?e=1795651200&v=beta&t=AhA09WyFiSbO8TG7VC93UoDGYMXDgKgN24cXL0Vx_-k" width="60" height="60" style="border-radius:12px"/> |   **Dev Team**    |              Igor Martins              |               <a href="https://github.com/IgorMartins0729"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/igormrtns/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
+|            <img src="https://media.licdn.com/dms/image/v2/D4D03AQEKrsk9CXyjxA/profile-displayphoto-crop_800_800/B4DZzIlYwdJ4AI-/0/1772891772140?e=1795651200&v=beta&t=ZMaAmiF-QO7Wq5otNc-eveJNZ1p4YWSmeAZKupWRh2Q" width="60" height="60" style="border-radius:12px"/>            |   **Dev Team**    |       Rodolfo Ferreira Venâncio        |               <a href="https://github.com/Clown0o0"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/rodolfo-ferreir4/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>                |
+| <img src="https://media.licdn.com/dms/image/v2/D4E03AQHiYzkTmAZtlg/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1714513797011?e=1795651200&v=beta&t=eSi4l1Yev6mf1po_b8IOSq_0G74fLAGRt_4uIEPfgFE" width="60" height="60" style="border-radius:12px"/> |   **Dev Team**    |     Yoseph Levi Rodrigues de Lima      |   <a href="https://github.com/YosephLima"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a> <a href="https://www.linkedin.com/in/yoseph-levi-rodrigues-de-lima-7020b324a/" rel="nofollow"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn" /></a>   |

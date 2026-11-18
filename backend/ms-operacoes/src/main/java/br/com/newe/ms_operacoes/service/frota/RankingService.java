@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 import org.springframework.stereotype.Service;
 
+import br.com.newe.ms_operacoes.client.FrotaClient;
 import br.com.newe.ms_operacoes.dto.frota.RankingMensalMotoristaDTO;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
@@ -20,10 +21,13 @@ public class RankingService {
     private static final List<String> COLUNAS = List.of("nome", "tipoVeiculo", "numeroViagens", "disponibilidade", "utilizacao", "valorFrete", "custoTotal", "rentabilidade", "rentabilidadeMediaViagem");
     private final IndicadoresService indicadoresService;
     private final ViagemMaisLongaService viagemMaisLongaService;
+    private final FrotaClient frotaClient;
 
-    public RankingService(IndicadoresService indicadoresService, ViagemMaisLongaService viagemMaisLongaService) {
+    public RankingService(IndicadoresService indicadoresService, ViagemMaisLongaService viagemMaisLongaService,
+            FrotaClient frotaClient) {
         this.indicadoresService = indicadoresService;
         this.viagemMaisLongaService = viagemMaisLongaService;
+        this.frotaClient = frotaClient;
     }
 
     public static boolean colunaValida(String coluna) { return COLUNAS.contains(coluna); }
@@ -31,16 +35,23 @@ public class RankingService {
     public List<RankingMensalMotoristaDTO> rankingMensal(String mes, String ordenarPor, String direcao, boolean operador) {
         List<IndicadoresMotorista> indicadores = indicadoresService.calcular(mes).motoristas();
         Map<UUID, ViagemMaisLonga> maisLonga = viagemMaisLongaService.porMotorista(mes, indicadores.stream().map(IndicadoresMotorista::motoristaId).toList());
+        Map<UUID, String> placas = frotaClient.buscarPlacas(maisLonga.values().stream()
+                .map(ViagemMaisLonga::veiculoId).distinct().toList());
         // Operador nao recebe os valores, entao ordenar por eles vazaria a ordem: cai em viagens.
         String colunaOrdenacao = operador && COLUNAS_FINANCEIRAS.contains(ordenarPor) ? "numeroViagens" : ordenarPor;
         return indicadores.stream()
-                .map(i -> RankingMensalMotoristaDTO.de(operador ? i.semValoresFinanceiros() : i, tipoVeiculo(maisLonga.get(i.motoristaId()))))
+                .map(i -> RankingMensalMotoristaDTO.de(operador ? i.semValoresFinanceiros() : i,
+                        tipoVeiculo(maisLonga.get(i.motoristaId())), placa(maisLonga.get(i.motoristaId()), placas)))
                 .sorted(comparador(colunaOrdenacao, direcao))
                 .toList();
     }
 
     private static String tipoVeiculo(ViagemMaisLonga viagem) {
         return viagem != null ? viagem.tipoVeiculo() : null;
+    }
+
+    private static String placa(ViagemMaisLonga viagem, Map<UUID, String> placas) {
+        return viagem != null ? placas.get(viagem.veiculoId()) : null;
     }
 
     // Nulo (ex.: media sem viagem apuravel) fica no fim nas duas direcoes: inverter

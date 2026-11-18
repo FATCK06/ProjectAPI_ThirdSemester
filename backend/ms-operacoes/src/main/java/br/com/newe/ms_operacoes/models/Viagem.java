@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 /**
@@ -25,7 +26,8 @@ import jakarta.persistence.Table;
 public class Viagem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "viagens_id_viagem_seq", sequenceName = "viagens_id_viagem_seq", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "viagens_id_viagem_seq")
     @Column(name = "id_viagem")
     private Integer idViagem;
 

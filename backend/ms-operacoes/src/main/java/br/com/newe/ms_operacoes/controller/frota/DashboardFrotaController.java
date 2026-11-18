@@ -2,6 +2,7 @@ package br.com.newe.ms_operacoes.controller.frota;
 
 import java.io.IOException;
 import java.text.Normalizer;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -37,6 +38,7 @@ import br.com.newe.ms_operacoes.service.exportacao.CsvExportacao;
 import br.com.newe.ms_operacoes.service.frota.MotoristasMesService;
 import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService;
 import br.com.newe.ms_operacoes.service.frota.ViagemMaisLongaService.ViagemMaisLonga;
+import br.com.newe.ms_operacoes.service.indicadores.IndicadorMotoristaMes;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresPorModelo;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -123,6 +125,36 @@ public class DashboardFrotaController {
         return respostaCsv("mensal_" + mesReferencia.replace('-', '_') + ".csv", List.of(
                 "Motorista", "Tipo de veículo", "Modelo", "Placa", "Viagens",
                 "Dias em operação", "Disponibilidade", "Utilização", "Efetividade"), linhas);
+    }
+
+    @GetMapping("/motoristas/{motoristaId}")
+    public ResponseEntity<MotoristaMesDTO> motoristaMes(
+            @org.springframework.web.bind.annotation.PathVariable UUID motoristaId,
+            @RequestParam("mesReferencia") @MesReferencia String mesReferencia) {
+        MotoristaMesDTO motorista = motoristasMesService.buscar(motoristaId, mesReferencia);
+        return motorista == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(motorista);
+    }
+
+    @GetMapping("/motoristas/{motoristaId}/historico")
+    public ResponseEntity<List<IndicadorMotoristaMes>> historicoMotorista(
+            @org.springframework.web.bind.annotation.PathVariable UUID motoristaId,
+            @RequestParam("inicio") @MesReferencia String inicio,
+            @RequestParam("fim") @MesReferencia String fim,
+            HttpServletRequest request) {
+        YearMonth primeiro = YearMonth.parse(inicio);
+        YearMonth ultimo = YearMonth.parse(fim);
+        if (primeiro.isAfter(ultimo)) {
+            throw new DadoInvalidoException("inicio", "deve ser anterior ou igual a fim");
+        }
+        if (java.time.temporal.ChronoUnit.MONTHS.between(primeiro, ultimo) >= 120) {
+            throw new DadoInvalidoException("fim", "o intervalo deve ter no máximo 120 meses");
+        }
+        List<IndicadorMotoristaMes> historico = indicadoresService.historicoMotorista(motoristaId, inicio, fim);
+        if (!perfilResolver.podeVerDadosFinanceiros(request)) {
+            historico = historico.stream().map(item -> item.indicadores() == null ? item
+                    : new IndicadorMotoristaMes(item.mesReferencia(), item.indicadores().semValoresFinanceiros())).toList();
+        }
+        return ResponseEntity.ok(historico);
     }
 
     @GetMapping("/ranking-motoristas") // "/api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5"

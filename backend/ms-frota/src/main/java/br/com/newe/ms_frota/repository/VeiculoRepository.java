@@ -15,6 +15,12 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
 
     Optional<Veiculo> findByPlaca(String placa);
 
+    List<Veiculo> findByPlacaIn(Collection<String> placas);
+
+    List<Veiculo> findByRenavamIn(Collection<String> renavams);
+
+    List<Veiculo> findByChassiIn(Collection<String> chassis);
+
     @Query("select v.placa as placa, v.idVeiculo as id from Veiculo v where v.placa in :placas")
     List<VeiculoPlacaId> buscarIdsPorPlaca(@Param("placas") Collection<String> placas);
 

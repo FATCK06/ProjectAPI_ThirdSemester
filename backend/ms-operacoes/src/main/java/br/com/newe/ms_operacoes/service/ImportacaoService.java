@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.models.ResumoImportacao;
 import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_operacoes.models.enums.TipoImportacaoEnum;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository.ContagemPorStatus;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository.EmAndamentoView;
@@ -44,8 +45,9 @@ public class ImportacaoService {
     }
 
     /** Guarda o arquivo e para por aqui: nada e parseado nem gravado ainda. */
-    public Importacao receber(String arquivoNome, byte[] conteudo, String usuarioResponsavel) {
+    public Importacao receber(String arquivoNome, byte[] conteudo, String usuarioResponsavel, TipoImportacaoEnum tipo) {
         Importacao importacao = new Importacao();
+        importacao.setTipo(tipo);
         importacao.setArquivoNome(arquivoNome);
         importacao.setArquivoConteudo(conteudo);
         importacao.setUsuarioResponsavel(usuarioResponsavel);

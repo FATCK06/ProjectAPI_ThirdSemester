@@ -1,0 +1,217 @@
+.comparativo-motorista-secao {
+  margin-top: 28px;
+}
+
+.comparativo-motorista-secao > h2 {
+  margin-bottom: 4px;
+  color: #1e293b;
+  font-size: 16px;
+}
+
+.comparativo-motorista-periodo {
+  margin-bottom: 14px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.comparativo-motorista-grade {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparativo-motorista-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #2563eb;
+}
+
+.comparativo-motorista-card-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.comparativo-motorista-card h3 {
+  margin: 0;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.comparativo-motorista-variacao {
+  flex: 0 0 auto;
+  padding: 4px 7px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.comparativo-motorista-variacao[data-sentido="alta"] {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.comparativo-motorista-variacao[data-sentido="queda"] {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.comparativo-motorista-variacao[data-sentido="estavel"] {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.comparativo-motorista-card .sparkline {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 5 / 1;
+  overflow: visible;
+}
+
+.comparativo-motorista-card .sparkline--unico {
+  width: 40px;
+  height: 28px;
+  margin-inline: auto;
+}
+
+.comparativo-motorista-sem-tendencia {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 5 / 1;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.comparativo-motorista-card .sparkline-line {
+  filter: drop-shadow(0 2px 3px currentColor);
+}
+
+.comparativo-motorista-card .sparkline--animada .sparkline-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: comparativo-linha-entra 700ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.comparativo-motorista-card .sparkline--animada .sparkline-area {
+  opacity: 0;
+  animation: comparativo-area-entra 500ms ease-out 180ms forwards;
+}
+
+.comparativo-motorista-card .sparkline-dot {
+  fill: #fff;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: comparativo-ponto-entra 280ms ease-out forwards;
+}
+
+.comparativo-motorista-card .sparkline-dot--atual {
+  fill: currentColor;
+  animation: comparativo-ponto-entra 280ms ease-out forwards, comparativo-ponto-pulsa 1.8s ease-in-out 700ms infinite;
+}
+
+@keyframes comparativo-linha-entra {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes comparativo-area-entra {
+  to { opacity: 1; }
+}
+
+@keyframes comparativo-ponto-entra {
+  from { opacity: 0; transform: scale(0.45); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes comparativo-ponto-pulsa {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comparativo-motorista-card .sparkline--animada .sparkline-line,
+  .comparativo-motorista-card .sparkline--animada .sparkline-area,
+  .comparativo-motorista-card .sparkline-dot,
+  .comparativo-motorista-card .sparkline-dot--atual {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+    transform: none;
+  }
+}
+
+.comparativo-motorista-valores {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.comparativo-motorista-card[data-resultado-unico="true"] .comparativo-motorista-valores {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 100px;
+  margin: 6px auto 0;
+}
+
+.comparativo-motorista-valores span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.comparativo-motorista-valores span {
+  text-align: center;
+}
+
+.comparativo-motorista-valores span[data-indisponivel="true"] strong {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+
+.comparativo-motorista-valores small {
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.2;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.comparativo-motorista-valores strong {
+  color: #0f172a;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .comparativo-motorista-grade {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .comparativo-motorista-card {
+    padding: 14px;
+  }
+}
+
+.comparativo-motorista-sem-dados {
+  margin: 0;
+  padding: 18px 0;
+  color: #64748b;
+  font-size: 12px;
+}

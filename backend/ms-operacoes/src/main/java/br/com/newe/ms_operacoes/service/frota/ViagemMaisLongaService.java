@@ -27,7 +27,7 @@ public class ViagemMaisLongaService {
 
     static final String TIPO_NAO_INFORMADO = "Não informado";
 
-    public record ViagemMaisLonga(String tipoVeiculo, Integer distanciaKm) {
+    public record ViagemMaisLonga(String tipoVeiculo, UUID veiculoId, Integer distanciaKm) {
     }
 
     private final ViagemRepository repository;
@@ -54,6 +54,7 @@ public class ViagemMaisLongaService {
         Map<UUID, ViagemMaisLonga> resultado = new HashMap<>();
         maisLonga.forEach((motoristaId, viagem) -> resultado.put(motoristaId, new ViagemMaisLonga(
                 tipos.getOrDefault(viagem.getVeiculoId(), TIPO_NAO_INFORMADO),
+                viagem.getVeiculoId(),
                 distancia(viagem))));
         return resultado;
     }
