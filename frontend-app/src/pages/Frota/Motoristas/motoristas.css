@@ -152,6 +152,37 @@
   text-decoration: underline;
 }
 
+.motoristas-lista-fichas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.motoristas-lista-fichas a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  background: #ffffff;
+}
+
+.motoristas-lista-fichas a:hover,
+.motoristas-lista-fichas a:focus-visible {
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  background: #f8fafc;
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
 .motoristas-mobile-cards {
   display: none;
 }

@@ -168,6 +168,13 @@ public class ImportacaoProcessamentoService {
         Long id = importacao.getId();
 
         try {
+            if (importacao.getTipo() == TipoImportacaoEnum.VEICULO) {
+                int gravados = veiculos.executar(id, importacao.getArquivoConteudo());
+                importacaoService.marcarConcluido(id, gravados);
+                return gravados;
+            }
+
+            parser.verificarEstrutura(importacao.getArquivoConteudo());
             ResultadoParse resultado = parser.parse(importacao.getArquivoConteudo());
 
             if (resultado.temErro()) {

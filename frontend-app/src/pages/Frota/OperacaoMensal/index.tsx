@@ -295,14 +295,6 @@ export function OperacaoMensal() {
               colunas={COLUNAS}
               linhas={motoristasFiltrados}
               chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
-              linkLinha={(m) =>
-                `/operacao-mensal/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
-              estadoNavegacaoLinha={() => ({
-                retorno: {
-                  destino: `/operacao-mensal?mes=${encodeURIComponent(mes)}&page=${pagina}`,
-                  restauracao: { busca, tipoVeiculo, ordenacao, scrollY: window.scrollY },
-                },
-              })}
               cardsNoMobile
               ordenacao={ordenacao}
               aoOrdenar={setOrdenacao}

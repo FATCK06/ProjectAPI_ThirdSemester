@@ -78,12 +78,6 @@ public class DashboardController {
         return ResponseEntity.ok(historico);
     }
 
-    /** Meses que o seletor do comparativo pode oferecer, em AAAA-MM crescente. */
-    @GetMapping("/indicadores/meses-importados")
-    public List<String> mesesImportados() {
-        return indicadoresService.mesesImportados();
-    }
-
     /**
      * Comparativo geral entre os meses escolhidos. Opcional para que a falta do
      * parametro caia na mesma mensagem de quem pede menos de dois meses.
