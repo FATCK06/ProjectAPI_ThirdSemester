@@ -20,6 +20,7 @@ import br.com.newe.ms_operacoes.models.enums.TipoImportacaoEnum;
 import br.com.newe.ms_operacoes.service.ImportacaoService;
 import br.com.newe.ms_operacoes.service.ImportacaoService.ExecucaoRecusadaException;
 import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
+import br.com.newe.ms_operacoes.service.importacao.ResolvedorFrota.CadastroRecusadoException;
 import br.com.newe.ms_operacoes.service.frota.SituacaoMotoristaService;
 
 /**
@@ -202,6 +203,13 @@ public class ImportacaoProcessamentoService {
         } catch (ArquivoComErroException | ArquivoInvalidoException | ExecucaoRecusadaException e) {
             // Nao e falha da importacao: o arquivo precisa ser corrigido, ou a vez e de
             // outra. Manter o status permite ao usuario voltar e tentar de novo.
+            throw e;
+
+        } catch (CadastroRecusadoException e) {
+            // Tambem e dado do arquivo, mas chega depois da reserva: marcar ERRO libera
+            // a vez para outra importacao. O usuario corrige e envia um arquivo novo.
+            log.warn("Importacao {}: {} Resposta do ms-frota: {}", id, e.getMessage(), e.getCause().getMessage());
+            importacaoService.marcarErro(id);
             throw e;
 
         } catch (Exception e) {
