@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.newe.ms_frota.dto.ProblemaImportacao;
 import br.com.newe.ms_frota.dto.ResultadoImportacaoVeiculos;
+import br.com.newe.ms_frota.dto.CategoriaVeiculoDTO;
 import br.com.newe.ms_frota.dto.TipoVeiculoDTO;
+import br.com.newe.ms_frota.dto.VeiculoClassificacaoDTO;
 import br.com.newe.ms_frota.dto.VeiculoImportacaoItem;
 import br.com.newe.ms_frota.dto.VeiculoLoteItem;
 import br.com.newe.ms_frota.models.Veiculo;
@@ -47,9 +49,16 @@ public class VeiculoController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    /** Os 14 tipos crus da planilha de origem. A importacao valida contra eles. */
     @GetMapping("/tipos")
     public ResponseEntity<List<TipoVeiculoDTO>> buscarTodosTipos() {
         return ResponseEntity.ok(service.buscarTodosTipos());
+    }
+
+    /** As sete categorias de analise, na ordem de porte. Usado pelo filtro do front. */
+    @GetMapping("/categorias")
+    public ResponseEntity<List<CategoriaVeiculoDTO>> buscarCategorias() {
+        return ResponseEntity.ok(service.buscarCategorias());
     }
 
     /** Placa por id, em lote. Usado pelo dashboard do ms-operacoes. */
@@ -88,9 +97,17 @@ public class VeiculoController {
         return ResponseEntity.ok(service.buscarModelosPorIds(ids));
     }
 
+    /** Categoria (ou "Não identificado" / "Não classificado") por id, em lote. */
     @PostMapping("/tipos")
     public ResponseEntity<Map<UUID, String>> tipos(
         @Valid @RequestBody @Size(max = 10000) List<@NotNull UUID> ids) {
         return ResponseEntity.ok(service.buscarTiposPorIds(ids));
+    }
+
+    /** Placa, tipo cru e categoria (nula = sem categoria) por id, em lote. Usado no resultado do tratamento. */
+    @PostMapping("/classificacao")
+    public ResponseEntity<List<VeiculoClassificacaoDTO>> classificacao(
+        @Valid @RequestBody @Size(max = 10000) List<@NotNull UUID> ids) {
+        return ResponseEntity.ok(service.classificar(ids));
     }
 }

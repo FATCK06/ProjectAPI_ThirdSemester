@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CheckCircle2, FileText } from 'lucide-react';
 import type { ImportacaoCriada, ResultadoValidacao } from '../../../../services/importacao';
 import './step6.css';
@@ -8,6 +9,8 @@ interface PropsPasso6 {
     linhasGravadas: number;
     aoRecomecar: () => void;
     rotuloGravadas?: string;
+    /** Bloco específico do tipo de importação, abaixo dos números. */
+    children?: ReactNode;
 }
 
 export function Step6Resultado({
@@ -16,6 +19,7 @@ export function Step6Resultado({
     linhasGravadas,
     aoRecomecar,
     rotuloGravadas = 'viagens gravadas',
+    children,
 }: PropsPasso6) {
     const lidas = validacao?.linhasValidas ?? linhasGravadas;
     // id_manifesto é UNIQUE: reimportar o mesmo arquivo pula o que já entrou.
@@ -58,6 +62,8 @@ export function Step6Resultado({
                     e {ignoradas === 1 ? 'foi ignorado' : 'foram ignorados'}. Reimportar o mesmo arquivo não duplica dados.
                 </p>
             )}
+
+            {children}
 
             <button className="btn-recomecar" onClick={aoRecomecar}>
                 Importar outro arquivo

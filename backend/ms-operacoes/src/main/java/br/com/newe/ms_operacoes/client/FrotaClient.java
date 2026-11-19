@@ -21,6 +21,7 @@ import br.com.newe.ms_operacoes.dto.MotoristaResumo;
 import br.com.newe.ms_operacoes.dto.ProblemaImportacao;
 import br.com.newe.ms_operacoes.dto.ResultadoImportacaoVeiculos;
 import br.com.newe.ms_operacoes.dto.VeiculoImportacaoItem;
+import br.com.newe.ms_operacoes.dto.VeiculoClassificacao;
 import br.com.newe.ms_operacoes.dto.VeiculoLoteItem;
 
 /**
@@ -216,6 +217,24 @@ public class FrotaClient {
                 .body(MAPA_ID_MODELO);
 
         return resposta != null ? resposta : Map.of();
+    }
+
+    private static final ParameterizedTypeReference<List<VeiculoClassificacao>> LISTA_CLASSIFICACAO = new ParameterizedTypeReference<>() {
+    };
+
+    /** Placa, tipo cru e categoria dos veiculos encontrados. */
+    public List<VeiculoClassificacao> classificarVeiculos(Collection<UUID> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+
+        List<VeiculoClassificacao> resposta = restClient.post()
+                .uri("/api/veiculos/classificacao")
+                .body(ids)
+                .retrieve()
+                .body(LISTA_CLASSIFICACAO);
+
+        return resposta != null ? resposta : List.of();
     }
 
     private static final ParameterizedTypeReference<Map<UUID, String>> MAPA_ID_MODELO = new ParameterizedTypeReference<>() {

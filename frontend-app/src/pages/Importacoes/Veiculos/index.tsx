@@ -1,5 +1,6 @@
 import { ImportacaoWizard } from '../Manifestos';
 import { Step4RevisaoVeiculos } from './components/Step4RevisaoVeiculos';
+import { ResultadoTratamento } from './components/ResultadoTratamento';
 
 export function VeiculosImport() {
     return (
@@ -8,6 +9,7 @@ export function VeiculosImport() {
             titulo="Importação de Veículos"
             subtitulo="Envie o CSV de veículos, confira o mapeamento e valide os dados antes de gravar"
             Revisao={Step4RevisaoVeiculos}
+            Complemento={ResultadoTratamento}
             identificarLinha={(valores) => ({
                 titulo: `Placa ${valores.Placa?.trim() || '—'}`,
                 detalhe: [valores.Marca, valores.Modelo].filter((v) => v?.trim()).join(' ') || 'Modelo não informado',

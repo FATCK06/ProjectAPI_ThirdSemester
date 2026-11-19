@@ -15,6 +15,7 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/importacao/arquivos/{id}/conteudo` | Baixa o CSV original |
 | `GET` | `/api/importacao/arquivos/{id}/viagens` | Viagens gravadas por uma importação |
 | `GET` | `/api/importacao/arquivos/{id}/motoristas` | Ids dos motoristas de uma importação |
+| `GET` | `/api/importacao/veiculos/tratamento` | Cruzamento entre manifestos e planilha de veículos |
 | `GET` | `/api/viagens` | Viagens de um mês |
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
@@ -239,6 +240,38 @@ Ids (UUID) dos motoristas presentes na importação. Nome e CPF ficam no ms-frot
 
 ---
 
+## Tratamento dos veículos
+
+### `GET /api/importacao/veiculos/tratamento`
+
+Como os veículos das viagens cruzaram com a planilha de veículos. Mostrado ao fim da importação de veículos (passo 6), mas não grava nada: é calculado sobre o estado atual do banco, então vale depois de qualquer uma das duas importações.
+
+Considera só os veículos que aparecem como o veículo de alguma viagem. Semi-reboque (que só aparece como reboque) e veículo sem viagem ficam de fora.
+
+**Resposta `200`:**
+
+```json
+{
+  "veiculosEmManifestos": 192,
+  "veiculosComCategoria": 180,
+  "tiposSemCategoria": [
+    { "tipo": "Automóveis", "quantidade": 2, "placas": ["ABC1D23", "XYZ9K87"] }
+  ],
+  "manifestosSemVeiculo": [
+    { "manifesto": 12345, "placa": "DEF4G56", "data": "2026-08-31" }
+  ]
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `veiculosEmManifestos` | veículos distintos usados em viagens |
+| `veiculosComCategoria` | desses, os que têm categoria |
+| `tiposSemCategoria` | tipos sem categoria ("Não classificado"), com quantos veículos de viagens e as placas |
+| `manifestosSemVeiculo` | viagens cujo veículo não veio na planilha ("Não identificado"), da mais recente para a mais antiga |
+
+---
+
 ## Viagens
 
 ### `GET /api/viagens`
@@ -447,7 +480,7 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
     "nome": "JOAO DA SILVA",
     "cpf": "12345678901",
     "numeroViagens": 22,
-    "tipoVeiculo": "FH 540",
+    "tipoVeiculo": "Truck",
     "distanciaMaximaKm": 480
   }
 ]
@@ -457,7 +490,7 @@ Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
 
 ### `GET /api/ranking/mensal`
 
-Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa.
+Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa. O tipo é a categoria do veículo, ou `Não identificado` / `Não classificado` (ver [ms-frota](ms-frota.md#tipo-e-categoria-de-veículo)).
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|

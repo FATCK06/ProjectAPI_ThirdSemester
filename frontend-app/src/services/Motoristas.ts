@@ -26,8 +26,9 @@ export interface MotoristasMesPage {
   last: boolean;
 }
 
+/** Categoria de veículo (Fiorino, Van, VUC, 3/4, Toco, Truck, Carreta): é o que a coluna "Tipo de veículo" mostra. */
 export interface TipoVeiculo {
-  idTipo: number;
+  idCategoria: number;
   descricao: string;
 }
 
@@ -89,7 +90,7 @@ export async function buscarHistoricoMotorista(
 }
 
 export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {
-  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/tipos");
+  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/categorias");
   return data ?? null;
 }
 
