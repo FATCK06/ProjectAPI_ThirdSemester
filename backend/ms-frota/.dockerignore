@@ -1,0 +1,13 @@
+# O build so precisa de .mvn/, mvnw, pom.xml e src/.
+
+target/
+*.log
+
+# Perfil dev local: aponta para arquivos da maquina de quem criou e pode ter
+# credenciais. Nao entra na imagem.
+src/main/resources/application-dev.properties
+
+.env
+.vscode/
+.idea/
+*.iml
