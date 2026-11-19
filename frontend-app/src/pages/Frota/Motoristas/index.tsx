@@ -54,7 +54,7 @@ export function Motoristas() {
 
   useEffect(() => {
     let cancelado = false;
-    buscarMotoristasMes(mes, pagina, 100)
+    buscarMotoristasMes(mes, pagina, { tamanho: 100 })
       .then((resposta) => {
         if (cancelado) return;
         if (pagina > Math.max(resposta.totalPages, 1)) {

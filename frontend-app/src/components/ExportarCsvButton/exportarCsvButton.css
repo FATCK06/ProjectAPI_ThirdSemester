@@ -1,0 +1,60 @@
+.exportar-csv {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.exportar-csv-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.exportar-csv-botao:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.exportar-csv-botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.exportar-csv-progresso {
+  width: min(100%, 300px);
+  color: #475569;
+  font-size: 12px;
+}
+
+.exportar-csv-progresso ol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.exportar-csv-progresso li.ativa {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.exportar-csv-progresso li.concluida {
+  color: #15803d;
+}
+
+.exportar-csv-progresso p {
+  margin: 6px 0 0;
+  color: #b91c1c;
+}

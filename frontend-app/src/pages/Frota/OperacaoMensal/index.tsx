@@ -11,12 +11,14 @@ import {
 import {
   buscarMotoristasMes,
   buscarTiposVeiculo,
+  baixarOperacaoMensalCsv,
   type MotoristasMesPage,
   type MotoristaMes,
   type TipoVeiculo,
 } from "../../../services/Motoristas";
 import { mesAtual } from "../../../utils/datas";
 import { formatarPercentual } from "../../../utils/formatacao";
+import { ExportarCsvButton } from "../../../components/ExportarCsvButton/ExportarCsvButton";
 import "./operacaoMensal.css";
 
 type Status = "loading" | "success" | "error";
@@ -39,14 +41,6 @@ function paginaDaUrl(valor: string | null) {
   return Number.isSafeInteger(pagina) && pagina > 0 && pagina <= 2_147_483_647
     ? pagina
     : 1;
-}
-
-function normalizarBusca(valor: string) {
-  return valor
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
 }
 
 const COLUNAS: ColunaTabela<MotoristaMes>[] = [
@@ -120,27 +114,21 @@ export function OperacaoMensal() {
   const [resultado, setResultado] = useState<ResultadoBusca | null>(null);
   const [tentativa, setTentativa] = useState(0);
   const scrollRestaurado = useRef(false);
-  const chaveConsulta = `${mes}|${pagina}|${tentativa}`;
+  const chaveConsulta = `${mes}|${pagina}|${busca}|${tipoVeiculo}|${tentativa}`;
   const status: Status = resultado?.chave === chaveConsulta
     ? resultado.status
     : "loading";
   const dados = resultado?.chave === chaveConsulta && resultado.status === "success"
     ? resultado.dados
     : null;
-  const termo = normalizarBusca(busca);
-  const placaTermo = termo.replace(/[^a-z0-9]/g, "");
+  const filtrosAtivos = Boolean(busca.trim() || tipoVeiculo);
   const tiposVeiculo = estadoTiposVeiculo.status === "success"
     ? Array.from(
       new Map((estadoTiposVeiculo.tipos ?? []).map((tipo) => [tipo.descricao, tipo])).values(),
     )
     : [];
   const semTiposVeiculo = estadoTiposVeiculo.status === "success" && tiposVeiculo.length === 0;
-  const motoristasFiltrados = dados?.content.filter((motorista) => {
-    const nome = normalizarBusca(motorista.nomeMotorista);
-    const placa = motorista.placa.toLocaleLowerCase("pt-BR").replace(/[^a-z0-9]/g, "");
-    const correspondeBusca = nome.includes(termo) || (placaTermo !== "" && placa.includes(placaTermo));
-    return correspondeBusca && (!tipoVeiculo || motorista.tipoVeiculo === tipoVeiculo);
-  }) ?? [];
+  const motoristasFiltrados = dados?.content ?? [];
 
   useEffect(() => {
     if (mesParametro !== mes || paginaParametro !== String(pagina)) {
@@ -156,7 +144,7 @@ export function OperacaoMensal() {
   useEffect(() => {
     let cancelado = false;
 
-    buscarMotoristasMes(mes, pagina)
+    buscarMotoristasMes(mes, pagina, { busca, tipoVeiculo })
       .then((resultado) => {
         if (cancelado) return;
         if (pagina > Math.max(resultado.totalPages, 1)) {
@@ -177,7 +165,7 @@ export function OperacaoMensal() {
     return () => {
       cancelado = true;
     };
-  }, [chaveConsulta, mes, pagina, setSearchParams]);
+  }, [busca, chaveConsulta, mes, pagina, setSearchParams, tipoVeiculo]);
 
   useEffect(() => {
     if (status !== "success" || restauracao?.scrollY === undefined || scrollRestaurado.current) return;
@@ -221,7 +209,10 @@ export function OperacaoMensal() {
               type="search"
               placeholder="Nome ou placa"
               value={busca}
-              onChange={(event) => setBusca(event.target.value)}
+              onChange={(event) => {
+                setBusca(event.target.value);
+                atualizarConsulta(mes, 1);
+              }}
             />
           </div>
           <div className="operacao-mensal-filtro">
@@ -230,7 +221,10 @@ export function OperacaoMensal() {
               id="operacao-mensal-tipo-veiculo"
               value={tipoVeiculo}
               disabled={estadoTiposVeiculo.status !== "success" || semTiposVeiculo}
-              onChange={(event) => setTipoVeiculo(event.target.value)}
+              onChange={(event) => {
+                setTipoVeiculo(event.target.value);
+                atualizarConsulta(mes, 1);
+              }}
             >
               {semTiposVeiculo ? (
                 <option value="" disabled>Nenhum veículo cadastrado</option>
@@ -257,6 +251,16 @@ export function OperacaoMensal() {
               }}
             />
           </div>
+          <ExportarCsvButton
+            nomeArquivo={`mensal_${mes.replace("-", "_")}.csv`}
+            baixarCsv={(aoProgredir) => baixarOperacaoMensalCsv(
+              mes,
+              busca,
+              tipoVeiculo,
+              aoProgredir,
+            )}
+            disabled={status !== "success"}
+          />
         </div>
       </PageHeader>
 
@@ -275,31 +279,25 @@ export function OperacaoMensal() {
       )}
 
       {status === "success" && dados && dados.content.length === 0 && (
-        <div className="operacao-mensal-feedback">
-          <p>Nenhum motorista encontrado para este mês.</p>
+        <div className="operacao-mensal-feedback" role="status">
+          <p>
+            {filtrosAtivos
+              ? `Nenhum motorista corresponde aos filtros aplicados${busca.trim() ? ` para “${busca}”` : ""}${tipoVeiculo ? ` e ao tipo “${tipoVeiculo}”` : ""}.`
+              : "Nenhum motorista encontrado para este mês."}
+          </p>
         </div>
       )}
 
       {status === "success" && dados && dados.content.length > 0 && (
         <>
-          {motoristasFiltrados.length === 0 ? (
-            <div className="operacao-mensal-feedback" role="status">
-              <p>
-                Nenhum motorista corresponde aos filtros aplicados
-                {busca.trim() ? ` para “${busca}”` : ""}
-                {tipoVeiculo ? ` e ao tipo “${tipoVeiculo}”` : ""}.
-              </p>
-            </div>
-          ) : (
-            <DataTable
-              colunas={COLUNAS}
-              linhas={motoristasFiltrados}
-              chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
-              cardsNoMobile
-              ordenacao={ordenacao}
-              aoOrdenar={setOrdenacao}
-            />
-          )}
+          <DataTable
+            colunas={COLUNAS}
+            linhas={motoristasFiltrados}
+            chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
+            cardsNoMobile
+            ordenacao={ordenacao}
+            aoOrdenar={setOrdenacao}
+          />
 
           {/* A lista já vem paginada do backend, por isso a paginação fica fora do DataTable */}
           <Paginacao
@@ -307,8 +305,8 @@ export function OperacaoMensal() {
             totalPaginas={dados.totalPages}
             aoMudar={(proxima) => atualizarConsulta(mes, proxima)}
             rotulo="Paginação de motoristas"
-            contagem={termo || tipoVeiculo
-              ? `${motoristasFiltrados.length} de ${dados.content.length} nesta página`
+            contagem={filtrosAtivos
+              ? `${dados.totalElements.toLocaleString("pt-BR")} motoristas correspondem aos filtros`
               : `${dados.totalElements.toLocaleString("pt-BR")} motoristas`}
           />
         </>
