@@ -60,8 +60,8 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 |  5   |    Alta    | Como gestor, quero consultar a situação e a disponibilidade dos motoristas para planejar as operações;                      |     5      |   2    |  Concluído   |
 |  6   |    Alta    | Como gestor, quero um ranking geral dos motoristas do mês para identificar os que se destacaram;                            |     6      |   2    |  Concluído   |
 |  7   |    Alta    | Como gestor, quero níveis de acesso por perfil para restringir as informações sensíveis aos usuários autorizados;           |     4      |   2    |  Concluído   |
-|  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Pendente   |
-|  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Pendente   |
+|  8   |   Média    | Como gestor, quero exportar o resultado do mês em planilha para compartilhar os dados fora do sistema;                      |     6      |   3    |   Concluído   |
+|  9   |   Baixa    | Como gestor, quero comparar meses anteriores de um motorista para avaliar sua evolução ao longo do tempo.                   |     6      |   3    |   Concluído   |
 
 
 <details>
