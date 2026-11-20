@@ -47,7 +47,7 @@ O desenvolvimento do projeto foi organizado seguindo a metodologia Scrum, sendo 
 | :----: | :---------------------: | :----------: | :-----------------: |
 |   1    | 07/09/2026 a 27/09/2026 |  Concluído   | [Vídeo Sprint 1](https://youtu.be/goyPNGYXRPQ) |
 |   2    | 05/10/2026 a 25/10/2026 |  Concluído   | [Vídeo Sprint 2](https://youtu.be/VSHxSVhqQvM) |
-|   3    | 02/11/2026 a 22/11/2026 |   Pendente   | [Vídeo Sprint 3](https://youtu.be/irGgT2lX5-Y) |
+|   3    | 02/11/2026 a 22/11/2026 |  Concluído   | [Vídeo Sprint 3](https://youtu.be/irGgT2lX5-Y) |
 
 ## Backlog do Produto
 
