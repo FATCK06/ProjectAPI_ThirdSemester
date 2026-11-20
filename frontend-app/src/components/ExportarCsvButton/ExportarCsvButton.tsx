@@ -53,7 +53,7 @@ export function ExportarCsvButton({
       : estado === "concluido" ? ETAPAS.length : -1;
 
   return (
-    <div className="exportar-csv">
+    <div className="exportar-csv" data-tour="exportar-csv">
       <button
         className="exportar-csv-botao"
         type="button"

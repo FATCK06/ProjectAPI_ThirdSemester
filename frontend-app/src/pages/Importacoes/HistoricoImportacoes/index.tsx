@@ -40,7 +40,7 @@ export function HistoricoImport() {
 
   // O cabeçalho fica sempre visível; só o conteúdo abaixo dele muda.
   return (
-    <div className="historico-importacoes">
+    <div className="historico-importacoes" data-tour="historico-pagina">
       <PageHeader
         titulo="Histórico de Importações"
         subtitulo="Arquivos importados, com data, responsável e status de cada envio"

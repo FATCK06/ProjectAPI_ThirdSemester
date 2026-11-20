@@ -91,9 +91,9 @@ export function Ranking() {
   const colunas = financeiro ? [...COLUNAS_OPERACIONAIS, ...COLUNAS_FINANCEIRAS] : COLUNAS_OPERACIONAIS;
 
   return (
-    <div className="ranking-page">
+    <div className="ranking-page" data-tour="ranking-pagina">
       <PageHeader titulo="Ranking Mensal" subtitulo="Compare o desempenho dos motoristas no período selecionado">
-        <label htmlFor="ranking-page-mes">Mês de referência
+        <label htmlFor="ranking-page-mes" data-tour="ranking-mes">Mês de referência
           <input id="ranking-page-mes" type="month" value={mes} onChange={(event) => {
             if (!event.target.value) return;
             setSearchParams((atual) => {
@@ -115,7 +115,11 @@ export function Ranking() {
         />
       </PageHeader>
 
-      {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
+      {!financeiro && (
+        <div data-tour="ranking-aviso-financeiro">
+          <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />
+        </div>
+      )}
       {!carregando && !erro && custosNaoInformados && <Aviso mensagem={AVISO_CUSTOS_NAO_INFORMADOS} />}
 
       {carregando && <TableSkeleton linhas={10} colunas={colunas.length} />}

@@ -117,8 +117,8 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
                 alvo: 'dashboard-grafico-tipos',
                 titulo: '"Rentabilidade por Tipo de Veículo"',
                 texto:
-                    'Soma a rentabilidade do mês por tipo de veículo, do mais ao menos rentável. Veículo cujo tipo não ' +
-                    'foi encontrado na frota entra em "Não identificado".',
+                    'Soma a rentabilidade do mês por tipo de veículo, do mais ao menos rentável. Manifesto sem veículo ' +
+                    'na frota entra em "Não identificado"; veículo com tipo sem categoria, em "Não classificado".',
             },
         );
     } else {

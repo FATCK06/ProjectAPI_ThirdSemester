@@ -52,10 +52,15 @@ function encontrarAlvo(alvo: string): Element | undefined {
     return Array.from(document.querySelectorAll(`[data-tour="${alvo}"]`)).find(visivel);
 }
 
-/** Resolve quando o alvo aparece, quando o tempo acaba ou quando o tour é cancelado. */
-function esperarAlvo(alvo: string | undefined, cancelado: () => boolean): Promise<void> {
+/** Elemento raiz da tela aberta (filho do <main> do DefaultLayout); muda a cada rota. */
+function raizDaPagina(): Element | null {
+    return document.querySelector('.layout-content')?.firstElementChild ?? null;
+}
+
+/** Resolve quando a condição vale, quando o tempo acaba ou quando o tour é cancelado. */
+function esperar(condicao: () => boolean, cancelado: () => boolean): Promise<void> {
     return new Promise((resolve) => {
-        if (!alvo || encontrarAlvo(alvo)) {
+        if (condicao()) {
             resolve();
             return;
         }
@@ -69,7 +74,7 @@ function esperarAlvo(alvo: string | undefined, cancelado: () => boolean): Promis
             resolve();
         };
         const conferir = () => {
-            if (cancelado() || encontrarAlvo(alvo)) terminar();
+            if (cancelado() || condicao()) terminar();
         };
         observador = new MutationObserver(conferir);
         observador.observe(document.body, { childList: true, subtree: true, attributes: true });
@@ -159,8 +164,15 @@ export function criarTour(passos: PassoTour[], controle: ControleTour, aoEncerra
     async function preparar(passo: PassoTour) {
         if (passo.menu === 'expandido') controle.expandirMenu();
         if (passo.menu === 'importacao') controle.abrirImportacao();
-        if (passo.rota && controle.rotaAtual() !== passo.rota) controle.navegar(passo.rota);
-        await esperarAlvo(passo.alvo, () => encerrado);
+        if (passo.rota && controle.rotaAtual() !== passo.rota) {
+            // Telas diferentes repetem alvos (cabeçalho, "Exportar CSV", passos da importação):
+            // só procura depois que a tela antiga saiu, para não destacar um elemento que vai sumir
+            const anterior = raizDaPagina();
+            controle.navegar(passo.rota);
+            await esperar(() => raizDaPagina() !== anterior, () => encerrado);
+        }
+        const alvo = passo.alvo;
+        if (alvo) await esperar(() => encontrarAlvo(alvo) !== undefined, () => encerrado);
     }
 
     async function irPara(indice: number) {
