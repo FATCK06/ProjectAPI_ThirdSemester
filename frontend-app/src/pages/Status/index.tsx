@@ -11,25 +11,34 @@ export function StatusServicos() {
     const [carregando, setCarregando] = useState(true);
     const [atualizadoEm, setAtualizadoEm] = useState<Date | null>(null);
 
-    const consultar = useCallback(async () => {
-        setCarregando(true);
-        try {
-            setDados(await buscarStatus());
-            setErro(null);
-        } catch (falha) {
-            setDados(null);
-            setErro(mensagemDeErro(falha));
-        } finally {
-            setCarregando(false);
-            setAtualizadoEm(new Date());
-        }
+    // Os setState ficam nos callbacks da promise: o efeito só dispara o pedido
+    const atualizar = useCallback(() => {
+        buscarStatus()
+            .then((resposta) => {
+                setDados(resposta);
+                setErro(null);
+            })
+            .catch((falha: unknown) => {
+                setDados(null);
+                setErro(mensagemDeErro(falha));
+            })
+            .finally(() => {
+                setCarregando(false);
+                setAtualizadoEm(new Date());
+            });
     }, []);
 
+    const consultar = useCallback(() => {
+        setCarregando(true);
+        atualizar();
+    }, [atualizar]);
+
     useEffect(() => {
-        consultar();
+        // carregando já começa true: a primeira consulta não precisa marcar
+        atualizar();
         const timer = setInterval(consultar, INTERVALO_MS);
         return () => clearInterval(timer);
-    }, [consultar]);
+    }, [atualizar, consultar]);
 
     return (
         <div className="status-container" data-tour="status-pagina">

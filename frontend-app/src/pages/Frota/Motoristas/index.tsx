@@ -4,6 +4,10 @@ import {
   buscarMotoristasMes,
   type MotoristasMesPage,
 } from "../../../services/Motoristas";
+import { CampoMes } from "../../../components/CampoMes/CampoMes";
+import { Loading } from "../../../components/Loading";
+import { SeloMes } from "../../../components/SeloMes/SeloMes";
+import { useMesDaUrl } from "../../../hooks/useMesDaUrl";
 import { mesAtual } from "../../../utils/datas";
 import "./motoristas.css";
 
@@ -15,10 +19,14 @@ function normalizarBusca(valor: string) {
   return valor.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("pt-BR").trim();
 }
 
+// Sem ?mes na URL, espera o mês mais recente com dados antes de montar a tela
 export function Motoristas() {
+  const mes = useMesDaUrl();
+  return mes ? <MotoristasDoMes mes={mes} /> : <Loading texto="Carregando mês" />;
+}
+
+function MotoristasDoMes({ mes }: { mes: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
-  const mesParametro = searchParams.get("mes");
-  const mes = mesParametro && /^\d{4}-(0[1-9]|1[0-2])$/.test(mesParametro) ? mesParametro : mesAtual();
   const paginaParametro = searchParams.get("page");
   const paginaLida = Number(paginaParametro);
   const pagina = Number.isSafeInteger(paginaLida) && paginaLida > 0 ? paginaLida : 1;
@@ -42,15 +50,14 @@ export function Motoristas() {
   }, [busca, dados]);
 
   useEffect(() => {
-    if (mesParametro !== mes || paginaParametro !== String(pagina)) {
+    if (paginaParametro !== String(pagina)) {
       setSearchParams((atual) => {
         const normalizados = new URLSearchParams(atual);
-        normalizados.set("mes", mes);
         normalizados.set("page", String(pagina));
         return normalizados;
       }, { replace: true });
     }
-  }, [mes, mesParametro, pagina, paginaParametro, setSearchParams]);
+  }, [pagina, paginaParametro, setSearchParams]);
 
   useEffect(() => {
     let cancelado = false;
@@ -84,7 +91,7 @@ export function Motoristas() {
     <section className="motoristas-card" data-tour="motoristas-pagina">
       <header className="motoristas-header">
         <div>
-          <h1 className="motoristas-title">Motoristas</h1>
+          <h1 className="motoristas-title">Motoristas<SeloMes mes={mes} /></h1>
           <p className="motoristas-subtitle">Acesse a ficha cadastral do motorista</p>
         </div>
         <div className="motoristas-filtros">
@@ -94,12 +101,12 @@ export function Motoristas() {
           </div>
           <div className="motoristas-filtro" data-tour="motoristas-mes">
             <label htmlFor="motoristas-mes">Mês de referência</label>
-            <input id="motoristas-mes" type="month" value={mes} onChange={(event) => { if (event.target.value) atualizarConsulta(event.target.value, 1); }} />
+            <CampoMes id="motoristas-mes" valor={mes} max={mesAtual()} onChange={(novoMes) => atualizarConsulta(novoMes, 1)} />
           </div>
         </div>
       </header>
 
-      {status === "loading" && <div className="motoristas-feedback" role="status">Carregando motoristas...</div>}
+      {status === "loading" && <Loading tamanho="sm" texto="Carregando motoristas" />}
       {status === "error" && (
         <div className="motoristas-feedback" role="alert">
           <p>Não foi possível carregar os motoristas.</p>

@@ -16,6 +16,11 @@ import {
   type MotoristaMes,
   type TipoVeiculo,
 } from "../../../services/Motoristas";
+import { CampoMes } from "../../../components/CampoMes/CampoMes";
+import { Loading } from "../../../components/Loading";
+import { SeloMes } from "../../../components/SeloMes/SeloMes";
+import { useMesDaUrl } from "../../../hooks/useMesDaUrl";
+import { Select, type OpcaoSelect } from "../../../components/Select/Select";
 import { mesAtual } from "../../../utils/datas";
 import { formatarPercentual } from "../../../utils/formatacao";
 import { ExportarCsvButton } from "../../../components/ExportarCsvButton/ExportarCsvButton";
@@ -95,14 +100,16 @@ const COLUNAS: ColunaTabela<MotoristaMes>[] = [
   },
 ];
 
+// Sem ?mes na URL, espera o mês mais recente com dados antes de montar a tela
 export function OperacaoMensal() {
+  const mes = useMesDaUrl();
+  return mes ? <OperacaoMensalDoMes mes={mes} /> : <Loading texto="Carregando mês" />;
+}
+
+function OperacaoMensalDoMes({ mes }: { mes: string }) {
   const location = useLocation();
   const restauracao = (location.state as { restauracao?: RestauracaoTabela } | null)?.restauracao;
   const [searchParams, setSearchParams] = useSearchParams();
-  const mesParametro = searchParams.get("mes");
-  const mes = mesParametro && /^\d{4}-(0[1-9]|1[0-2])$/.test(mesParametro)
-    ? mesParametro
-    : mesAtual();
   const paginaParametro = searchParams.get("page");
   const pagina = paginaDaUrl(paginaParametro);
   const [busca, setBusca] = useState(restauracao?.busca ?? "");
@@ -128,18 +135,29 @@ export function OperacaoMensal() {
     )
     : [];
   const semTiposVeiculo = estadoTiposVeiculo.status === "success" && tiposVeiculo.length === 0;
+  // Sem tipos cadastrados a lista fica vazia e o campo mostra o placeholder
+  const opcoesTipoVeiculo: OpcaoSelect<string>[] = semTiposVeiculo
+    ? []
+    : [
+      {
+        valor: "",
+        rotulo: estadoTiposVeiculo.status === "loading"
+          ? "Carregando tipos..."
+          : estadoTiposVeiculo.status === "error" ? "Tipos indisponíveis" : "Todos",
+      },
+      ...tiposVeiculo.map((tipo) => ({ valor: tipo.descricao, rotulo: tipo.descricao })),
+    ];
   const motoristasFiltrados = dados?.content ?? [];
 
   useEffect(() => {
-    if (mesParametro !== mes || paginaParametro !== String(pagina)) {
+    if (paginaParametro !== String(pagina)) {
       setSearchParams((atual) => {
         const normalizados = new URLSearchParams(atual);
-        normalizados.set("mes", mes);
         normalizados.set("page", String(pagina));
         return normalizados;
       }, { replace: true });
     }
-  }, [mes, mesParametro, pagina, paginaParametro, setSearchParams]);
+  }, [pagina, paginaParametro, setSearchParams]);
 
   useEffect(() => {
     let cancelado = false;
@@ -200,7 +218,7 @@ export function OperacaoMensal() {
 
   return (
     <section className="operacao-mensal-page" data-tour="operacao-pagina">
-      <PageHeader titulo="Operação Mensal" subtitulo="Viagens, dias em operação e indicadores de cada motorista e veículo no mês">
+      <PageHeader titulo="Operação Mensal" selo={<SeloMes mes={mes} />} subtitulo="Viagens, dias em operação e indicadores de cada motorista e veículo no mês">
         <div className="operacao-mensal-filtros">
           <div className="operacao-mensal-filtro" data-tour="operacao-busca">
             <label htmlFor="operacao-mensal-busca">Buscar motorista ou placa</label>
@@ -217,38 +235,25 @@ export function OperacaoMensal() {
           </div>
           <div className="operacao-mensal-filtro" data-tour="operacao-tipo">
             <label htmlFor="operacao-mensal-tipo-veiculo">Tipo de veículo</label>
-            <select
+            <Select
               id="operacao-mensal-tipo-veiculo"
-              value={tipoVeiculo}
+              valor={tipoVeiculo}
+              opcoes={opcoesTipoVeiculo}
+              placeholder="Nenhum veículo cadastrado"
               disabled={estadoTiposVeiculo.status !== "success" || semTiposVeiculo}
-              onChange={(event) => {
-                setTipoVeiculo(event.target.value);
+              onChange={(novoTipo) => {
+                setTipoVeiculo(novoTipo);
                 atualizarConsulta(mes, 1);
               }}
-            >
-              {semTiposVeiculo ? (
-                <option value="" disabled>Nenhum veículo cadastrado</option>
-              ) : (
-                <option value="">
-                  {estadoTiposVeiculo.status === "loading"
-                    ? "Carregando tipos..."
-                    : estadoTiposVeiculo.status === "error" ? "Tipos indisponíveis" : "Todos"}
-                </option>
-              )}
-              {tiposVeiculo.map((tipo) => (
-                <option key={tipo.idCategoria} value={tipo.descricao}>{tipo.descricao}</option>
-              ))}
-            </select>
+            />
           </div>
           <div className="operacao-mensal-filtro" data-tour="operacao-mes">
             <label htmlFor="operacao-mensal-mes">Mês</label>
-            <input
+            <CampoMes
               id="operacao-mensal-mes"
-              type="month"
-              value={mes}
-              onChange={(event) => {
-                if (event.target.value) atualizarConsulta(event.target.value, 1);
-              }}
+              valor={mes}
+              max={mesAtual()}
+              onChange={(novoMes) => atualizarConsulta(novoMes, 1)}
             />
           </div>
           <ExportarCsvButton
@@ -294,6 +299,15 @@ export function OperacaoMensal() {
             colunas={COLUNAS}
             linhas={motoristasFiltrados}
             chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
+            // O nome leva à ficha no mesmo mês; o "Voltar" de lá restaura filtros e rolagem
+            linkLinha={(m) => `/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}`}
+            estadoNavegacaoLinha={() => ({
+              retorno: {
+                destino: `/operacao-mensal?mes=${encodeURIComponent(mes)}&page=${pagina}`,
+                rotulo: "Voltar para Operação Mensal",
+                restauracao: { busca, tipoVeiculo, ordenacao, scrollY: window.scrollY },
+              },
+            })}
             cardsNoMobile
             ordenacao={ordenacao}
             aoOrdenar={setOrdenacao}

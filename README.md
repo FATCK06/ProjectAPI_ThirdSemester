@@ -626,7 +626,6 @@ ProjectAPI_ThirdSemester                    | Sistema de gestão logística
       │  │     ├─ IndicadoresCard/           | Cartões de indicadores
       │  │     └─ SeletorMes/                | Seleção do mês
       │  ├─ Frota/                           | Gestão da frota
-      │  │  ├─ HistoricoMotorista/           | Histórico do motorista
       │  │  ├─ Motoristas/                   | Listagem de motoristas
       │  │  ├─ OperacaoMensal/               | Operação mensal
       │  │  └─ Ranking/                      | Ranking da frota
@@ -636,7 +635,6 @@ ProjectAPI_ThirdSemester                    | Sistema de gestão logística
       │  │  │  └─ components/               | Componentes de manifestos
       │  │  └─ Veiculos/                    | Importação de veículos
       │  ├─ Login/                           | Autenticação
-      │  ├─ Ranking/                         | Ranking de motoristas
       │  ├─ Status/                          | Status dos serviços
       │  └─ Usuarios/                        | Gestão de usuários
       │     └─ Cadastro/                    | Cadastro de usuários
