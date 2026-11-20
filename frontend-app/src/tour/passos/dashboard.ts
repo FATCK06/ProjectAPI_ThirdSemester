@@ -50,8 +50,9 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             alvo: 'dashboard-indicadores',
             titulo: '"Dias disponíveis" e "% de utilização"',
             texto:
-                'Em desenvolvimento: o CSV de manifestos não informa férias, afastamentos nem manutenção, então os ' +
-                'dois aparecem como "-". A utilização será dias em operação ÷ dias disponíveis × 100.',
+                '"Dias disponíveis" são os dias em que a frota pode rodar, descontando férias, afastamentos e ' +
+                'manutenção. "% de utilização" = dias em operação ÷ dias disponíveis × 100: mostra quanto da ' +
+                'capacidade foi usada.',
         },
         {
             id: 'dashboard-filtros',
@@ -95,8 +96,7 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
                   'viagem de vários dias conta 1 dia. Nos financeiros, ele aparece quando alguma viagem veio sem frete ' +
                   'ou custo no CSV e ficou fora das somas. O "-" indica que não há dado para calcular.'
                 : 'O * marca um valor aproximado; passe o mouse sobre ele para ver o motivo. Em "Dias em operação", ' +
-                  'viagem de vários dias conta 1 dia, pois a coluna Diária do CSV vem vazia. O "-" indica que não há ' +
-                  'dado para calcular.',
+                  'viagem de vários dias conta 1 dia. O "-" indica que não há dado para calcular.',
         },
     );
 
@@ -171,8 +171,8 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             titulo: '"Ranking de Motoristas"',
             texto:
                 'Os 5 motoristas com mais viagens no mês de referência. Clique em uma linha para abrir o histórico do ' +
-                'motorista naquele mês. "Disponibilidade" e "Utilização" mostram "-" até os dias disponíveis serem ' +
-                'informados.' +
+                'motorista naquele mês. "Disponibilidade" e "Utilização" mostram quanto cada motorista esteve ' +
+                'disponível e quanto rodou.' +
                 (financeiro ? ' As colunas de fretes, custos e rentabilidade completam cada linha.' : ''),
         },
     );

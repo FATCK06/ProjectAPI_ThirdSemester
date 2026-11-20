@@ -68,9 +68,8 @@ export const passosOperacaoMensal: MontarPassos = () => [
         alvo: 'operacao-pagina',
         titulo: '"Disponibilidade", "Utilização" e "Efetividade"',
         texto:
-            'O CSV não informa folgas, então os dias disponíveis são os dias do mês: "Disponibilidade" sai 100% ' +
-            'e "Utilização" = dias em operação ÷ dias do mês × 100. "Efetividade" é a média do percentual de ' +
-            'efetividade das viagens.',
+            '"Disponibilidade" = dias disponíveis ÷ dias do mês × 100. "Utilização" = dias em operação ÷ dias ' +
+            'disponíveis × 100. "Efetividade" é a média do percentual de efetividade das viagens.',
     },
     {
         id: 'operacao-ficha',
@@ -78,7 +77,7 @@ export const passosOperacaoMensal: MontarPassos = () => [
         alvo: 'operacao-pagina',
         titulo: 'Ficha do motorista',
         texto:
-            'As linhas desta tabela não abrem a ficha. A ficha cadastral abre pela tela "Motoristas", e o ' +
-            'histórico do mês, por uma linha do "Ranking de Motoristas" no Dashboard.',
+            'A ficha cadastral de cada motorista fica na tela "Motoristas", a próxima do tutorial. O histórico do ' +
+            'mês abre por uma linha do "Ranking de Motoristas" no Dashboard.',
     },
 ];
