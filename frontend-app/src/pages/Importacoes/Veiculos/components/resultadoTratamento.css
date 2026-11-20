@@ -1,0 +1,81 @@
+/* Bloco do passo 6 da importação de veículos; reaproveita os cards do step6.css. */
+
+.tratamento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 640px;
+  margin-top: 8px;
+  padding-top: 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.tratamento-titulo {
+  font-size: 15px;
+  color: #0f172a;
+}
+
+.tratamento-info {
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+}
+
+.tratamento-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #16a34a;
+}
+
+.tratamento-aviso {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.tratamento-aviso summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.tratamento-explica {
+  margin: 8px 0;
+  font-size: 12px;
+  color: #a16207;
+}
+
+.tratamento-tabela {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  font-size: 12px;
+  color: #334155;
+}
+
+.tratamento-tabela th,
+.tratamento-tabela td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+  vertical-align: top;
+}
+
+.tratamento-tabela th {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tratamento-tabela td.celula-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-word;
+}

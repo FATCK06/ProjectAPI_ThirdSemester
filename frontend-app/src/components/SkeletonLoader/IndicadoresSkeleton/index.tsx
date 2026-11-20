@@ -1,3 +1,5 @@
+import { useRef } from "react";
+import { useColunasEquilibradas } from "../../../hooks/useColunasEquilibradas";
 import { SkeletonBloco } from "../SkeletonBloco";
 import { SkeletonCard } from "../SkeletonCard";
 import "../skeleton.css";
@@ -16,25 +18,26 @@ interface PropsIndicadoresSkeleton {
 
 /** Card de indicadores: ícone, título, valor, variação e linha de tendência de cada item. */
 export function IndicadoresSkeleton({ itens }: PropsIndicadoresSkeleton) {
+  const gradeRef = useRef<HTMLDivElement>(null);
+  const colunas = useColunasEquilibradas(gradeRef, itens.length);
+
   return (
     // Ações: seletor "Comparar com" e botão Filtros
     <SkeletonCard rotulo="Carregando indicadores" comSobretitulo acoes={[200, 96]}>
-      <div className="skeleton-indicadores-area">
-        <div className="skeleton-indicadores-grid">
-          {itens.map((item, i) => (
-            <div key={i} className="skeleton-indicador">
-              <SkeletonBloco largura={44} altura={44} raio={12} />
-              <div className="skeleton-indicador-corpo">
-                <SkeletonBloco largura="55%" altura={10} />
-                <SkeletonBloco largura={item.comVariacao ? "65%" : 24} altura={28} />
-                {item.comVariacao && <SkeletonBloco largura="40%" altura={10} />}
-              </div>
-              {item.comGrafico && (
-                <SkeletonBloco className="skeleton-sparkline" largura={120} altura={40} />
-              )}
+      <div ref={gradeRef} className="skeleton-indicadores-grid" style={colunas}>
+        {itens.map((item, i) => (
+          <div key={i} className="skeleton-indicador">
+            <SkeletonBloco largura={44} altura={44} raio={12} />
+            <div className="skeleton-indicador-corpo">
+              <SkeletonBloco largura="55%" altura={10} />
+              <SkeletonBloco largura={item.comVariacao ? "65%" : 24} altura={28} />
+              {item.comVariacao && <SkeletonBloco largura="40%" altura={10} />}
             </div>
-          ))}
-        </div>
+            {item.comGrafico && (
+              <SkeletonBloco className="skeleton-sparkline" largura="100%" altura={36} />
+            )}
+          </div>
+        ))}
       </div>
     </SkeletonCard>
   );

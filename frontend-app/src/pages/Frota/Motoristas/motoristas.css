@@ -7,8 +7,7 @@
   min-width: 0;
 }
 
-.motoristas-header,
-.ficha-header {
+.motoristas-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -49,8 +48,7 @@
   min-width: 220px;
 }
 
-.motoristas-filtro input,
-.motoristas-filtro select {
+.motoristas-filtro input {
   min-height: 36px;
   font-family: inherit;
   font-size: 13px;
@@ -59,10 +57,6 @@
   border-radius: 8px;
   color: #334155;
   background: #ffffff;
-}
-
-.motoristas-filtro select {
-  min-width: 150px;
 }
 
 .motoristas-table-wrap {
@@ -152,6 +146,37 @@
   text-decoration: underline;
 }
 
+.motoristas-lista-fichas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.motoristas-lista-fichas a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  background: #ffffff;
+}
+
+.motoristas-lista-fichas a:hover,
+.motoristas-lista-fichas a:focus-visible {
+  border-color: #93c5fd;
+  color: #1d4ed8;
+  background: #f8fafc;
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
 .motoristas-mobile-cards {
   display: none;
 }
@@ -201,58 +226,6 @@
   color: #64748b;
   font-size: 14px;
   text-align: center;
-}
-
-.ficha-voltar {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 22px;
-  color: #1d4ed8;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.ficha-voltar:hover {
-  text-decoration: underline;
-}
-
-.ficha-secao {
-  margin-top: 24px;
-}
-
-.ficha-secao h2 {
-  margin-bottom: 12px;
-  color: #1e293b;
-  font-size: 16px;
-}
-
-.ficha-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px;
-}
-
-.ficha-grid > div {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
-}
-
-.ficha-grid dt {
-  margin-bottom: 6px;
-  color: #64748b;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.ficha-grid dd {
-  color: #1e293b;
-  font-size: 14px;
-  overflow-wrap: anywhere;
 }
 
 @media (max-width: 900px) {
@@ -350,7 +323,8 @@
     width: 100%;
   }
 
-  .motoristas-filtro input {
+  .motoristas-filtro input,
+  .motoristas-filtro .campo-mes {
     width: 100%;
   }
 

@@ -1,6 +1,7 @@
 package br.com.newe.ms_operacoes.repository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,14 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
      * So os ids: nome e CPF do motorista pertencem ao ms-frota. Quem precisar do
      * dado completo consulta la com estes ids.
      */
+    /** Todo veiculo que aparece como o veiculo de alguma viagem. */
+    @Query("select distinct v.idVeiculo from Viagem v")
+    List<UUID> buscarIdsVeiculos();
+
+    @Query("select v.idManifesto as manifesto, v.idVeiculo as veiculoId, v.dataViagem as data "
+            + "from Viagem v where v.idVeiculo in :ids order by v.dataViagem desc, v.idManifesto")
+    List<ManifestoVeiculoView> buscarManifestosPorVeiculos(@Param("ids") Collection<UUID> ids);
+
     @Query("select distinct v.idMotorista from Viagem v where v.importacaoId = :importacaoId")
     List<UUID> buscarIdsMotoristasPorArquivo(@Param("importacaoId") Long importacaoId);
 
@@ -107,6 +116,21 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.idMotorista")
     List<SomaMotoristaView> somasPorMotorista(@Param("mesReferencia") String mesReferencia);
 
+    /** Somas mensais de um motorista, para compor seu historico sem carregar os demais. */
+    @Query("select v.mesReferencia as mesReferencia, "
+            + "v.idMotorista as motoristaId, "
+            + "count(v) as numeroViagens, "
+            + "count(distinct v.dataViagem) as diasOperacao, "
+            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
+            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
+            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
+            + "from Viagem v "
+            + "where v.mesReferencia in :meses and v.idMotorista = :motoristaId "
+            + "group by v.mesReferencia, v.idMotorista")
+    List<SomaMotoristaMesView> somasMotoristaNosMeses(
+            @Param("motoristaId") UUID motoristaId,
+            @Param("meses") Collection<String> meses);
+
     /**
      * Mesmas somas de {@link #somasPorMotorista}, para varios meses numa consulta
      * so: alimenta o comparativo com os meses anteriores no dashboard.
@@ -123,19 +147,9 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
             + "group by v.mesReferencia, v.idMotorista")
     List<SomaMotoristaMesView> somasPorMotoristaNosMeses(@Param("meses") Collection<String> meses);
 
-    @Query("select v.mesReferencia as mesReferencia, "
-            + "v.idMotorista as motoristaId, "
-            + "count(v) as numeroViagens, "
-            + "count(distinct v.dataViagem) as diasOperacao, "
-            + "sum(case when " + APURAVEL + " then 1 else 0 end) as viagensApuradas, "
-            + "sum(case when " + APURAVEL + " then v.valorFretes end) as valorFrete, "
-            + "sum(case when " + APURAVEL + " then v.valeFrete end) as custoTotal "
-            + "from Viagem v "
-            + "where v.idMotorista = :motoristaId and v.mesReferencia in :meses "
-            + "group by v.mesReferencia, v.idMotorista")
-    List<SomaMotoristaMesView> somasMotoristaNosMeses(
-            @Param("motoristaId") UUID motoristaId,
-            @Param("meses") Collection<String> meses);
+    /** Meses com ao menos uma viagem importada, do mais antigo ao mais novo. */
+    @Query("select distinct v.mesReferencia from Viagem v order by v.mesReferencia")
+    List<String> buscarMesesImportados();
 
     /** Mesmas somas de {@link #somasPorMotorista}, por veiculo. */
     @Query("select v.idVeiculo as veiculoId, "
@@ -177,6 +191,14 @@ public interface ViagemRepository extends JpaRepository<Viagem, Integer> {
 
     interface SomaMotoristaMesView extends SomaMotoristaView {
         String getMesReferencia();
+    }
+
+    interface ManifestoVeiculoView {
+        Integer getManifesto();
+
+        UUID getVeiculoId();
+
+        LocalDate getData();
     }
 
     interface RankingMotoristaView {

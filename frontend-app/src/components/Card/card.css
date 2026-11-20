@@ -13,7 +13,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
+  /* Sem espaço ao lado do título (celular), as ações descem para a linha de baixo */
+  flex-wrap: wrap;
+  gap: 12px 16px;
   margin-bottom: 16px;
 }
 
@@ -42,4 +44,9 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: #64748b;
+}
+/* Título com selo de mês: o selo é mais alto que o texto, então o subtítulo
+   precisa de mais respiro para não colar nele */
+.ui-card-title:has(.selo-mes) + .ui-card-subtitle {
+  margin-top: 10px;
 }

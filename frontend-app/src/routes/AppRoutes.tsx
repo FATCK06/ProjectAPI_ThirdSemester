@@ -1,18 +1,34 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { lazy } from 'react';
+import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { Login } from '../pages/Login';
-import { Dashboard } from '../pages/Dashboard/Dashboard';
 import { DefaultLayout } from '../layouts/DefaultLayout';
-import { ManifestosImport } from '../pages/Importacoes/Manifestos';
-import { VeiculosImport } from '../pages/Importacoes/Veiculos';
-import { HistoricoImport } from '../pages/Importacoes/HistoricoImportacoes';
-import { CadastroUsuario } from '../pages/Usuarios/Cadastro';
-import { StatusServicos } from '../pages/Status';
-import { OperacaoMensal } from '../pages/Frota/OperacaoMensal';
-import { FichaMotorista } from '../pages/Frota/OperacaoMensal/FichaMotorista';
 import { PrivateRoute } from './PrivateRoute';
-import { Ranking } from '../pages/Frota/Ranking';
-import { HistoricoMotorista } from '../pages/Frota/HistoricoMotorista';
 import { RotaComPermissao } from './RotaComPermissao';
+
+// Cada página vira um arquivo próprio no build e só é baixada quando aberta: o
+// login não carrega Chart.js nem a importação de manifestos. O Suspense que
+// mostra o carregamento fica no DefaultLayout, para a sidebar não piscar.
+const Dashboard = lazy(() => import('../pages/Dashboard/Dashboard').then((m) => ({ default: m.Dashboard })));
+const Ranking = lazy(() => import('../pages/Frota/Ranking').then((m) => ({ default: m.Ranking })));
+const OperacaoMensal = lazy(() => import('../pages/Frota/OperacaoMensal').then((m) => ({ default: m.OperacaoMensal })));
+const Motoristas = lazy(() => import('../pages/Frota/Motoristas').then((m) => ({ default: m.Motoristas })));
+const FichaCadastralMotorista = lazy(() =>
+  import('../pages/Frota/OperacaoMensal/FichaMotorista').then((m) => ({ default: m.FichaMotorista })),
+);
+const ManifestosImport = lazy(() =>
+  import('../pages/Importacoes/Manifestos').then((m) => ({ default: m.ManifestosImport })),
+);
+const VeiculosImport = lazy(() => import('../pages/Importacoes/Veiculos').then((m) => ({ default: m.VeiculosImport })));
+const HistoricoImport = lazy(() =>
+  import('../pages/Importacoes/HistoricoImportacoes').then((m) => ({ default: m.HistoricoImport })),
+);
+const CadastroUsuario = lazy(() => import('../pages/Usuarios/Cadastro').then((m) => ({ default: m.CadastroUsuario })));
+const StatusServicos = lazy(() => import('../pages/Status').then((m) => ({ default: m.StatusServicos })));
+
+function RedirecionarFichaMotorista() {
+  const { motoristaId } = useParams();
+  return <Navigate to={motoristaId ? `/motoristas/${motoristaId}` : '/motoristas'} replace />;
+}
 
 export function AppRoutes() {
   const token = localStorage.getItem('@Logistica:token');
@@ -28,8 +44,9 @@ export function AppRoutes() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/ranking" element={<Ranking />} />
           <Route path="/operacao-mensal" element={<OperacaoMensal />} />
-          <Route path="/operacao-mensal/motoristas/:motoristaId" element={<FichaMotorista />} />
-          <Route path="/motoristas/:motoristaId/historico" element={<HistoricoMotorista />} />
+          <Route path="/motoristas" element={<Motoristas />} />
+          <Route path="/motoristas/:motoristaId" element={<FichaCadastralMotorista />} />
+          <Route path="/operacao-mensal/motoristas/:motoristaId" element={<RedirecionarFichaMotorista />} />
           <Route path="/importacoes/manifestos" element={<ManifestosImport />} />
           <Route path="/importacoes/veiculos" element={<VeiculosImport />} />
           <Route path="/importacoes/historico" element={<HistoricoImport />} />

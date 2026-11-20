@@ -22,6 +22,9 @@ import br.com.newe.ms_operacoes.models.Importacao;
 import br.com.newe.ms_operacoes.models.ResumoImportacao;
 import br.com.newe.ms_operacoes.models.Viagem;
 import br.com.newe.ms_operacoes.models.enums.StatusImportacaoEnum;
+import br.com.newe.ms_operacoes.models.enums.TipoImportacaoEnum;
+import br.com.newe.ms_operacoes.service.importacao.CsvVeiculoParser;
+import br.com.newe.ms_operacoes.service.importacao.ManifestoCsvConfig;
 import br.com.newe.ms_operacoes.repository.ImportacaoRepository.EmAndamentoView;
 import br.com.newe.ms_operacoes.repository.ViagemRepository;
 import br.com.newe.ms_operacoes.security.PerfilResolver;
@@ -32,6 +35,7 @@ import br.com.newe.ms_operacoes.service.importacao.AvaliacaoCampo.Severidade;
 import br.com.newe.ms_operacoes.service.importacao.CsvManifestoParser;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService;
 import br.com.newe.ms_operacoes.service.importacao.ImportacaoProcessamentoService.ArquivoComErroException;
+import br.com.newe.ms_operacoes.service.importacao.ResolvedorFrota.CadastroRecusadoException;
 import br.com.newe.ms_operacoes.service.importacao.ResultadoValidacao;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -84,6 +88,8 @@ public class ImportacaoController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> receber(
             @RequestParam("arquivo") MultipartFile arquivo,
+            // Sem o parametro continua manifesto: a tela de manifestos nao manda.
+            @RequestParam(defaultValue = "MANIFESTO") TipoImportacaoEnum tipo,
             HttpServletRequest request
     ) throws IOException {
 
@@ -98,10 +104,12 @@ public class ImportacaoController {
 
         byte[] conteudo = arquivo.getBytes();
         // Vazio, sem cabecalho ou so com cabecalho: recusa ja aqui, antes de guardar.
-        parser.verificarEstrutura(conteudo);
+        parser.verificarEstrutura(conteudo, tipo == TipoImportacaoEnum.VEICULO
+                ? CsvVeiculoParser.COLUNAS_ESPERADAS
+                : ManifestoCsvConfig.COLUNAS_ESPERADAS);
 
         Importacao importacao = service.receber(
-                nome, conteudo, perfilResolver.resolverUsuario(request));
+                nome, conteudo, perfilResolver.resolverUsuario(request), tipo);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                 "id", importacao.getId(),
@@ -165,6 +173,10 @@ public class ImportacaoController {
 
         } catch (ArquivoComErroException e) {
             // Quantas linhas estao invalidas: o usuario precisa saber para corrigir.
+            return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
+
+        } catch (CadastroRecusadoException e) {
+            // O ms-frota recusou um cadastro do arquivo: o motivo vai junto para o usuario.
             return erro(HttpStatus.UNPROCESSABLE_ENTITY, e.getMessage());
         }
         // Falha na gravacao (ImportacaoFalhouException) carrega o erro do banco na

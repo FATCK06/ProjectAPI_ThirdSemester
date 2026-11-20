@@ -1,0 +1,36 @@
+/* Azul mais forte que o fundo da página e dos cards, com borda para não sumir no branco */
+.selo-mes {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #93c5fd;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.selo-mes[data-tamanho="titulo"] {
+  padding: 4px 12px;
+  font-size: 16px;
+}
+
+/* Meses de referência numa frase (ex.: "Comparando com..."): neutro e sem
+   borda, para não competir com o selo azul do mês exibido */
+.selo-mes[data-tamanho="texto"] {
+  padding: 2px 8px;
+  border-color: transparent;
+  background: #e2e8f0;
+  color: #1e293b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Ao lado do título da tela ou do card */
+h1 > .selo-mes,
+h2 > .selo-mes {
+  margin-left: 10px;
+  vertical-align: 3px;
+}

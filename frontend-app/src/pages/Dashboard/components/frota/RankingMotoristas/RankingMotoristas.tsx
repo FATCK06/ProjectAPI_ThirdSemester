@@ -81,28 +81,34 @@ const COLUNAS: ColunaTabela<LinhaRanking>[] = [
 const COLUNAS_FINANCEIRAS = ["valorFrete", "custoTotal", "rentabilidade", "rentabilidadeMediaViagem"];
 
 export function RankingMotoristas({ mesReferencia, indicadores }: PropsRankingMotoristas) {
-  const [ranking, setRanking] = useState<RankingMotorista[]>([]);
-  const [status, setStatus] = useState<Status>("loading");
   const [tentativa, setTentativa] = useState(0);
+  // O resultado guarda a chave do pedido: se ela não bate com a atual, o pedido
+  // novo ainda está a caminho. Assim o carregando é derivado, sem setState no efeito.
+  const [resultado, setResultado] = useState<
+    { chave: string; status: "success"; linhas: RankingMotorista[] } | { chave: string; status: "error" } | null
+  >(null);
+  const chave = `${mesReferencia}|${tentativa}`;
+  const status: Status = resultado?.chave === chave ? resultado.status : "loading";
+  const ranking = useMemo(
+    () => (resultado?.chave === chave && resultado.status === "success" ? resultado.linhas : []),
+    [resultado, chave],
+  );
 
   useEffect(() => {
     let cancelado = false;
-    setStatus("loading");
 
     buscarRankingMotoristas(mesReferencia, LIMITE)
       .then((linhas) => {
-        if (cancelado) return;
-        setRanking(linhas);
-        setStatus("success");
+        if (!cancelado) setResultado({ chave, status: "success", linhas });
       })
       .catch(() => {
-        if (!cancelado) setStatus("error");
+        if (!cancelado) setResultado({ chave, status: "error" });
       });
 
     return () => {
       cancelado = true;
     };
-  }, [mesReferencia, tentativa]);
+  }, [mesReferencia, chave]);
 
   const itens = useMemo<LinhaRanking[]>(() => {
     const porMotorista = new Map((indicadores ?? []).map((m) => [m.motoristaId, m]));
@@ -143,7 +149,13 @@ export function RankingMotoristas({ mesReferencia, indicadores }: PropsRankingMo
           colunas={colunas}
           linhas={itens}
           chaveLinha={(l) => l.motoristaId}
-          linkLinha={(l) => `/motoristas/${l.motoristaId}/historico?mes=${encodeURIComponent(mesReferencia)}&origem=dashboard`}
+          linkLinha={(l) => `/motoristas/${l.motoristaId}?mes=${encodeURIComponent(mesReferencia)}`}
+          estadoNavegacaoLinha={() => ({
+            retorno: {
+              destino: `/dashboard?mes=${encodeURIComponent(mesReferencia)}`,
+              rotulo: "Voltar para o Dashboard",
+            },
+          })}
           alturaMaxima={232}
         />
       )}

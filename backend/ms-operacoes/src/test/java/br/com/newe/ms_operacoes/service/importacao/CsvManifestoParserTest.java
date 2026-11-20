@@ -29,6 +29,40 @@ class CsvManifestoParserTest {
                 .orElseThrow();
     }
 
+    private ResultadoParse parseComCapacidade(String capacidade) throws IOException {
+        String csv = "Manifesto;Data;CPF;Veículo;Capacidade Veículo\n"
+                + "19808;01/04/2026;12345678909;JQI0F65;" + capacidade + "\n";
+        return parser.parse(csv.getBytes(ManifestoCsvConfig.CHARSET));
+    }
+
+    @Test
+    void capacidadeNegativaViraPendenciaESegueSemValor() throws IOException {
+        // Caso real: manifestos_jul-ago.csv, linha 1014. O ms-frota recusava o lote
+        // inteiro de veiculos por causa dela, e a importacao terminava em 500.
+        ResultadoParse resultado = parseComCapacidade("-954,99");
+
+        assertThat(resultado.temErro()).isFalse();
+        assertThat(resultado.linhas()).hasSize(1);
+        assertThat(resultado.linhas().get(0).capacidadeVeiculo()).isNull();
+
+        LinhaComProblema linha = resultado.problemas().get(0);
+        assertThat(linha.bloqueia()).isFalse();
+        ProblemaCelula capacidade = problemaNaColuna(linha, "Capacidade Veículo");
+        assertThat(capacidade.severidade()).isEqualTo(Severidade.PENDENCIA);
+        assertThat(capacidade.estado()).isEqualTo(EstadoCampo.NAO_CONVERTE);
+        assertThat(capacidade.mensagem()).contains("negativo").contains("-954,99");
+    }
+
+    @Test
+    void capacidadePositivaSegueComoVeio() throws IOException {
+        ResultadoParse resultado = parseComCapacidade("954,99");
+
+        assertThat(resultado.linhas().get(0).capacidadeVeiculo()).isEqualByComparingTo("954.99");
+        assertThat(resultado.problemas())
+                .flatMap(LinhaComProblema::problemas)
+                .noneMatch(p -> "Capacidade Veículo".equals(p.coluna()));
+    }
+
     @Test
     void valorInvalidoEmCampoOpcionalViraPendenciaENaoBloqueia() throws IOException {
         ResultadoParse resultado = parse("123;01/04/2026;12345678909;ABC1D23;abc;5;10,00");

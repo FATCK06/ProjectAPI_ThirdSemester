@@ -1,0 +1,201 @@
+/* Âncora do painel: o painel flutua e não muda a altura do cabeçalho */
+.exportar-csv {
+  position: relative;
+  display: inline-flex;
+}
+
+.exportar-csv-botao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.exportar-csv-botao:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f8fafc;
+}
+
+.exportar-csv-botao:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+/* Exportando: o botão continua legível, só sem clique */
+.exportar-csv-botao[aria-busy="true"] {
+  opacity: 1;
+  color: #1d4ed8;
+  cursor: progress;
+}
+
+.exportar-csv-girando {
+  animation: exportar-csv-girar 0.8s linear infinite;
+}
+
+.exportar-csv-painel {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 20;
+  width: 240px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+  color: #475569;
+  font-size: 12px;
+  animation: exportar-csv-entrar 0.18s ease-out;
+}
+
+.exportar-csv-painel[data-direita] {
+  left: auto;
+  right: 0;
+}
+
+.exportar-csv-painel[data-saindo] {
+  animation: exportar-csv-sair 0.2s ease-in forwards;
+}
+
+.exportar-csv-painel ol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.exportar-csv-painel li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  transition: color 0.2s ease;
+}
+
+.exportar-csv-icone {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+}
+
+.exportar-csv-etapa {
+  flex: 1;
+  min-width: 0;
+  line-height: 18px;
+}
+
+.exportar-csv-painel li[data-situacao="pendente"] {
+  color: #94a3b8;
+}
+
+.exportar-csv-painel li[data-situacao="ativa"] {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.exportar-csv-painel li[data-situacao="concluida"] {
+  color: #15803d;
+}
+
+/* O check entra com um "pop" quando a etapa termina */
+.exportar-csv-painel li[data-situacao="concluida"] .exportar-csv-icone {
+  background: #dcfce7;
+  animation: exportar-csv-pop 0.25s ease-out;
+}
+
+.exportar-csv-percentual {
+  color: #1d4ed8;
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+}
+
+.exportar-csv-barra {
+  display: block;
+  height: 4px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #dbeafe;
+  overflow: hidden;
+}
+
+.exportar-csv-barra > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #2563eb;
+  transition: width 0.2s ease;
+}
+
+.exportar-csv-erro {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  color: #b91c1c;
+}
+
+.exportar-csv-erro p {
+  flex: 1;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.exportar-csv-erro button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: #b91c1c;
+  cursor: pointer;
+}
+
+.exportar-csv-erro button:hover {
+  background: #fee2e2;
+}
+
+@keyframes exportar-csv-girar {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes exportar-csv-entrar {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes exportar-csv-sair {
+  to { opacity: 0; transform: translateY(-6px); }
+}
+
+@keyframes exportar-csv-pop {
+  0% { transform: scale(0.4); }
+  70% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .exportar-csv-painel,
+  .exportar-csv-painel[data-saindo],
+  .exportar-csv-painel li[data-situacao="concluida"] .exportar-csv-icone {
+    animation: none;
+  }
+
+  .exportar-csv-girando {
+    animation-duration: 2s;
+  }
+}

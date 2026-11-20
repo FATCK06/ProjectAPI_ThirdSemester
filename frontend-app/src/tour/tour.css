@@ -1,0 +1,176 @@
+/* Tema do balão do tutorial sobre o driver.js, com as cores do app
+   (azul #1d4ed8 do item ativo, cinzas do sidebar.css e a fonte Montserrat). */
+
+.driver-popover.tour-balao {
+  --driver-popover-font-family: 'Montserrat', sans-serif;
+  min-width: 280px;
+  max-width: 380px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background-color: #ffffff;
+  color: #0f172a;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22);
+}
+
+.tour-balao .driver-popover-title {
+  padding-right: 24px; /* não encosta no X */
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: #0f172a;
+}
+
+.tour-balao .driver-popover-description {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #475569;
+}
+
+.tour-balao .driver-popover-close-btn {
+  top: 8px;
+  right: 8px;
+  color: #94a3b8;
+  font-size: 20px;
+}
+
+.tour-balao .driver-popover-close-btn:hover,
+.tour-balao .driver-popover-close-btn:focus-visible {
+  color: #0f172a;
+}
+
+.tour-balao .driver-popover-footer {
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.tour-balao .driver-popover-progress-text {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.tour-balao .driver-popover-navigation-btns {
+  gap: 8px;
+}
+
+.tour-balao .driver-popover-navigation-btns button + button {
+  margin-left: 0;
+}
+
+.tour-balao .driver-popover-footer-btn {
+  padding: 8px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-shadow: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.tour-balao .driver-popover-footer-btn:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+
+.tour-balao .driver-popover-footer-btn:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+.tour-balao .driver-popover-next-btn,
+.tour-balao .tour-primario {
+  border-color: #1d4ed8;
+  background-color: #1d4ed8;
+  color: #ffffff;
+}
+
+.tour-balao .driver-popover-next-btn:hover,
+.tour-balao .tour-primario:hover {
+  background-color: #1e40af;
+  color: #ffffff;
+}
+
+/* "Pular tutorial": ação discreta, à esquerda dos botões de navegação */
+.tour-balao .tour-pular {
+  order: 2;
+  margin-right: auto;
+  padding-left: 0;
+  padding-right: 0;
+  border-color: transparent;
+  background: none;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tour-balao .tour-pular:hover {
+  background: none;
+  color: #0f172a;
+  text-decoration: underline;
+}
+
+.tour-balao .driver-popover-progress-text {
+  order: 1;
+  width: 100%;
+}
+
+.tour-balao .driver-popover-navigation-btns {
+  order: 3;
+  flex-grow: 0;
+}
+
+/* Enquanto a próxima tela carrega */
+.tour-balao.tour-carregando .driver-popover-footer-btn {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tour-balao.tour-carregando .driver-popover-progress-text::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border: 2px solid #cbd5e1;
+  border-top-color: #1d4ed8;
+  border-radius: 50%;
+  vertical-align: -1px;
+  animation: tour-girar 0.8s linear infinite;
+}
+
+@keyframes tour-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Convite do primeiro acesso */
+.tour-oferta-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* Celular: o balão ocupa a largura útil, com 16px de folga de cada lado */
+@media (max-width: 640px) {
+  .driver-popover.tour-balao {
+    min-width: 0;
+    max-width: calc(100vw - 32px);
+    padding: 16px;
+  }
+
+  .tour-balao .driver-popover-footer-btn {
+    padding: 8px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-balao.tour-carregando .driver-popover-progress-text::before {
+    animation: none;
+  }
+}

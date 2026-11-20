@@ -1,6 +1,8 @@
 package br.com.newe.ms_operacoes.service.importacao;
 
 import java.math.BigDecimal;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Catalogo dos campos do manifesto: coluna no CSV, tipo e exigencia.
@@ -76,6 +78,16 @@ public enum CampoManifesto {
     /** OBRIGATORIO barra a linha; IMPORTANTE vira pendencia; o resto so informa. */
     public enum Nivel { OBRIGATORIO, IMPORTANTE, OPCIONAL, DERIVADO }
 
+    /**
+     * Colunas em que valor negativo e erro de digitacao do arquivo. Vira NAO_CONVERTE
+     * (pendencia, segue sem o valor) em vez de chegar ao ms-frota, que recusa o lote
+     * inteiro de veiculos por causa de uma linha (capacidadeLotacao >= 0).
+     *
+     * So a capacidade por enquanto: e a unica que o ms-frota valida. As colunas de
+     * valor e de despesa continuam gravando o que veio.
+     */
+    private static final Set<CampoManifesto> NAO_NEGATIVOS = EnumSet.of(CAPACIDADE_VEICULO);
+
     private final String coluna;
     private final Tipo tipo;
     private final Nivel nivel;
@@ -117,7 +129,9 @@ public enum CampoManifesto {
             case PLACA -> "Placa no padrao AAA9999 ou Mercosul AAA9A99";
             case UF -> "Sigla de UF com 2 letras (ex.: SP)";
             case INTEIRO -> "Numero inteiro";
-            case DECIMAL -> "Numero decimal (1.234,56)";
+            case DECIMAL -> NAO_NEGATIVOS.contains(this)
+                    ? "Numero decimal maior ou igual a zero (1.234,56)"
+                    : "Numero decimal (1.234,56)";
             case DATA -> "Data no formato DD/MM/AAAA";
         };
     }
@@ -129,6 +143,9 @@ public enum CampoManifesto {
         }
         try {
             Object valor = converter(ManifestoCsvConfig.textoOuNulo(valorCru));
+            if (NAO_NEGATIVOS.contains(this) && ehNegativo(valor)) {
+                throw new IllegalArgumentException("Valor negativo nao e aceito: " + valorCru.trim());
+            }
             if (zeroAusente && ehZero(valor)) {
                 // O zero segue para a gravacao como veio no arquivo; o estado so sinaliza.
                 return new AvaliacaoCampo(this, valorCru, EstadoCampo.AUSENTE_COMO_ZERO, valor, null);
@@ -170,6 +187,10 @@ public enum CampoManifesto {
         } catch (ArithmeticException e) {
             throw new IllegalArgumentException("Numero inteiro invalido: " + valorCru.trim(), e);
         }
+    }
+
+    private static boolean ehNegativo(Object valor) {
+        return valor instanceof BigDecimal decimal && decimal.signum() < 0;
     }
 
     private static boolean ehZero(Object valor) {

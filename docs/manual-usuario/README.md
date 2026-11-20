@@ -15,11 +15,13 @@ Parceiro: Newelog · Equipe RubyFox · FATEC São José dos Campos
 6. [Motoristas](#6-motoristas)
 7. [Ranking mensal](#7-ranking-mensal)
 8. [Importação de manifestos](#8-importação-de-manifestos)
-9. [Histórico de importações](#9-histórico-de-importações)
-10. [Cadastrar usuário](#10-cadastrar-usuário-administrador)
-11. [Status dos serviços](#11-status-dos-serviços-administrador)
-12. [Dúvidas frequentes](#12-dúvidas-frequentes)
-13. [Glossário](#13-glossário)
+9. [Importação de veículos](#9-importação-de-veículos)
+10. [Histórico de importações](#10-histórico-de-importações)
+11. [Tutorial guiado](#11-tutorial-guiado)
+12. [Cadastrar usuário](#12-cadastrar-usuário-administrador)
+13. [Status dos serviços](#13-status-dos-serviços-administrador)
+14. [Dúvidas frequentes](#14-dúvidas-frequentes)
+15. [Glossário](#15-glossário)
 
 ---
 
@@ -75,12 +77,15 @@ O menu lateral fica à esquerda da tela:
 | Item | Descrição |
 |---|---|
 | **Dashboard** | Indicadores e ranking de motoristas |
-| **Motoristas** | Consulta motoristas e indicadores operacionais do mês, como viagens, dias em operação, disponibilidade e utilização |
+| **Operação Mensal** | Consulta motoristas e indicadores operacionais do mês, como viagens, dias em operação, disponibilidade e utilização |
+| **Motoristas** | Lista os motoristas cadastrados, com filtros e ficha cadastral |
 | **Ranking mensal** | Compara e ordena o desempenho dos motoristas no período selecionado |
-| **Importação de Dados → Manifestos** | Importação do CSV de manifestos |
+| **Importação de Dados → Manifestos** | Importação do CSV de viagens |
+| **Importação de Dados → Veículos** | Cadastro ou atualização da frota por CSV |
 | **Importação de Dados → Histórico de Importações** | Listagem de arquivos importados |
 | **Cadastrar usuário** | Somente Administrador |
 | **Status dos serviços** | Somente Administrador |
+| **Tutorial** | Inicia o tour guiado pelo sistema |
 | **Sair** | Encerra a sessão |
 
 O botão no topo do menu recolhe a barra para mostrar só os ícones, deixando mais espaço para o conteúdo. Clique de novo para expandir.
@@ -97,22 +102,21 @@ O seletor no topo da tela vale para **todos os blocos** (indicadores, gráficos 
 
 | Opção | O que mostra |
 |---|---|
-| **Mês atual** | O mês do calendário (é a opção que abre por padrão) |
+| **Mês atual** | O mês do calendário |
 | **Mês anterior** | O mês anterior ao atual |
 | **Selecionar mês** | Abre o calendário para escolher qualquer mês até o atual. O mês escolhido aparece no próprio botão |
 
-> O mês atual costuma aparecer vazio até a planilha dele ser importada. Para ver meses já fechados, use **Mês anterior** ou **Selecionar mês**.
+> O Dashboard abre no **último mês com viagens importadas** (o mês atual costuma ficar vazio até a planilha dele ser importada). O mês escolhido fica no endereço da página e é lembrado enquanto a aba estiver aberta: ao sair e voltar pelo menu, ou ao atualizar a página, o Dashboard continua nele.
 
 ### 5.1 Card de indicadores
 
-O título mostra o mês de referência (ex.: **Indicadores de junho de 2026**). Os indicadores são divididos em duas categorias:
+O título mostra o mês de referência num selo azul (ex.: **Indicadores do mês** `Junho 2026`). Os indicadores são divididos em duas categorias:
 
 | Categoria | Indicador | O que significa |
 |---|---|---|
 | Operacional | **Nº de viagens** | Total de viagens no mês |
 | Operacional | **Dias em operação*** | Soma, por motorista, das datas diferentes com manifesto. Viagem de mais de um dia conta como 1, pois a coluna Diária do CSV vem vazia |
-| Operacional | **Dias disponíveis** | Dias do mês em que os motoristas podiam operar. Exibe "–": o CSV não informa férias, afastamento ou manutenção |
-| Operacional | **% de utilização** | Quanto dos dias disponíveis foi de fato usado em viagens. Exibe "–" enquanto não houver dias disponíveis |
+| Operacional | **% de utilização*** | Dias em operação ÷ (dias do mês × motoristas com viagem). Aproximado: todos os dias do mês contam como disponíveis, pois o CSV não informa férias, afastamento ou manutenção |
 | Financeiro | **Valor total dos fretes** | Quanto os clientes pagaram à Newe (coluna *Valor Fretes*) |
 | Financeiro | **Custo total** | Quanto a Newe pagou ao motorista (coluna *Vale frete*) |
 | Financeiro | **Rentabilidade total** | Valor dos fretes menos custo total |
@@ -121,14 +125,14 @@ O título mostra o mês de referência (ex.: **Indicadores de junho de 2026**). 
 
 > Os cinco indicadores financeiros só somam as viagens com frete **e** custo informados no CSV. Quando alguma viagem do mês veio sem esses valores, o valor ganha um **\*** e o tooltip mostra quantas ficaram de fora.
 
-**Comparação com meses anteriores:** use **Comparar com**, no canto do card, para escolher o período. O subtítulo do card mostra contra o que está comparando (ex.: "Comparando com a média de abr. a mai. de 2026").
+**Comparação com meses anteriores:** use **Comparar com**, no canto do card, para escolher o período. O subtítulo do card mostra, em selos cinza, contra quais meses está comparando (ex.: "Comparando com a média de `Abril 2026` a `Maio 2026`").
 
-| Opção | Variação abaixo do valor | Gráfico à direita |
+| Opção | Variação abaixo do valor | Linha de tendência na base do card |
 |---|---|---|
-| **Mês anterior** (padrão) | Contra o mês anterior, ex.: "vs. mai. de 2026 (596)" | Não tem: dois pontos não formam tendência |
-| **Últimos 2 meses** / **Últimos 3 meses** | Contra a **média** do período, ex.: "vs. média de abr. a mai. de 2026 (694)" | Linha com o período e o mês exibido. Passe o mouse para ver o valor de cada mês |
+| **Mês anterior** (padrão) | Contra o mês anterior, ex.: "vs. maio de 2026 (596)" | Não tem: dois pontos não formam tendência |
+| **Últimos 2 meses** / **Últimos 3 meses** | Contra a **média** do período, ex.: "vs. média de abril a maio de 2026 (694)" | Linha com o período e o mês exibido. Passe o mouse para ver o valor de cada mês |
 
-A seta fica verde quando o indicador melhorou e vermelha quando piorou. Dias disponíveis e % de utilização não têm comparação enquanto exibirem "-".
+A seta fica verde quando o indicador melhorou e vermelha quando piorou.
 
 **Só aparecem as opções que têm dados:** um período só fica disponível se **todos** os meses dele tiverem viagens importadas. Exemplo com abril a junho importados:
 
@@ -141,7 +145,7 @@ A seta fica verde quando o indicador melhorou e vermelha quando piorou. Dias dis
 
 A escolha do período e dos indicadores continua valendo quando você troca o mês no seletor do topo. Se o novo mês tiver menos histórico, o card usa o maior período possível e volta ao escolhido quando houver dados.
 
-Quando o número de indicadores não fecha a última linha, os que sobram ficam **centralizados**, com o mesmo tamanho dos de cima.
+Os indicadores são distribuídos por igual entre as linhas, para nunca sobrar um sozinho (ex.: 7 indicadores ficam 4 + 3). Os valores ficam sempre numa linha só; em telas estreitas, valores muito grandes aparecem resumidos (ex.: "R$ 1,76 mi") e o valor completo aparece ao passar o mouse.
 
 **Escolhendo o que aparece no card:**
 
@@ -161,7 +165,7 @@ Gráfico de barras com a rentabilidade agrupada pelo modelo do veículo. Serve p
 
 <!-- Print sugerido: img/04-ranking.png -->
 
-Tabela com os **5 motoristas com mais viagens** no mês escolhido no seletor do topo da tela.
+Tabela com os **5 motoristas com mais viagens** no mês escolhido no seletor do topo da tela. Clique no **nome** de um motorista para abrir a ficha dele no mesmo mês; **Voltar para o Dashboard** retorna ao mesmo mês.
 
 | Coluna | Descrição |
 |---|---|
@@ -197,11 +201,21 @@ Se não houver registros para o mês ou para os filtros escolhidos, a página in
 
 <!-- Print sugerido: img/13-ranking-mensal.png -->
 
-A página **Ranking mensal** lista os motoristas e permite comparar e ordenar seus resultados no período. Escolha o **Mês de referência** no topo da página. Clique no cabeçalho de uma coluna para ordenar; clique novamente para alternar entre ordem crescente e decrescente.
+A página **Ranking mensal** lista os motoristas e permite comparar e ordenar seus resultados no período. Ao abrir pelo menu, ela mostra o último mês com viagens importadas, indicado no selo ao lado do título; para trocar, use o **Mês de referência** no topo da página. Clique no cabeçalho de uma coluna para ordenar; clique novamente para alternar entre ordem crescente e decrescente.
 
-A tabela inclui motorista, tipo de veículo, viagens, disponibilidade e utilização. Gestores e Administradores também veem valor dos fretes, custos, rentabilidade e rentabilidade média por viagem. Operadores não veem os valores financeiros.
+Clique no **nome** de um motorista para abrir a ficha dele no mesmo mês; o **Voltar** da ficha retorna à mesma página da tabela, na mesma ordenação e posição. A tabela inclui motorista, tipo de veículo, viagens, disponibilidade e utilização. Gestores e Administradores também veem valor dos fretes, custos, rentabilidade e rentabilidade média por viagem. Operadores não veem os valores financeiros.
 
 Se não houver dados para o período, a página informa que não há dados importados.
+
+### Exportar o resultado do mês
+
+Nas páginas **Operação Mensal** e **Ranking mensal**, use **Exportar CSV** para baixar os dados exibidos no mês selecionado.
+
+1. Clique em **Exportar CSV**.
+2. Acompanhe as etapas **Gerando planilha**, **Recebendo arquivo** e **Download iniciado** no painel que abre abaixo do botão. Ele some sozinho logo depois que o download começa.
+3. Abra o arquivo baixado no navegador de planilhas.
+
+O nome do arquivo identifica o período, por exemplo `mensal_2026_06.csv` ou `ranking_2026_06.csv`. Se a geração falhar, o painel mostra o aviso; clique em **Exportar CSV** de novo para tentar outra vez.
 
 ## 8. Importação de manifestos
 
@@ -304,13 +318,51 @@ Mostra o resumo da importação:
 
 Clique em **Importar outro arquivo** para começar de novo.
 
-## 9. Histórico de importações
+## 9. Importação de veículos
+
+Acesse **Importação de Dados → Veículos**. Essa importação usa o mesmo assistente de **6 etapas** da importação de manifestos: upload, mapeamento, validação, revisão, confirmação e resultado.
+
+Use uma planilha **.csv** com no máximo **10 MB**. Identifique as placas dos veículos e informe também os dados disponíveis, como marca, modelo e tipo. As linhas são validadas antes da gravação.
+
+Na etapa de confirmação, o sistema informa quantos veículos serão gravados:
+
+- uma placa nova é cadastrada;
+- uma placa já existente é atualizada com os dados da planilha;
+- nenhuma gravação ocorre antes da confirmação em **Sim, enviar**.
+
+Na etapa de resultado, o sistema mostra quantos veículos foram gravados e faz o cruzamento com os manifestos:
+
+- **veículos em manifestos**: quantos veículos da frota aparecem em viagens;
+- **com categoria**: quantos tipos foram classificados;
+- **manifestos sem veículo correspondente**: aparecem como **Não identificado** na listagem e no ranking;
+- **tipo sem categoria**: veículos desse tipo aparecem como **Não classificado** até que o tipo seja cadastrado ou tratado.
+
+Não feche a página durante a gravação. Se houver um erro, leia a mensagem exibida e tente novamente.
+
+## 10. Histórico de importações
 
 <!-- Print sugerido: img/14-historico-importacoes.png -->
 
 A página **Importação de Dados → Histórico de Importações** apresenta uma tabela com o nome do arquivo, a data da importação, o usuário responsável e o status. Enquanto os dados são carregados, aparece a indicação **Carregando...**; se não for possível obter o histórico, a página mostra uma mensagem de erro.
 
-## 10. Cadastrar usuário (Administrador)
+## 11. Tutorial guiado
+
+Clique em **Tutorial** no final do menu lateral para iniciar o tour guiado. Na primeira vez que entrar no sistema, o tutorial pode ser iniciado automaticamente.
+
+O tutorial percorre as telas na ordem do menu e explica:
+
+- boas-vindas e navegação;
+- Dashboard e indicadores;
+- Operação Mensal, Motoristas e Ranking mensal;
+- importações de manifestos e veículos;
+- histórico de importações;
+- opções disponíveis para Administradores.
+
+Use **Próximo**, **Anterior** ou as setas do teclado para navegar. Use **Pular tutorial**, o botão **X** ou a tecla **Esc** para encerrar antes do fim.
+
+> O tutorial somente apresenta as telas e explicações. Ele não envia arquivos, não grava dados e não altera o sistema.
+
+## 12. Cadastrar usuário (Administrador)
 
 <!-- Print sugerido: img/10-cadastro-usuario.png -->
 
@@ -326,7 +378,7 @@ Se der certo, aparece *"Nome cadastrado como Perfil. Já pode fazer login."*. Se
 
 > A senha é criptografada antes de ser gravada. Nem o Administrador consegue vê-la depois.
 
-## 11. Status dos serviços (Administrador)
+## 13. Status dos serviços (Administrador)
 
 <!-- Print sugerido: img/11-status.png -->
 
@@ -344,10 +396,10 @@ Mostra se cada parte do sistema está funcionando. É útil quando alguma tela n
 
 > Um serviço que está rodando mas não consegue acessar o banco de dados aparece como **Fora**.
 
-## 12. Dúvidas frequentes
+## 14. Dúvidas frequentes
 
 **O Dashboard está vazio.**
-Ainda não há viagens importadas para o mês exibido. O Dashboard abre no mês atual, que costuma estar vazio até a planilha dele ser importada. Use **Mês anterior** ou **Selecionar mês** no topo da tela.
+Ainda não há viagens importadas para o mês exibido. O Dashboard abre no último mês com viagens importadas; se você escolheu outro mês, use **Selecionar mês** no topo da tela para voltar a um mês com dados.
 
 **Importei o arquivo, mas os números não mudaram.**
 Confira se a importação chegou à etapa 6 (Resultado). Se todas as linhas aparecerem como *já existiam*, o arquivo já tinha sido importado antes.
@@ -364,7 +416,16 @@ A sessão expira em 2 horas. Faça login novamente.
 **Não vejo "Cadastrar usuário" nem "Status dos serviços".**
 Essas opções aparecem só para o perfil Administrador.
 
-## 13. Glossário
+**Como exporto o resultado do mês?**
+Na página **Operação Mensal** ou **Ranking mensal**, clique em **Exportar CSV**. O download usa o mês selecionado e pode ser aberto em uma planilha.
+
+**Como atualizo a lista de veículos?**
+Acesse **Importação de Dados → Veículos**, envie o CSV da frota e confirme a gravação na etapa 5. Placas novas são cadastradas e placas existentes são atualizadas.
+
+**O tutorial mudou os dados?**
+Não. O tutorial apenas navega e mostra explicações; ele não envia, importa ou salva dados.
+
+## 15. Glossário
 
 | Termo | Significado |
 |---|---|

@@ -1,0 +1,102 @@
+# Backend inteiro em containers: os tres servicos e o gateway.
+#
+#   docker compose up -d --build --wait    sobe (ou atualiza) tudo e espera ficar pronto
+#   docker compose down                    derruba
+#   docker compose logs -f ms-operacoes    acompanha o log de um servico
+#
+# Credenciais vem do mesmo backend/.env usado fora do Docker (copia do .env.example).
+#
+# Nao rode isto junto com os servicos pela IDE: cada servico segura ate 3
+# conexoes no pooler do Supabase, que tem limite e e dividido pelo time.
+
+name: newe-backend
+
+# Valem para os quatro servicos.
+x-ambiente: &ambiente
+  # Perfil sem arquivo proprio: so garante que o application-dev local nao entra.
+  SPRING_PROFILES_ACTIVE: docker
+  # Dentro da rede do compose. Quem publica porta e so o gateway, mais abaixo.
+  SERVER_ADDRESS: 0.0.0.0
+  # Existem Dados e Features baseados em horario local.
+  TZ: America/Sao_Paulo
+  # A heap acompanha o mem_limit de cada servico, nao a memoria da maquina.
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75
+
+x-servico: &servico
+  env_file: .env
+  # Não reiniciar automaticamente (já que os containers ocupam conexões com o Supabase)
+  restart: "no"
+
+services:
+  ms-usuarios:
+    <<: *servico
+    build: ./ms-usuarios
+    environment:
+      <<: *ambiente
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8081/actuator/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 90s
+      start_interval: 3s
+
+  ms-frota:
+    <<: *servico
+    build: ./ms-frota
+    environment:
+      <<: *ambiente
+    mem_limit: 768m
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8082/actuator/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 90s
+      start_interval: 3s
+
+  ms-operacoes:
+    <<: *servico
+    build: ./ms-operacoes
+    environment:
+      <<: *ambiente
+      FROTA_BASE_URL: http://ms-frota:8082
+    # Mais folga: a importacao le o CSV inteiro (ate 10MB) em memoria.
+    mem_limit: 1g
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "-o", "/dev/null", "http://localhost:8083/actuator/health"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 90s
+      start_interval: 3s
+
+  api-gateway:
+    <<: *servico
+    build: ./api-gateway
+    environment:
+      <<: *ambiente
+      MS_USUARIOS_URL: http://ms-usuarios:8081
+      MS_FROTA_URL: http://ms-frota:8082
+      MS_OPERACOES_URL: http://ms-operacoes:8083
+    mem_limit: 512m
+    # Unica porta publicada: o navegador fala so com o gateway. Os servicos de
+    # tras confiam no header X-User-Role e nao podem ser alcancados de fora.
+    ports:
+      - "8080:8080"
+    depends_on:
+      ms-usuarios:
+        condition: service_healthy
+      ms-frota:
+        condition: service_healthy
+      ms-operacoes:
+        condition: service_healthy
+    # O gateway nao tem Actuator: qualquer resposta HTTP (ate 401) prova que subiu.
+    healthcheck:
+      test: ["CMD", "curl", "-sS", "-o", "/dev/null", "http://localhost:8080/api/status"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 60s
+      start_interval: 3s

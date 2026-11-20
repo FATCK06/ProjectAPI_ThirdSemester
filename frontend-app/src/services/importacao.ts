@@ -6,6 +6,9 @@ export const TAMANHO_MAXIMO_BYTES = 10 * 1024 * 1024;
 
 export const EXTENSOES_ACEITAS = ['.csv'];
 
+/** Manifesto grava viagens; veículo grava o cadastro de veículos. */
+export type TipoImportacao = 'MANIFESTO' | 'VEICULO';
+
 export type StatusImportacao =
     | 'AGUARDANDO'
     | 'VALIDADO'
@@ -76,6 +79,20 @@ export interface LinhaPreview {
     valorFrete: number | null;
 }
 
+/** Linha da prévia na importação de veículos (o backend manda a amostra do tipo da importação). */
+export interface VeiculoPreview {
+    numeroLinha: number;
+    placa: string;
+    marca: string | null;
+    modelo: string | null;
+    tipoVeiculo: string | null;
+    anoFabricacao: number | null;
+    cidadeLicenciamento: string | null;
+    ufLicenciamento: string | null;
+    agregado: string | null;
+    status: string | null;
+}
+
 /** Uma coluna que o sistema espera, confrontada com o cabeçalho do arquivo. */
 export interface MapeamentoColuna {
     campoSistema: string;
@@ -135,9 +152,11 @@ export interface ResumoImportacao {
 export async function enviarArquivo(
     arquivo: File,
     aoProgredir?: (porcentagem: number) => void,
+    tipo: TipoImportacao = 'MANIFESTO',
 ): Promise<ImportacaoCriada> {
     const formData = new FormData();
     formData.append('arquivo', arquivo);
+    formData.append('tipo', tipo);
 
     const { data } = await api.post<ImportacaoCriada>('/importacao/arquivos', formData, {
         onUploadProgress: (evento) => {

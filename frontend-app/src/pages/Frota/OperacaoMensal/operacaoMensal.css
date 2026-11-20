@@ -53,8 +53,7 @@
   min-width: 220px;
 }
 
-.operacao-mensal-filtro input,
-.operacao-mensal-filtro select {
+.operacao-mensal-filtro input {
   min-height: 36px;
   font-family: inherit;
   font-size: 13px;
@@ -63,10 +62,6 @@
   border-radius: 8px;
   color: #334155;
   background: #ffffff;
-}
-
-.operacao-mensal-filtro select {
-  min-width: 150px;
 }
 
 .operacao-mensal-feedback button {
@@ -168,7 +163,9 @@
     width: 100%;
   }
 
-  .operacao-mensal-filtro input {
+  .operacao-mensal-filtro input,
+  .operacao-mensal-filtro .select,
+  .operacao-mensal-filtro .campo-mes {
     width: 100%;
   }
 }

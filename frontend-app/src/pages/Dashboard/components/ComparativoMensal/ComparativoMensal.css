@@ -1,0 +1,94 @@
+.comparativo-meses {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.comparativo-meses:empty {
+  margin-bottom: 0;
+}
+
+.comparativo-meses button {
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #475569;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.comparativo-meses button:hover:not(:disabled) {
+  border-color: #94a3b8;
+  background: #f1f5f9;
+}
+
+/* Depois do hover: selecionado continua escuro, só um tom acima */
+.comparativo-meses button[aria-pressed="true"] {
+  border-color: #334155;
+  background: #334155;
+  color: #ffffff;
+}
+
+.comparativo-meses button[aria-pressed="true"]:hover:not(:disabled) {
+  border-color: #1e293b;
+  background: #1e293b;
+}
+
+.comparativo-meses button:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.comparativo-limite {
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.comparativo-graficos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.comparativo-grafico {
+  margin: 0;
+  min-width: 0;
+}
+
+.comparativo-grafico figcaption {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.comparativo-grafico-area {
+  position: relative;
+  height: 240px;
+}
+
+.comparativo-evolucao .ui-aviso + .ui-aviso {
+  margin-top: 8px;
+}
+
+.comparativo-cards-titulo {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.comparativo-cards-grid {
+  display: grid;
+  /* auto-fit: poucos cards esticam até ocupar a linha, sem sobrar espaço à direita */
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 12px;
+}

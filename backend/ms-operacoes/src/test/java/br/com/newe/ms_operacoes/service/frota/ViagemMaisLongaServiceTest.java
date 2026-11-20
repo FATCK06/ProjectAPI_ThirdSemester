@@ -61,7 +61,7 @@ class ViagemMaisLongaServiceTest {
     void veiculoForaDoCadastroFicaNaoInformado() {
         ViagemMaisLonga v = calcular(viagem(UUID.randomUUID(), 200, 0));
 
-        assertThat(v.tipoVeiculo()).isEqualTo(ViagemMaisLongaService.TIPO_NAO_INFORMADO);
+        assertThat(v.tipoVeiculo()).isEqualTo(ViagemMaisLongaService.TIPO_NAO_IDENTIFICADO);
     }
 
     private static ViagemMaisLonga calcular(ViagemKmView... viagens) {

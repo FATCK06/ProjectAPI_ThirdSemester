@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import "./card.css";
 
 interface PropsCard {
-    titulo: string;
-    subtitulo?: string;
+    titulo: ReactNode;
+    subtitulo?: ReactNode;
     sobretitulo?: string
     acoes?: ReactNode;
     className?: string;

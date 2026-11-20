@@ -9,7 +9,9 @@
   top: 0;
   border-right: 1px solid #e5e5e5;
   transition: width 0.3s ease;
-  overflow: hidden;
+  /* Em telas baixas (notebook) o menu rola em vez de cortar o rodapé */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Quando estiver minimizada, a largura cai para 80px */
@@ -89,7 +91,8 @@
 }
 
 /* Reseta o estilo nativo do botão para ficar igual aos NavLinks */
-.btn-accordion {
+.btn-accordion,
+.btn-tutorial {
   background: none;
   border: none;
   width: calc(100% - 32px); /* Compensa a margem lateral */
@@ -177,6 +180,27 @@
   .accordion-seta,
   .accordion-content {
     transition: none;
+  }
+}
+
+/* Notebooks menores: sidebar mais estreita (casar com layout.css) */
+@media (max-width: 1366px) {
+  .sidebar-container {
+    width: 220px;
+  }
+}
+
+/* Telas baixas (ex.: 1366x768): itens mais compactos para caber sem rolar */
+@media (max-height: 800px) {
+  .sidebar-header {
+    padding: 16px 20px;
+    min-height: 60px;
+  }
+
+  .nav-item,
+  .nav-sub-item {
+    padding-top: 8px;
+    padding-bottom: 8px;
   }
 }
 

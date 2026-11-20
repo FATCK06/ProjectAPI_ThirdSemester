@@ -26,8 +26,9 @@ export interface MotoristasMesPage {
   last: boolean;
 }
 
+/** Categoria de veículo (Fiorino, Van, VUC, 3/4, Toco, Truck, Carreta): é o que a coluna "Tipo de veículo" mostra. */
 export interface TipoVeiculo {
-  idTipo: number;
+  idCategoria: number;
   descricao: string;
 }
 
@@ -42,16 +43,32 @@ export interface MotoristaFicha {
   numero: string | null;
   bairro: string | null;
   idCidade: number | null;
+  nomeCidade: string | null;
   criadoEm: string | null;
 }
 
 export async function buscarMotoristasMes(
   mesReferencia: string,
   pagina: number,
-  tamanho = 20,
+  opcoes: { busca?: string; tipoVeiculo?: string; tamanho?: number } = {},
 ): Promise<MotoristasMesPage> {
+  const { busca = "", tipoVeiculo = "", tamanho = 20 } = opcoes;
   const { data } = await api.get<MotoristasMesPage>("/dashboard/motoristas", {
-    params: { mesReferencia, page: pagina - 1, size: tamanho },
+    params: { mesReferencia, page: pagina - 1, size: tamanho, busca, tipoVeiculo },
+  });
+  return data;
+}
+
+export async function baixarOperacaoMensalCsv(
+  mesReferencia: string,
+  busca: string,
+  tipoVeiculo: string,
+  aoProgredir: (progresso?: number) => void,
+): Promise<Blob> {
+  const { data } = await api.get<Blob>("/dashboard/motoristas/csv", {
+    params: { mesReferencia, busca, tipoVeiculo },
+    responseType: "blob",
+    onDownloadProgress: (evento) => aoProgredir(evento.progress),
   });
   return data;
 }
@@ -89,7 +106,7 @@ export async function buscarHistoricoMotorista(
 }
 
 export async function buscarTiposVeiculo(): Promise<TipoVeiculo[] | null> {
-  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/tipos");
+  const { data } = await api.get<TipoVeiculo[] | null>("/veiculos/categorias");
   return data ?? null;
 }
 

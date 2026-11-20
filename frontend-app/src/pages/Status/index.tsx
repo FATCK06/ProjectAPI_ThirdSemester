@@ -11,29 +11,38 @@ export function StatusServicos() {
     const [carregando, setCarregando] = useState(true);
     const [atualizadoEm, setAtualizadoEm] = useState<Date | null>(null);
 
-    const consultar = useCallback(async () => {
-        setCarregando(true);
-        try {
-            setDados(await buscarStatus());
-            setErro(null);
-        } catch (falha) {
-            setDados(null);
-            setErro(mensagemDeErro(falha));
-        } finally {
-            setCarregando(false);
-            setAtualizadoEm(new Date());
-        }
+    // Os setState ficam nos callbacks da promise: o efeito só dispara o pedido
+    const atualizar = useCallback(() => {
+        buscarStatus()
+            .then((resposta) => {
+                setDados(resposta);
+                setErro(null);
+            })
+            .catch((falha: unknown) => {
+                setDados(null);
+                setErro(mensagemDeErro(falha));
+            })
+            .finally(() => {
+                setCarregando(false);
+                setAtualizadoEm(new Date());
+            });
     }, []);
 
+    const consultar = useCallback(() => {
+        setCarregando(true);
+        atualizar();
+    }, [atualizar]);
+
     useEffect(() => {
-        consultar();
+        // carregando já começa true: a primeira consulta não precisa marcar
+        atualizar();
         const timer = setInterval(consultar, INTERVALO_MS);
         return () => clearInterval(timer);
-    }, [consultar]);
+    }, [atualizar, consultar]);
 
     return (
-        <div className="status-container">
-            <div className="status-header">
+        <div className="status-container" data-tour="status-pagina">
+            <div className="status-header" data-tour="status-cabecalho">
                 <div>
                     <h2>Status dos serviços</h2>
                     {atualizadoEm && (
@@ -42,7 +51,7 @@ export function StatusServicos() {
                         </p>
                     )}
                 </div>
-                <button className="btn-atualizar" onClick={consultar} disabled={carregando}>
+                <button className="btn-atualizar" data-tour="status-atualizar" onClick={consultar} disabled={carregando}>
                     <RefreshCw size={16} className={carregando ? 'girando' : ''} />
                     Atualizar
                 </button>

@@ -130,39 +130,6 @@
 }
 
 .btn-delete:hover { color: #ef4444; }
-/* --- MES DE REFERENCIA --- */
-.campo-mes {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 24px;
-}
-
-.campo-mes label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #0f172a;
-}
-
-.campo-mes input {
-  width: 180px;
-  padding: 10px 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  font-size: 14px;
-  color: #0f172a;
-}
-
-.campo-mes input:focus {
-  outline: none;
-  border-color: #2563eb;
-}
-
-.campo-mes input:disabled {
-  background: #f8fafc;
-  color: #94a3b8;
-}
-
 .campo-ajuda {
   font-size: 12px;
   color: #94a3b8;

@@ -11,12 +11,19 @@ import {
 import {
   buscarMotoristasMes,
   buscarTiposVeiculo,
+  baixarOperacaoMensalCsv,
   type MotoristasMesPage,
   type MotoristaMes,
   type TipoVeiculo,
 } from "../../../services/Motoristas";
+import { CampoMes } from "../../../components/CampoMes/CampoMes";
+import { Loading } from "../../../components/Loading";
+import { SeloMes } from "../../../components/SeloMes/SeloMes";
+import { useMesDaUrl } from "../../../hooks/useMesDaUrl";
+import { Select, type OpcaoSelect } from "../../../components/Select/Select";
 import { mesAtual } from "../../../utils/datas";
 import { formatarPercentual } from "../../../utils/formatacao";
+import { ExportarCsvButton } from "../../../components/ExportarCsvButton/ExportarCsvButton";
 import "./operacaoMensal.css";
 
 type Status = "loading" | "success" | "error";
@@ -39,14 +46,6 @@ function paginaDaUrl(valor: string | null) {
   return Number.isSafeInteger(pagina) && pagina > 0 && pagina <= 2_147_483_647
     ? pagina
     : 1;
-}
-
-function normalizarBusca(valor: string) {
-  return valor
-    .normalize("NFD")
-    .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase("pt-BR")
-    .trim();
 }
 
 const COLUNAS: ColunaTabela<MotoristaMes>[] = [
@@ -101,14 +100,16 @@ const COLUNAS: ColunaTabela<MotoristaMes>[] = [
   },
 ];
 
+// Sem ?mes na URL, espera o mês mais recente com dados antes de montar a tela
 export function OperacaoMensal() {
+  const mes = useMesDaUrl();
+  return mes ? <OperacaoMensalDoMes mes={mes} /> : <Loading texto="Carregando mês" />;
+}
+
+function OperacaoMensalDoMes({ mes }: { mes: string }) {
   const location = useLocation();
   const restauracao = (location.state as { restauracao?: RestauracaoTabela } | null)?.restauracao;
   const [searchParams, setSearchParams] = useSearchParams();
-  const mesParametro = searchParams.get("mes");
-  const mes = mesParametro && /^\d{4}-(0[1-9]|1[0-2])$/.test(mesParametro)
-    ? mesParametro
-    : mesAtual();
   const paginaParametro = searchParams.get("page");
   const pagina = paginaDaUrl(paginaParametro);
   const [busca, setBusca] = useState(restauracao?.busca ?? "");
@@ -120,43 +121,48 @@ export function OperacaoMensal() {
   const [resultado, setResultado] = useState<ResultadoBusca | null>(null);
   const [tentativa, setTentativa] = useState(0);
   const scrollRestaurado = useRef(false);
-  const chaveConsulta = `${mes}|${pagina}|${tentativa}`;
+  const chaveConsulta = `${mes}|${pagina}|${busca}|${tipoVeiculo}|${tentativa}`;
   const status: Status = resultado?.chave === chaveConsulta
     ? resultado.status
     : "loading";
   const dados = resultado?.chave === chaveConsulta && resultado.status === "success"
     ? resultado.dados
     : null;
-  const termo = normalizarBusca(busca);
-  const placaTermo = termo.replace(/[^a-z0-9]/g, "");
+  const filtrosAtivos = Boolean(busca.trim() || tipoVeiculo);
   const tiposVeiculo = estadoTiposVeiculo.status === "success"
     ? Array.from(
       new Map((estadoTiposVeiculo.tipos ?? []).map((tipo) => [tipo.descricao, tipo])).values(),
     )
     : [];
   const semTiposVeiculo = estadoTiposVeiculo.status === "success" && tiposVeiculo.length === 0;
-  const motoristasFiltrados = dados?.content.filter((motorista) => {
-    const nome = normalizarBusca(motorista.nomeMotorista);
-    const placa = motorista.placa.toLocaleLowerCase("pt-BR").replace(/[^a-z0-9]/g, "");
-    const correspondeBusca = nome.includes(termo) || (placaTermo !== "" && placa.includes(placaTermo));
-    return correspondeBusca && (!tipoVeiculo || motorista.tipoVeiculo === tipoVeiculo);
-  }) ?? [];
+  // Sem tipos cadastrados a lista fica vazia e o campo mostra o placeholder
+  const opcoesTipoVeiculo: OpcaoSelect<string>[] = semTiposVeiculo
+    ? []
+    : [
+      {
+        valor: "",
+        rotulo: estadoTiposVeiculo.status === "loading"
+          ? "Carregando tipos..."
+          : estadoTiposVeiculo.status === "error" ? "Tipos indisponíveis" : "Todos",
+      },
+      ...tiposVeiculo.map((tipo) => ({ valor: tipo.descricao, rotulo: tipo.descricao })),
+    ];
+  const motoristasFiltrados = dados?.content ?? [];
 
   useEffect(() => {
-    if (mesParametro !== mes || paginaParametro !== String(pagina)) {
+    if (paginaParametro !== String(pagina)) {
       setSearchParams((atual) => {
         const normalizados = new URLSearchParams(atual);
-        normalizados.set("mes", mes);
         normalizados.set("page", String(pagina));
         return normalizados;
       }, { replace: true });
     }
-  }, [mes, mesParametro, pagina, paginaParametro, setSearchParams]);
+  }, [pagina, paginaParametro, setSearchParams]);
 
   useEffect(() => {
     let cancelado = false;
 
-    buscarMotoristasMes(mes, pagina)
+    buscarMotoristasMes(mes, pagina, { busca, tipoVeiculo })
       .then((resultado) => {
         if (cancelado) return;
         if (pagina > Math.max(resultado.totalPages, 1)) {
@@ -177,7 +183,7 @@ export function OperacaoMensal() {
     return () => {
       cancelado = true;
     };
-  }, [chaveConsulta, mes, pagina, setSearchParams]);
+  }, [busca, chaveConsulta, mes, pagina, setSearchParams, tipoVeiculo]);
 
   useEffect(() => {
     if (status !== "success" || restauracao?.scrollY === undefined || scrollRestaurado.current) return;
@@ -211,52 +217,55 @@ export function OperacaoMensal() {
   }
 
   return (
-    <section className="operacao-mensal-page">
-      <PageHeader titulo="Operação Mensal" subtitulo="Viagens, dias em operação e indicadores de cada motorista e veículo no mês">
+    <section className="operacao-mensal-page" data-tour="operacao-pagina">
+      <PageHeader titulo="Operação Mensal" selo={<SeloMes mes={mes} />} subtitulo="Viagens, dias em operação e indicadores de cada motorista e veículo no mês">
         <div className="operacao-mensal-filtros">
-          <div className="operacao-mensal-filtro">
+          <div className="operacao-mensal-filtro" data-tour="operacao-busca">
             <label htmlFor="operacao-mensal-busca">Buscar motorista ou placa</label>
             <input
               id="operacao-mensal-busca"
               type="search"
               placeholder="Nome ou placa"
               value={busca}
-              onChange={(event) => setBusca(event.target.value)}
-            />
-          </div>
-          <div className="operacao-mensal-filtro">
-            <label htmlFor="operacao-mensal-tipo-veiculo">Tipo de veículo</label>
-            <select
-              id="operacao-mensal-tipo-veiculo"
-              value={tipoVeiculo}
-              disabled={estadoTiposVeiculo.status !== "success" || semTiposVeiculo}
-              onChange={(event) => setTipoVeiculo(event.target.value)}
-            >
-              {semTiposVeiculo ? (
-                <option value="" disabled>Nenhum veículo cadastrado</option>
-              ) : (
-                <option value="">
-                  {estadoTiposVeiculo.status === "loading"
-                    ? "Carregando tipos..."
-                    : estadoTiposVeiculo.status === "error" ? "Tipos indisponíveis" : "Todos"}
-                </option>
-              )}
-              {tiposVeiculo.map((tipo) => (
-                <option key={tipo.idTipo} value={tipo.descricao}>{tipo.descricao}</option>
-              ))}
-            </select>
-          </div>
-          <div className="operacao-mensal-filtro">
-            <label htmlFor="operacao-mensal-mes">Mês</label>
-            <input
-              id="operacao-mensal-mes"
-              type="month"
-              value={mes}
               onChange={(event) => {
-                if (event.target.value) atualizarConsulta(event.target.value, 1);
+                setBusca(event.target.value);
+                atualizarConsulta(mes, 1);
               }}
             />
           </div>
+          <div className="operacao-mensal-filtro" data-tour="operacao-tipo">
+            <label htmlFor="operacao-mensal-tipo-veiculo">Tipo de veículo</label>
+            <Select
+              id="operacao-mensal-tipo-veiculo"
+              valor={tipoVeiculo}
+              opcoes={opcoesTipoVeiculo}
+              placeholder="Nenhum veículo cadastrado"
+              disabled={estadoTiposVeiculo.status !== "success" || semTiposVeiculo}
+              onChange={(novoTipo) => {
+                setTipoVeiculo(novoTipo);
+                atualizarConsulta(mes, 1);
+              }}
+            />
+          </div>
+          <div className="operacao-mensal-filtro" data-tour="operacao-mes">
+            <label htmlFor="operacao-mensal-mes">Mês</label>
+            <CampoMes
+              id="operacao-mensal-mes"
+              valor={mes}
+              max={mesAtual()}
+              onChange={(novoMes) => atualizarConsulta(novoMes, 1)}
+            />
+          </div>
+          <ExportarCsvButton
+            nomeArquivo={`mensal_${mes.replace("-", "_")}.csv`}
+            baixarCsv={(aoProgredir) => baixarOperacaoMensalCsv(
+              mes,
+              busca,
+              tipoVeiculo,
+              aoProgredir,
+            )}
+            disabled={status !== "success"}
+          />
         </div>
       </PageHeader>
 
@@ -275,39 +284,34 @@ export function OperacaoMensal() {
       )}
 
       {status === "success" && dados && dados.content.length === 0 && (
-        <div className="operacao-mensal-feedback">
-          <p>Nenhum motorista encontrado para este mês.</p>
+        <div className="operacao-mensal-feedback" role="status">
+          <p>
+            {filtrosAtivos
+              ? `Nenhum motorista corresponde aos filtros aplicados${busca.trim() ? ` para “${busca}”` : ""}${tipoVeiculo ? ` e ao tipo “${tipoVeiculo}”` : ""}.`
+              : "Nenhum motorista encontrado para este mês."}
+          </p>
         </div>
       )}
 
       {status === "success" && dados && dados.content.length > 0 && (
         <>
-          {motoristasFiltrados.length === 0 ? (
-            <div className="operacao-mensal-feedback" role="status">
-              <p>
-                Nenhum motorista corresponde aos filtros aplicados
-                {busca.trim() ? ` para “${busca}”` : ""}
-                {tipoVeiculo ? ` e ao tipo “${tipoVeiculo}”` : ""}.
-              </p>
-            </div>
-          ) : (
-            <DataTable
-              colunas={COLUNAS}
-              linhas={motoristasFiltrados}
-              chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
-              linkLinha={(m) =>
-                `/operacao-mensal/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}&page=${pagina}`}
-              estadoNavegacaoLinha={() => ({
-                retorno: {
-                  destino: `/operacao-mensal?mes=${encodeURIComponent(mes)}&page=${pagina}`,
-                  restauracao: { busca, tipoVeiculo, ordenacao, scrollY: window.scrollY },
-                },
-              })}
-              cardsNoMobile
-              ordenacao={ordenacao}
-              aoOrdenar={setOrdenacao}
-            />
-          )}
+          <DataTable
+            colunas={COLUNAS}
+            linhas={motoristasFiltrados}
+            chaveLinha={(m) => `${m.motoristaId}-${m.veiculoId}`}
+            // O nome leva à ficha no mesmo mês; o "Voltar" de lá restaura filtros e rolagem
+            linkLinha={(m) => `/motoristas/${m.motoristaId}?mes=${encodeURIComponent(mes)}`}
+            estadoNavegacaoLinha={() => ({
+              retorno: {
+                destino: `/operacao-mensal?mes=${encodeURIComponent(mes)}&page=${pagina}`,
+                rotulo: "Voltar para Operação Mensal",
+                restauracao: { busca, tipoVeiculo, ordenacao, scrollY: window.scrollY },
+              },
+            })}
+            cardsNoMobile
+            ordenacao={ordenacao}
+            aoOrdenar={setOrdenacao}
+          />
 
           {/* A lista já vem paginada do backend, por isso a paginação fica fora do DataTable */}
           <Paginacao
@@ -315,8 +319,8 @@ export function OperacaoMensal() {
             totalPaginas={dados.totalPages}
             aoMudar={(proxima) => atualizarConsulta(mes, proxima)}
             rotulo="Paginação de motoristas"
-            contagem={termo || tipoVeiculo
-              ? `${motoristasFiltrados.length} de ${dados.content.length} nesta página`
+            contagem={filtrosAtivos
+              ? `${dados.totalElements.toLocaleString("pt-BR")} motoristas correspondem aos filtros`
               : `${dados.totalElements.toLocaleString("pt-BR")} motoristas`}
           />
         </>

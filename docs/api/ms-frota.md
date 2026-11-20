@@ -1,22 +1,27 @@
 # ms-frota
 
-Cadastro e consulta de motoristas, veículos e agregados. Porta interna **8082**, dono das tabelas `motoristas`, `veiculos`, `agregados`, `categorias_veiculos`, `cidades` e `estados`.
+Cadastro e consulta de motoristas, veículos e agregados. Porta interna **8082**, dono das tabelas `motoristas`, `veiculos`, `agregados`, `tipo_veiculos`, `categorias_veiculo`, `cidades` e `estados`.
 
 Todas as rotas exigem `Authorization: Bearer <token>` quando chamadas pelo gateway.
 
 | Método | Rota | Descrição |
 |---|---|---|
 | `GET` | `/api/motoristas/{cpf}` | Busca motorista por CPF |
+| `GET` | `/api/motoristas/id/{id}` | Busca ficha do motorista por id, incluindo nome da cidade |
 | `POST` | `/api/motoristas/resumos` | Nome e CPF de vários motoristas por id |
 | `POST` | `/api/motoristas/lote` | Upsert em lote por CPF |
 | `GET` | `/api/veiculos/{placa}` | Busca veículo por placa |
 | `POST` | `/api/veiculos/placas` | Placa de vários veículos por id |
 | `POST` | `/api/veiculos/modelos` | Modelo de vários veículos por id |
+| `GET` | `/api/veiculos/tipos` | Os tipos crus da planilha de veículos |
+| `POST` | `/api/veiculos/tipos` | Categoria de vários veículos por id |
+| `GET` | `/api/veiculos/categorias` | As sete categorias de análise |
+| `POST` | `/api/veiculos/classificacao` | Placa, tipo cru e categoria de vários veículos por id |
 | `POST` | `/api/veiculos/lote` | Upsert em lote por placa |
 | `GET` | `/api/agregados/{documento}` | Busca agregado por CPF/CNPJ |
 | `POST` | `/api/agregados/lote` | Upsert em lote por documento |
 
-> As rotas `/lote`, `/resumos`, `/placas` e `/modelos` existem para uso **entre serviços**: o ms-operacoes as chama durante a importação e no dashboard. Um manifesto traz centenas de linhas, e uma chamada HTTP por motorista seria inviável.
+> As rotas `/lote`, `/resumos`, `/placas`, `/modelos`, `POST /tipos` e `/classificacao` existem para uso **entre serviços**: o ms-operacoes as chama durante a importação e no dashboard. Um manifesto traz centenas de linhas, e uma chamada HTTP por motorista seria inviável.
 
 ---
 
@@ -47,6 +52,12 @@ Todas as rotas exigem `Authorization: Bearer <token>` quando chamadas pelo gatew
 ```
 
 **Erros:** `404` se o CPF não existir.
+
+### `GET /api/motoristas/id/{id}`
+
+Busca os dados cadastrais do motorista pelo UUID. A resposta inclui `idCidade` e `nomeCidade`; o nome vem vazio quando o motorista não tem cidade cadastrada.
+
+**Erros:** `404` se o id não existir.
 
 ### `POST /api/motoristas/resumos`
 
@@ -154,6 +165,63 @@ Cria ou atualiza veículos pela placa. O manifesto traz só placa, capacidade e 
 
 ```json
 { "ABC1D23": "b1b2c3d4-0000-4000-8000-000000000010" }
+```
+
+### Tipo e categoria de veículo
+
+Dois níveis:
+
+- **Tipo**: o texto da planilha de veículos do sistema de origem (`FIORINO`, `Truck ou pesado`, `Cavalo mecânico`...), em `tipo_veiculos`. A importação de veículos só aceita tipo cadastrado ali.
+- **Categoria**: uma das sete categorias que o cliente usa na análise (Fiorino, Van, VUC, 3/4, Toco, Truck, Carreta), em `categorias_veiculo`. Cada tipo aponta para uma categoria pela coluna `tipo_veiculos.id_categoria`, que é a tabela de-para. Classificar um tipo novo é um `INSERT` em `tipo_veiculos` com a categoria, sem mexer em código.
+
+Onde o sistema mostra "tipo de veículo" (listagem, ranking, indicadores, exportação), o valor é a **categoria**, ou um destes rótulos:
+
+| Rótulo | Quando |
+|---|---|
+| `Não identificado` | o veículo não tem tipo: só veio por manifesto, nunca pela planilha de veículos |
+| `Não classificado` | o tipo existe mas não aponta para nenhuma categoria (hoje: Automóveis, Motocicletas e semi-reboques) |
+
+### `GET /api/veiculos/tipos`
+
+Os tipos crus cadastrados, em ordem alfabética.
+
+```json
+[ { "idTipo": 3, "descricao": "3/4" }, { "idTipo": 1, "descricao": "FIORINO" } ]
+```
+
+### `POST /api/veiculos/tipos`
+
+**Body:** lista de ids de veículos.
+**Resposta `200`:** mapa `id → categoria` (ou um dos rótulos acima). Ids que não existem ficam de fora.
+
+```json
+{
+  "b1b2c3d4-0000-4000-8000-000000000010": "Truck",
+  "b1b2c3d4-0000-4000-8000-000000000011": "Não identificado"
+}
+```
+
+### `GET /api/veiculos/categorias`
+
+As sete categorias, do menor para o maior porte. Usado pelo filtro "Tipo de veículo" do front.
+
+```json
+[
+  { "idCategoria": 1, "descricao": "Fiorino" },
+  { "idCategoria": 2, "descricao": "Van" }
+]
+```
+
+### `POST /api/veiculos/classificacao`
+
+**Body:** lista de ids de veículos.
+**Resposta `200`:** placa, tipo cru e categoria de cada veículo encontrado, **sem rótulo**: `tipo` vem nulo quando o veículo nunca veio na planilha, e `categoria` vem nula quando não há tipo ou o tipo não tem categoria. Usado pelo resultado do tratamento no ms-operacoes.
+
+```json
+[
+  { "idVeiculo": "b1b2c3d4-0000-4000-8000-000000000010", "placa": "ABC1D23", "tipo": "Bi-Truck ou pesado", "categoria": "Truck" },
+  { "idVeiculo": "b1b2c3d4-0000-4000-8000-000000000012", "placa": "XYZ9K87", "tipo": "Automóveis", "categoria": null }
+]
 ```
 
 ---

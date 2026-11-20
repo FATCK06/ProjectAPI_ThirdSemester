@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 
 /**
  * Um veiculo vindo da importacao. O CSV de manifestos traz so a placa (e, as
- * vezes, capacidade e nome do agregado), entao o cadastro nasce minimo e e
+ * vezes, capacidade de lotacao e nome do agregado), entao o cadastro nasce minimo e e
  * completado depois pelo CRUD de frota.
  */
 public record VeiculoLoteItem(
@@ -19,7 +19,7 @@ public record VeiculoLoteItem(
         String placa,
         @DecimalMin(value = "0", message = "deve ser maior ou igual a zero")
         @Digits(integer = 8, fraction = 2, message = "deve ter até 8 dígitos inteiros e 2 casas decimais")
-        BigDecimal capacidade,
+        BigDecimal capacidadeLotacao,
         @Size(max = 150, message = "deve conter no máximo 150 caracteres")
         String nomeAgregado
 ) {

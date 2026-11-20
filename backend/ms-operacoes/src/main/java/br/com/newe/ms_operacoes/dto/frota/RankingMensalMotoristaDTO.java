@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import br.com.newe.ms_operacoes.service.frota.TipoVeiculoRotulos;
 import br.com.newe.ms_operacoes.service.indicadores.IndicadoresMotorista;
 
 /**
@@ -29,7 +30,7 @@ public record RankingMensalMotoristaDTO(
 
     public static RankingMensalMotoristaDTO de(IndicadoresMotorista i, String tipoVeiculo, String placa) {
         String nome = i.nome() == null || i.nome().isBlank() ? NAO_INFORMADO : i.nome();
-        String tipo = tipoVeiculo == null || tipoVeiculo.isBlank() ? NAO_INFORMADO : tipoVeiculo;
+        String tipo = tipoVeiculo == null || tipoVeiculo.isBlank() ? TipoVeiculoRotulos.NAO_IDENTIFICADO : tipoVeiculo;
         return new RankingMensalMotoristaDTO(i.motoristaId(), nome, tipo, placa, i.numeroViagens(),
                 i.disponibilidade(), i.utilizacao(), i.valorFrete(), i.custoTotal(), i.rentabilidade(),
                 i.rentabilidadeMediaViagem());

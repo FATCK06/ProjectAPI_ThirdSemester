@@ -26,16 +26,20 @@ interface OpcoesDashboard {
 
 // mesReferencia null: o mês ainda não chegou do servidor, o skeleton continua
 export function useDashboard(mesReferencia: string | null, { buscarPorModelo }: OpcoesDashboard) {
-    const [dados, setDados] = useState<DadosDashboard | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
-    const [erro, setErro] = useState<string | null>(null);
+    // Resultado com a chave do pedido: chave diferente da atual = ainda carregando
+    const [resultado, setResultado] = useState<
+        { chave: string; dados: DadosDashboard } | { chave: string; erro: string } | null
+    >(null);
+    const chave = `${mesReferencia}|${buscarPorModelo}`;
+    const atual = resultado?.chave === chave ? resultado : null;
+    const isLoading = atual === null;
+    const dados = atual && "dados" in atual ? atual.dados : null;
+    const erro = atual && "erro" in atual ? atual.erro : null;
 
     useEffect(() => {
         if (!mesReferencia) return;
 
         let cancelado = false;
-        setIsLoading(true);
-        setErro(null);
 
         //As chamadas saem juntas, o loading só termina quando todas voltam,
         //assim o skeleton fica até o card e os dois graficos estarem prontos
@@ -49,21 +53,16 @@ export function useDashboard(mesReferencia: string | null, { buscarPorModelo }: 
                 : Promise.resolve<IndicadoresPorModelo[]>([]),
         ])
             .then(([indicadores, historico, porModelo]) => {
-                if (cancelado) return;
-                setDados({ indicadores, historico, porModelo });
+                if (!cancelado) setResultado({ chave, dados: { indicadores, historico, porModelo } });
             })
             .catch(() => {
-                if (cancelado) return;
-                setErro("Não foi possivel carregar os indicadores deste mês.");
-            })
-            .finally(() => {
-                if (!cancelado) setIsLoading(false);
-            })
+                if (!cancelado) setResultado({ chave, erro: "Não foi possível carregar os indicadores deste mês." });
+            });
 
         return () => {
             cancelado = true;
         };
-    }, [mesReferencia, buscarPorModelo]);
+    }, [mesReferencia, buscarPorModelo, chave]);
 
     return { dados, isLoading, erro };
 }

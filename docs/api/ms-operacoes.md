@@ -15,13 +15,17 @@ Todas as rotas exigem `Authorization: Bearer <token>`.
 | `GET` | `/api/importacao/arquivos/{id}/conteudo` | Baixa o CSV original |
 | `GET` | `/api/importacao/arquivos/{id}/viagens` | Viagens gravadas por uma importação |
 | `GET` | `/api/importacao/arquivos/{id}/motoristas` | Ids dos motoristas de uma importação |
+| `GET` | `/api/importacao/veiculos/tratamento` | Cruzamento entre manifestos e planilha de veículos |
 | `GET` | `/api/viagens` | Viagens de um mês |
 | `GET` | `/api/dashboard/indicadores` | Indicadores do mês e por motorista |
 | `GET` | `/api/dashboard/indicadores-por-modelo` | Indicadores por modelo de veículo |
 | `GET` | `/api/dashboard/indicadores/historico` | Totais dos últimos meses, para o comparativo dos cards |
 | `GET` | `/api/dashboard/meses-referencia` | Mês atual e anterior pelo relógio do servidor |
 | `GET` | `/api/dashboard/ranking-motoristas` | Top N motoristas por número de viagens |
+| `GET` | `/api/dashboard/motoristas` | Indicadores mensais paginados, com busca por nome/placa e filtro por tipo de veículo |
+| `GET` | `/api/dashboard/motoristas/csv` | Exporta os indicadores de operação mensal em CSV |
 | `GET` | `/api/ranking/mensal` | Ranking mensal completo dos motoristas, com ordenação por coluna |
+| `GET` | `/api/ranking/mensal/csv` | Exporta o ranking mensal em CSV |
 | `GET` | `/api/dashboard/motoristas/situacao` | Situação (disponível/indisponível) de cada motorista no mês |
 
 ---
@@ -239,6 +243,38 @@ Ids (UUID) dos motoristas presentes na importação. Nome e CPF ficam no ms-frot
 
 ---
 
+## Tratamento dos veículos
+
+### `GET /api/importacao/veiculos/tratamento`
+
+Como os veículos das viagens cruzaram com a planilha de veículos. Mostrado ao fim da importação de veículos (passo 6), mas não grava nada: é calculado sobre o estado atual do banco, então vale depois de qualquer uma das duas importações.
+
+Considera só os veículos que aparecem como o veículo de alguma viagem. Semi-reboque (que só aparece como reboque) e veículo sem viagem ficam de fora.
+
+**Resposta `200`:**
+
+```json
+{
+  "veiculosEmManifestos": 192,
+  "veiculosComCategoria": 180,
+  "tiposSemCategoria": [
+    { "tipo": "Automóveis", "quantidade": 2, "placas": ["ABC1D23", "XYZ9K87"] }
+  ],
+  "manifestosSemVeiculo": [
+    { "manifesto": 12345, "placa": "DEF4G56", "data": "2026-08-31" }
+  ]
+}
+```
+
+| Campo | Significado |
+|---|---|
+| `veiculosEmManifestos` | veículos distintos usados em viagens |
+| `veiculosComCategoria` | desses, os que têm categoria |
+| `tiposSemCategoria` | tipos sem categoria ("Não classificado"), com quantos veículos de viagens e as placas |
+| `manifestosSemVeiculo` | viagens cujo veículo não veio na planilha ("Não identificado"), da mais recente para a mais antiga |
+
+---
+
 ## Viagens
 
 ### `GET /api/viagens`
@@ -447,7 +483,7 @@ GET /api/dashboard/ranking-motoristas?mesReferencia=2026-09&limite=5
     "nome": "JOAO DA SILVA",
     "cpf": "12345678901",
     "numeroViagens": 22,
-    "tipoVeiculo": "FH 540",
+    "tipoVeiculo": "Truck",
     "distanciaMaximaKm": 480
   }
 ]
@@ -457,7 +493,7 @@ Um mês sem viagens devolve `[]`. **Erros:** `400` para parâmetros inválidos.
 
 ### `GET /api/ranking/mensal`
 
-Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa.
+Todos os motoristas do mês, com os mesmos indicadores de `/api/dashboard/indicadores` (mesmo cálculo e mesmos nomes, sem a margem) mais o tipo de veículo da viagem mais longa. O tipo é a categoria do veículo, ou `Não identificado` / `Não classificado` (ver [ms-frota](ms-frota.md#tipo-e-categoria-de-veículo)).
 
 | Parâmetro | Tipo | Padrão | Regra |
 |---|---|---|---|
@@ -487,6 +523,36 @@ Valor ausente fica no fim nas duas direções. Para quem não vê dado financeir
 ```
 
 **Erros:** `400` para parâmetros inválidos.
+
+### `GET /api/dashboard/motoristas`
+
+Lista os indicadores de operação mensal paginados. A busca por nome/placa e o filtro por tipo de veículo são aplicados ao conjunto completo do mês antes da paginação, para que resultados de qualquer página possam ser encontrados.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM` com mês de 01 a 12 |
+| `page` | query | `0` | página baseada em zero |
+| `size` | query | `20` | até 100 |
+| `busca` | query | vazio | trecho do nome do motorista ou da placa; ignora acentos e caixa, e a placa ignora caracteres não alfanuméricos |
+| `tipoVeiculo` | query | vazio | descrição exata do tipo; vazio inclui todos |
+
+### `GET /api/dashboard/motoristas/csv`
+
+Baixa todos os indicadores de operação mensal em CSV UTF-8. Os mesmos filtros de mês, busca por nome/placa e tipo de veículo da tela podem ser enviados na query; a busca ignora acentos e caixa, e a placa ignora caracteres não alfanuméricos.
+
+| Parâmetro | Tipo | Padrão | Regra |
+|---|---|---|---|
+| `mesReferencia` | query | | obrigatório, `AAAA-MM` com mês de 01 a 12 |
+| `busca` | query | vazio | trecho do nome do motorista ou da placa |
+| `tipoVeiculo` | query | vazio | descrição exata do tipo; vazio inclui todos |
+
+Resposta `200`: arquivo `mensal_AAAA_MM.csv`, com cabeçalho e todas as linhas que correspondem aos filtros, sem limitar à página atual da tabela.
+
+### `GET /api/ranking/mensal/csv`
+
+Baixa o ranking mensal em CSV UTF-8 com a mesma ordenação e as mesmas permissões financeiras de `/api/ranking/mensal`. Aceita os mesmos parâmetros `mesReferencia`, `ordenarPor` e `direcao`. Sem permissão financeira, os campos e valores financeiros não são incluídos no arquivo.
+
+Resposta `200`: arquivo `ranking_AAAA_MM.csv`.
 
 ### `GET /api/dashboard/motoristas/situacao`
 

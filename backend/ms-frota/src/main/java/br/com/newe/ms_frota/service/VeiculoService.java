@@ -12,7 +12,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.newe.ms_frota.dto.CategoriaVeiculoDTO;
 import br.com.newe.ms_frota.dto.TipoVeiculoDTO;
+import br.com.newe.ms_frota.dto.VeiculoClassificacaoDTO;
 import br.com.newe.ms_frota.dto.VeiculoLoteItem;
 import br.com.newe.ms_frota.models.Veiculo;
 import br.com.newe.ms_frota.repository.VeiculoRepository;
@@ -20,6 +22,12 @@ import br.com.newe.ms_frota.repository.VeiculoRepository.VeiculoPlacaId;
 
 @Service
 public class VeiculoService {
+
+    /** Veiculo sem tipo: so veio por manifesto, nunca pela planilha de veiculos. */
+    public static final String NAO_IDENTIFICADO = "Não identificado";
+
+    /** Tipo cadastrado que nao aponta para nenhuma das sete categorias. */
+    public static final String NAO_CLASSIFICADO = "Não classificado";
 
     private final VeiculoRepository repository;
 
@@ -96,7 +104,7 @@ public class VeiculoService {
     private Veiculo montar(String placa, VeiculoLoteItem item) {
         Veiculo veiculo = new Veiculo();
         veiculo.setPlaca(placa);
-        veiculo.setCapacidade(item.capacidade());
+        veiculo.setCapacidadeLotacao(item.capacidadeLotacao());
         veiculo.setNomeAgregado(item.nomeAgregado());
         veiculo.setStatusVeiculo(Veiculo.STATUS_ATIVO);
         return veiculo;
@@ -110,15 +118,40 @@ public class VeiculoService {
         return modelos;
     }
 
+    /**
+     * Categoria de cada veiculo, que e o que listagem, ranking e indicadores
+     * mostram como "tipo de veiculo". O tipo cru da planilha fica em
+     * {@link #classificar(List)}.
+     */
     public Map<UUID, String> buscarTiposPorIds(List<UUID> ids) {
         Map<UUID, String> tipos = new HashMap<>();
-        if (ids.isEmpty()) {
-            return tipos;
-        }
-        for (VeiculoRepository.VeiculoTipoView veiculo : repository.buscarTiposPorIds(ids)) {
-            tipos.put(veiculo.getId(), veiculo.getDescricao() != null ? veiculo.getDescricao() : "Não informado");
+        for (VeiculoClassificacaoDTO veiculo : classificar(ids)) {
+            tipos.put(veiculo.idVeiculo(), rotulo(veiculo.tipo(), veiculo.categoria()));
         }
         return tipos;
+    }
+
+    /** Placa, tipo cru e categoria (sem rotulo); ids que nao existem ficam de fora. */
+    public List<VeiculoClassificacaoDTO> classificar(List<UUID> ids) {
+        if (ids.isEmpty()) {
+            return List.of();
+        }
+        return repository.buscarClassificacaoPorIds(ids).stream()
+                .map(v -> new VeiculoClassificacaoDTO(v.getIdVeiculo(), v.getPlaca(), v.getTipo(), v.getCategoria()))
+                .toList();
+    }
+
+    static String rotulo(String tipo, String categoria) {
+        if (tipo == null) {
+            return NAO_IDENTIFICADO;
+        }
+        return categoria != null ? categoria : NAO_CLASSIFICADO;
+    }
+
+    public List<CategoriaVeiculoDTO> buscarCategorias() {
+        return repository.buscarCategorias().stream()
+                .map(c -> new CategoriaVeiculoDTO(c.getIdCategoria(), c.getDescricao()))
+                .toList();
     }
 
     public List<TipoVeiculoDTO> buscarTodosTipos() {

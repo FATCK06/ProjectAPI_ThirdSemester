@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { CheckCircle2, FileText } from 'lucide-react';
 import type { ImportacaoCriada, ResultadoValidacao } from '../../../../services/importacao';
 import './step6.css';
@@ -7,9 +8,19 @@ interface PropsPasso6 {
     validacao: ResultadoValidacao | null;
     linhasGravadas: number;
     aoRecomecar: () => void;
+    rotuloGravadas?: string;
+    /** Bloco específico do tipo de importação, abaixo dos números. */
+    children?: ReactNode;
 }
 
-export function Step6Resultado({ importacao, validacao, linhasGravadas, aoRecomecar }: PropsPasso6) {
+export function Step6Resultado({
+    importacao,
+    validacao,
+    linhasGravadas,
+    aoRecomecar,
+    rotuloGravadas = 'viagens gravadas',
+    children,
+}: PropsPasso6) {
     const lidas = validacao?.linhasValidas ?? linhasGravadas;
     // id_manifesto é UNIQUE: reimportar o mesmo arquivo pula o que já entrou.
     const ignoradas = Math.max(0, lidas - linhasGravadas);
@@ -31,7 +42,7 @@ export function Step6Resultado({ importacao, validacao, linhasGravadas, aoRecome
             <div className="resultado-numeros">
                 <div className="resultado-card destaque">
                     <span className="resultado-valor">{linhasGravadas}</span>
-                    <span className="resultado-rotulo">viagens gravadas</span>
+                    <span className="resultado-rotulo">{rotuloGravadas}</span>
                 </div>
                 <div className="resultado-card">
                     <span className="resultado-valor">{lidas}</span>
@@ -51,6 +62,8 @@ export function Step6Resultado({ importacao, validacao, linhasGravadas, aoRecome
                     e {ignoradas === 1 ? 'foi ignorado' : 'foram ignorados'}. Reimportar o mesmo arquivo não duplica dados.
                 </p>
             )}
+
+            {children}
 
             <button className="btn-recomecar" onClick={aoRecomecar}>
                 Importar outro arquivo

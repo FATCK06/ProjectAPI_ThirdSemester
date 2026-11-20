@@ -111,13 +111,9 @@
 /*
  * Grade de indicadores. Flex em vez de grid para a última linha incompleta ficar
  * centralizada, com cards da mesma largura das linhas de cima. A quantidade de
- * colunas acompanha a largura do card (container query), cada uma com pelo menos
- * 300px. O IndicadoresSkeleton repete estas regras (skeleton.css).
+ * colunas (--colunas) é calculada pelo useColunasEquilibradas a partir da
+ * largura e do número de cards. O IndicadoresSkeleton repete estas regras.
  */
-.indicadores-area {
-  container-type: inline-size;
-}
-
 .indicadores-grid {
   display: flex;
   flex-wrap: wrap;
@@ -126,27 +122,10 @@
 }
 
 .indicadores-grid > .indicador-item {
-  flex: 0 0 100%;
+  /* --colunas vem do useColunasEquilibradas */
+  flex: 0 0 calc((100% - (var(--colunas, 1) - 1) * 16px) / var(--colunas, 1));
   min-width: 0;
   box-sizing: border-box;
-}
-
-@container (min-width: 616px) {
-  .indicadores-grid > .indicador-item {
-    flex-basis: calc((100% - 16px) / 2);
-  }
-}
-
-@container (min-width: 932px) {
-  .indicadores-grid > .indicador-item {
-    flex-basis: calc((100% - 32px) / 3);
-  }
-}
-
-@container (min-width: 1248px) {
-  .indicadores-grid > .indicador-item {
-    flex-basis: calc((100% - 48px) / 4);
-  }
 }
 
 /* Seletor do período de comparação, ao lado do botão Filtros */
@@ -166,22 +145,14 @@
   color: #64748b;
 }
 
-.indicadores-comparacao select {
-  font-family: inherit;
-  font-size: 13px;
-  padding: 6px 10px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #334155;
-  cursor: pointer;
+/* Não encolhe com o cabeçalho apertado (celular): o texto sumia no ellipsis */
+.indicadores-comparacao .select {
+  min-width: 0;
+  flex-shrink: 0;
 }
 
-/* Mês sem histórico para comparar */
-.indicadores-comparacao select:disabled {
-  background: #f8fafc;
-  color: #94a3b8;
-  cursor: not-allowed;
+.indicadores-comparacao .select-gatilho {
+  min-height: 32px;
 }
 
 .indicador-item {
@@ -191,8 +162,9 @@
   --tom-icone-bg: #dcfce7;
   --tom-icone: #15803d;
 
+  /* Ícone e corpo; a linha de tendência, quando há, ocupa a base inteira */
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   column-gap: 16px;
   align-items: start;
   padding: 16px 18px;
@@ -274,26 +246,61 @@
 
 .indicador-asterisco {
   margin-left: 2px;
-  font-size: 18px;
+  font-size: 0.65em;
   vertical-align: super;
   color: #94a3b8;
   cursor: help;
 }
 
+/* A fonte do valor acompanha a largura do corpo do card (unidade cqi) */
+.indicador-corpo {
+  container-type: inline-size;
+}
+
+/*
+ * Sempre numa linha: de 28px a 17px conforme a largura. Abaixo disso o
+ * ValorAjustavel troca pela versão compacta; o ellipsis é só a última defesa.
+ */
 .indicador-valor {
+  position: relative;
+  display: flex;
+  align-items: baseline;
   margin-top: 4px;
-  font-size: 28px;
+  font-size: clamp(17px, 11cqi, 28px);
   font-weight: 700;
   line-height: 1.15;
   color: #0f172a;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+}
+
+.indicador-valor-texto {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.indicador-valor-medida {
+  position: absolute;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* Variação e "vs. ..." na mesma linha quando cabem; senão o "vs." desce */
+.indicador-comparacao {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-top: 8px;
 }
 
 .indicador-variacao {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  align-self: center;
   gap: 4px;
-  margin-top: 8px;
   font-size: 13px;
   font-weight: 600;
 }
@@ -311,13 +318,19 @@
 }
 
 .indicador-anterior {
-  margin-top: 4px;
   font-size: 13px;
   color: #64748b;
 }
 
+/* "Sem dados..." sozinho, fora da linha de comparação */
+.indicador-corpo > .indicador-anterior {
+  margin-top: 8px;
+}
+
 .indicador-item .sparkline {
-  align-self: end;
+  grid-column: 1 / -1;
+  display: block;
+  margin-top: 12px;
   color: var(--tom-icone);
 }
 
