@@ -15,11 +15,13 @@ Parceiro: Newelog · Equipe RubyFox · FATEC São José dos Campos
 6. [Motoristas](#6-motoristas)
 7. [Ranking mensal](#7-ranking-mensal)
 8. [Importação de manifestos](#8-importação-de-manifestos)
-9. [Histórico de importações](#9-histórico-de-importações)
-10. [Cadastrar usuário](#10-cadastrar-usuário-administrador)
-11. [Status dos serviços](#11-status-dos-serviços-administrador)
-12. [Dúvidas frequentes](#12-dúvidas-frequentes)
-13. [Glossário](#13-glossário)
+9. [Importação de veículos](#9-importação-de-veículos)
+10. [Histórico de importações](#10-histórico-de-importações)
+11. [Tutorial guiado](#11-tutorial-guiado)
+12. [Cadastrar usuário](#12-cadastrar-usuário-administrador)
+13. [Status dos serviços](#13-status-dos-serviços-administrador)
+14. [Dúvidas frequentes](#14-dúvidas-frequentes)
+15. [Glossário](#15-glossário)
 
 ---
 
@@ -75,12 +77,15 @@ O menu lateral fica à esquerda da tela:
 | Item | Descrição |
 |---|---|
 | **Dashboard** | Indicadores e ranking de motoristas |
-| **Motoristas** | Consulta motoristas e indicadores operacionais do mês, como viagens, dias em operação, disponibilidade e utilização |
+| **Operação Mensal** | Consulta motoristas e indicadores operacionais do mês, como viagens, dias em operação, disponibilidade e utilização |
+| **Motoristas** | Lista os motoristas cadastrados, com filtros e ficha cadastral |
 | **Ranking mensal** | Compara e ordena o desempenho dos motoristas no período selecionado |
-| **Importação de Dados → Manifestos** | Importação do CSV de manifestos |
+| **Importação de Dados → Manifestos** | Importação do CSV de viagens |
+| **Importação de Dados → Veículos** | Cadastro ou atualização da frota por CSV |
 | **Importação de Dados → Histórico de Importações** | Listagem de arquivos importados |
 | **Cadastrar usuário** | Somente Administrador |
 | **Status dos serviços** | Somente Administrador |
+| **Tutorial** | Inicia o tour guiado pelo sistema |
 | **Sair** | Encerra a sessão |
 
 O botão no topo do menu recolhe a barra para mostrar só os ícones, deixando mais espaço para o conteúdo. Clique de novo para expandir.
@@ -203,6 +208,16 @@ A tabela inclui motorista, tipo de veículo, viagens, disponibilidade e utiliza�
 
 Se não houver dados para o período, a página informa que não há dados importados.
 
+### Exportar o resultado do mês
+
+Nas páginas **Operação Mensal** e **Ranking mensal**, use **Exportar CSV** para baixar os dados exibidos no mês selecionado.
+
+1. Clique em **Exportar CSV**.
+2. Aguarde as etapas **Gerando planilha**, **Recebendo arquivo** e **Download iniciado**.
+3. Abra o arquivo baixado no navegador de planilhas.
+
+O nome do arquivo identifica o período, por exemplo `mensal_2026_06.csv` ou `ranking_2026_06.csv`. Se a geração falhar, a página mostra a opção para tentar novamente.
+
 ## 8. Importação de manifestos
 
 Acesse **Importação de Dados → Manifestos**. A importação é feita em **6 etapas**, mostradas no topo da tela. Cada etapa aparece como *Pendente*, *Em progresso* ou *Concluído*.
@@ -304,13 +319,51 @@ Mostra o resumo da importação:
 
 Clique em **Importar outro arquivo** para começar de novo.
 
-## 9. Histórico de importações
+## 9. Importação de veículos
+
+Acesse **Importação de Dados → Veículos**. Essa importação usa o mesmo assistente de **6 etapas** da importação de manifestos: upload, mapeamento, validação, revisão, confirmação e resultado.
+
+Use uma planilha **.csv** com no máximo **10 MB**. Identifique as placas dos veículos e informe também os dados disponíveis, como marca, modelo e tipo. As linhas são validadas antes da gravação.
+
+Na etapa de confirmação, o sistema informa quantos veículos serão gravados:
+
+- uma placa nova é cadastrada;
+- uma placa já existente é atualizada com os dados da planilha;
+- nenhuma gravação ocorre antes da confirmação em **Sim, enviar**.
+
+Na etapa de resultado, o sistema mostra quantos veículos foram gravados e faz o cruzamento com os manifestos:
+
+- **veículos em manifestos**: quantos veículos da frota aparecem em viagens;
+- **com categoria**: quantos tipos foram classificados;
+- **manifestos sem veículo correspondente**: aparecem como **Não identificado** na listagem e no ranking;
+- **tipo sem categoria**: veículos desse tipo aparecem como **Não classificado** até que o tipo seja cadastrado ou tratado.
+
+Não feche a página durante a gravação. Se houver um erro, leia a mensagem exibida e tente novamente.
+
+## 10. Histórico de importações
 
 <!-- Print sugerido: img/14-historico-importacoes.png -->
 
 A página **Importação de Dados → Histórico de Importações** apresenta uma tabela com o nome do arquivo, a data da importação, o usuário responsável e o status. Enquanto os dados são carregados, aparece a indicação **Carregando...**; se não for possível obter o histórico, a página mostra uma mensagem de erro.
 
-## 10. Cadastrar usuário (Administrador)
+## 11. Tutorial guiado
+
+Clique em **Tutorial** no final do menu lateral para iniciar o tour guiado. Na primeira vez que entrar no sistema, o tutorial pode ser iniciado automaticamente.
+
+O tutorial percorre as telas na ordem do menu e explica:
+
+- boas-vindas e navegação;
+- Dashboard e indicadores;
+- Operação Mensal, Motoristas e Ranking mensal;
+- importações de manifestos e veículos;
+- histórico de importações;
+- opções disponíveis para Administradores.
+
+Use **Próximo**, **Anterior** ou as setas do teclado para navegar. Use **Pular tutorial**, o botão **X** ou a tecla **Esc** para encerrar antes do fim.
+
+> O tutorial somente apresenta as telas e explicações. Ele não envia arquivos, não grava dados e não altera o sistema.
+
+## 12. Cadastrar usuário (Administrador)
 
 <!-- Print sugerido: img/10-cadastro-usuario.png -->
 
@@ -326,7 +379,7 @@ Se der certo, aparece *"Nome cadastrado como Perfil. Já pode fazer login."*. Se
 
 > A senha é criptografada antes de ser gravada. Nem o Administrador consegue vê-la depois.
 
-## 11. Status dos serviços (Administrador)
+## 13. Status dos serviços (Administrador)
 
 <!-- Print sugerido: img/11-status.png -->
 
@@ -344,7 +397,7 @@ Mostra se cada parte do sistema está funcionando. É útil quando alguma tela n
 
 > Um serviço que está rodando mas não consegue acessar o banco de dados aparece como **Fora**.
 
-## 12. Dúvidas frequentes
+## 14. Dúvidas frequentes
 
 **O Dashboard está vazio.**
 Ainda não há viagens importadas para o mês exibido. O Dashboard abre no mês atual, que costuma estar vazio até a planilha dele ser importada. Use **Mês anterior** ou **Selecionar mês** no topo da tela.
@@ -364,7 +417,16 @@ A sessão expira em 2 horas. Faça login novamente.
 **Não vejo "Cadastrar usuário" nem "Status dos serviços".**
 Essas opções aparecem só para o perfil Administrador.
 
-## 13. Glossário
+**Como exporto o resultado do mês?**
+Na página **Operação Mensal** ou **Ranking mensal**, clique em **Exportar CSV**. O download usa o mês selecionado e pode ser aberto em uma planilha.
+
+**Como atualizo a lista de veículos?**
+Acesse **Importação de Dados → Veículos**, envie o CSV da frota e confirme a gravação na etapa 5. Placas novas são cadastradas e placas existentes são atualizadas.
+
+**O tutorial mudou os dados?**
+Não. O tutorial apenas navega e mostra explicações; ele não envia, importa ou salva dados.
+
+## 15. Glossário
 
 | Termo | Significado |
 |---|---|
