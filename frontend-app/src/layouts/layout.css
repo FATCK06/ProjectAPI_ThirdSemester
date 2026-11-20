@@ -17,6 +17,14 @@
   margin-left: 80px;
 }
 
+/* Notebooks menores: acompanha a sidebar de 220px e reduz o respiro */
+@media (max-width: 1366px) {
+  .layout-content {
+    margin-left: 220px;
+    padding: 24px;
+  }
+}
+
 @media (max-width: 640px) {
   .layout-content,
   .layout-content.minimized {
