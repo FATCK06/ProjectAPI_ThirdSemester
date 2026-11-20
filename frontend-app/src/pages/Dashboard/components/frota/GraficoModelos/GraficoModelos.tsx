@@ -1,6 +1,7 @@
 import { Bar } from "react-chartjs-2";
 import type { ChartData, ChartOptions } from "chart.js";
 import "../../../../../components/chartSetup";
+import { ALTURA_EIXO_X, ALTURA_GRAFICO_BARRAS } from "../alturaGraficos";
 import { Card } from "../../../../../components/Card/Card";
 import { EmDesenvolvimento } from "../../../../../components/EmDesenvolvimento";
 import type { IndicadoresPorModelo } from "../../../../../services/Dashboard";
@@ -76,6 +77,11 @@ const opcoes: ChartOptions<"bar"> = {
       title: { display: false }, 
     },
     x: {
+      // Mesma altura do eixo nos dois gráficos de barras: a linha do R$ 0 fica
+      // alinhada mesmo com os nomes de motorista inclinados no outro
+      afterFit: (escala) => {
+        escala.height = ALTURA_EIXO_X;
+      },
       grid: {
         display: false,
       },
@@ -91,9 +97,9 @@ const opcoes: ChartOptions<"bar"> = {
 
 export function GraficoModelos({ porModelo, disponivel }: PropsGraficoModelos) {
   return (
-    <Card titulo="Rentabilidade por Tipo de Veículo">
+    <Card titulo="Rentabilidade por Tipo de Veículo" subtitulo="Categorias do mês">
       {disponivel ? (
-        <div className="ui-card-chart" style={{ width: "100%", height: "300px" }}>
+        <div className="ui-card-chart" style={{ width: "100%", height: ALTURA_GRAFICO_BARRAS }}>
           <Bar data={montarDados(porModelo)} options={opcoes} />
         </div>
       ) : (

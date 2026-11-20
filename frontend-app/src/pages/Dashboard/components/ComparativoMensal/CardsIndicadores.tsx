@@ -3,6 +3,7 @@ import {
   ArrowUp,
   CircleDollarSign,
   CreditCard,
+  Info,
   Percent,
   TrendingUp,
   Truck,
@@ -10,8 +11,10 @@ import {
 } from "lucide-react";
 import type { SerieMes, TotaisSerie, VariacaoIndicador, VariacoesSerie } from "../../../../services/Dashboard";
 import { podeVerDadosFinanceiros } from "../../../../services/auth";
-import { formatarMesCurto, formatarMesNumerico } from "../../../../utils/datas";
-import { formatarMoeda, formatarPercentual, SEM_VALOR } from "../../../../utils/formatacao";
+import { formatarMesExtenso, formatarMesNumerico } from "../../../../utils/datas";
+import { formatarMoeda, formatarMoedaCompacta, formatarPercentual, SEM_VALOR } from "../../../../utils/formatacao";
+import { AJUDA_UTILIZACAO } from "../IndicadoresCard/selecao";
+import { ValorAjustavel } from "../IndicadoresCard/ValorAjustavel";
 // Mesmo visual dos cards do topo (indicador-item, indicador-variacao/data-sentido)
 import "../IndicadoresCard/IndicadoresCard.css";
 
@@ -25,6 +28,10 @@ interface DefinicaoCard {
   maiorEhMelhor: boolean;
   financeiro?: boolean;
   formatar: (valor: number) => string;
+  // Versão curta para quando o valor não cabe no card
+  formatarCompacto?: (valor: number) => string;
+  // Valor aproximado: ganha o * com este texto no tooltip
+  aproximado?: string;
   // Diferença absoluta, mostrada quando não há percentual (anterior = 0)
   formatarDiferenca: (valor: number) => string;
 }
@@ -63,6 +70,7 @@ const CARDS: DefinicaoCard[] = [
     Icone: Percent,
     maiorEhMelhor: true,
     formatar: formatarPercentual,
+    aproximado: AJUDA_UTILIZACAO,
     // Diferença entre percentuais: pontos percentuais
     formatarDiferenca: (v) => `${sinal(v)}${v.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} p.p.`,
   },
@@ -74,6 +82,7 @@ const CARDS: DefinicaoCard[] = [
     maiorEhMelhor: true,
     financeiro: true,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     formatarDiferenca: (v) => `${sinal(v)}${formatarMoeda(v)}`,
   },
   {
@@ -84,6 +93,7 @@ const CARDS: DefinicaoCard[] = [
     maiorEhMelhor: false, // custo maior é ruim
     financeiro: true,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     formatarDiferenca: (v) => `${sinal(v)}${formatarMoeda(v)}`,
   },
   {
@@ -94,6 +104,7 @@ const CARDS: DefinicaoCard[] = [
     maiorEhMelhor: true,
     financeiro: true,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     formatarDiferenca: (v) => `${sinal(v)}${formatarMoeda(v)}`,
   },
 ];
@@ -115,17 +126,17 @@ function Variacao({ d, variacao, mesAnterior }: PropsVariacao) {
   const sentido = valor === 0 ? "neutro" : valor > 0 === d.maiorEhMelhor ? "bom" : "ruim";
 
   return (
-    <>
-      <div className="indicador-variacao" data-sentido={sentido}>
+    <div className="indicador-comparacao">
+      <span className="indicador-variacao" data-sentido={sentido}>
         {valor > 0 && <ArrowUp size={14} />}
         {valor < 0 && <ArrowDown size={14} />}
         {temPercentual ? formatarVariacao(valor) : d.formatarDiferenca(valor)}
-      </div>
-      <div className="indicador-anterior">
-        vs. {formatarMesCurto(mesAnterior)}
+      </span>
+      <span className="indicador-anterior">
+        vs. {formatarMesExtenso(mesAnterior)}
         {temPercentual && ` (${d.formatarDiferenca(variacao.diferenca)})`}
-      </div>
-    </>
+      </span>
+    </div>
   );
 }
 
@@ -145,8 +156,8 @@ export function CardsIndicadores({ serie }: PropsCardsIndicadores) {
   return (
     <div className="comparativo-cards">
       <p className="comparativo-cards-titulo">
-        {formatarMesCurto(mes.mesReferencia)}
-        {mesAnterior && ` vs. ${formatarMesCurto(mesAnterior)} (mês anterior)`}
+        {formatarMesExtenso(mes.mesReferencia)}
+        {mesAnterior && ` vs. ${formatarMesExtenso(mesAnterior)} (mês anterior)`}
       </p>
       <div className="comparativo-cards-grid">
         {cards.map((d) => {
@@ -169,9 +180,21 @@ export function CardsIndicadores({ serie }: PropsCardsIndicadores) {
             }
             corpo = (
               <>
-                <div className="indicador-valor">
-                  {valor === undefined || valor === null ? SEM_VALOR : d.formatar(valor)}
-                </div>
+                {valor === undefined || valor === null ? (
+                  <div className="indicador-valor">{SEM_VALOR}</div>
+                ) : (
+                  <ValorAjustavel
+                    completo={d.formatar(valor)}
+                    compacto={d.formatarCompacto?.(valor)}
+                    extra={
+                      d.aproximado && (
+                        <span className="indicador-asterisco" title={d.aproximado}>
+                          *
+                        </span>
+                      )
+                    }
+                  />
+                )}
                 {comparacao}
               </>
             );
@@ -183,7 +206,14 @@ export function CardsIndicadores({ serie }: PropsCardsIndicadores) {
                 <d.Icone size={22} />
               </span>
               <div className="indicador-corpo">
-                <div className="indicador-titulo">{d.titulo}</div>
+                <div className="indicador-titulo">
+                  {d.titulo}
+                  {d.aproximado && (
+                    <span className="indicador-ajuda" title={d.aproximado} aria-label={d.aproximado} tabIndex={0}>
+                      <Info size={13} />
+                    </span>
+                  )}
+                </div>
                 {corpo}
               </div>
             </div>

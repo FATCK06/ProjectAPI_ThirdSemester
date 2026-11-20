@@ -1,0 +1,226 @@
+/* ---------- Campo (gatilho) ---------- */
+.campo-mes {
+  position: relative;
+  display: inline-flex;
+}
+
+.campo-mes-gatilho {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 170px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.campo-mes-gatilho:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.campo-mes-gatilho:focus-visible,
+.campo-mes[data-aberto] .campo-mes-gatilho {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.campo-mes-gatilho:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+.campo-mes-icone {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+.campo-mes-valor {
+  flex: 1;
+  white-space: nowrap;
+}
+
+.campo-mes-seta {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.15s ease;
+}
+
+.campo-mes[data-aberto] .campo-mes-seta {
+  transform: rotate(180deg);
+}
+
+/* ---------- Popover ---------- */
+.campo-mes-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  animation: calendario-mes-entrar 0.12s ease-out;
+}
+
+.campo-mes-popover[data-acima] {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.campo-mes-popover[data-direita] {
+  left: auto;
+  right: 0;
+}
+
+/* ---------- Calendário (também usado direto pelo seletor do Dashboard) ---------- */
+.calendario-mes {
+  width: 256px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  color: #334155;
+  font-family: inherit;
+}
+
+.calendario-mes-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.calendario-mes-ano {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.calendario-mes-nav {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #475569;
+  cursor: pointer;
+}
+
+.calendario-mes-nav:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.calendario-mes-nav:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.calendario-mes-grade {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.calendario-mes-item {
+  padding: 9px 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.calendario-mes-item:hover:not([aria-disabled="true"]) {
+  background: #f1f5f9;
+}
+
+/* Mês corrente: contorno discreto, para se localizar no ano */
+.calendario-mes-item[data-atual] {
+  border-color: #cbd5e1;
+}
+
+.calendario-mes-item[aria-pressed="true"],
+.calendario-mes-item[aria-pressed="true"]:hover {
+  border-color: #334155;
+  background: #334155;
+  color: #ffffff;
+}
+
+.calendario-mes-item[aria-disabled="true"] {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+.calendario-mes-item:focus-visible,
+.calendario-mes-nav:focus-visible,
+.calendario-mes-rodape button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.calendario-mes-rodape {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.calendario-mes-rodape button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 7px;
+  background: none;
+  color: #2563eb;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.calendario-mes-rodape button:hover:not(:disabled) {
+  background: #eff6ff;
+}
+
+.calendario-mes-rodape button:disabled {
+  color: #cbd5e1;
+  cursor: not-allowed;
+}
+
+@keyframes calendario-mes-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .campo-mes-popover,
+  .seletor-mes-popover {
+    animation: none;
+  }
+
+  .campo-mes-seta {
+    transition: none;
+  }
+}

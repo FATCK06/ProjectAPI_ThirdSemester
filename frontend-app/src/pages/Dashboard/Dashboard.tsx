@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { IndicadoresSkeleton } from "../../components/SkeletonLoader/IndicadoresSkeleton";
 import { GraficoSkeleton } from "../../components/SkeletonLoader/GraficoSkeleton";
 import { RankingMotoristas } from "./components/frota/RankingMotoristas/RankingMotoristas";
 import IndicadoresCard from "./components/IndicadoresCard/IndicadoresCard";
 import {
-  COMPARACAO_INICIAL,
-  SELECAO_INICIAL,
+  PREFERENCIA_COMPARACAO,
+  PREFERENCIA_SELECIONADOS,
+  comparacaoSalva,
   indicadoresVisiveis,
+  selecaoSalva,
   temGrafico,
   type IndicadorId,
   type MesesComparacao,
@@ -18,8 +21,9 @@ import { SeletorMes } from "./components/SeletorMes/SeletorMes";
 import { useDashboard } from "./useDashboard";
 import { Aviso, AVISO_SEM_PERMISSAO_FINANCEIRO } from "../../components/Aviso/Aviso";
 import { podeVerDadosFinanceiros } from "../../services/auth";
-import { buscarMesesReferencia, type MesesReferencia } from "../../services/Dashboard";
-import { mesAtual } from "../../utils/datas";
+import { buscarMesesImportados, buscarMesesReferencia, type MesesReferencia } from "../../services/Dashboard";
+import { ehMesValido, mesAtual } from "../../utils/datas";
+import { gravarPreferencia, gravarPreferenciaSessao, lerPreferenciaSessao } from "../../utils/preferencias";
 import "./dashboard.css";
 
 // Enquanto false, o card mostra o aviso de "Em desenvolvimento" no lugar do gráfico
@@ -27,9 +31,40 @@ import "./dashboard.css";
 // as barras são as sete categorias, mais "Não identificado" e "Não classificado".
 const GRAFICO_MODELOS_DISPONIVEL = true;
 
+// Último mês escolhido nesta aba: voltar pelo menu (/dashboard, sem ?mes) reabre nele
+const PREFERENCIA_MES = "dashboard.mes";
+
+/** Mês aceito no ?mes: formato válido e não depois do mês atual. */
+function mesPermitido(valor: unknown, meses: MesesReferencia): valor is string {
+  return typeof valor === "string" && ehMesValido(valor) && valor <= meses.mesAtual;
+}
+
+/** Sem dados no mês atual (início do mês, importação atrasada): abre no último importado. */
+function mesInicial(meses: MesesReferencia, importados: string[]): string {
+  const memorizado = lerPreferenciaSessao(PREFERENCIA_MES);
+  if (mesPermitido(memorizado, meses)) return memorizado;
+  if (importados.length === 0 || importados.includes(meses.mesAtual)) return meses.mesAtual;
+  return importados[importados.length - 1];
+}
+
+/** Se a API dos meses falhar, calcula atual e anterior pelo relógio do navegador. */
+function mesesLocais(): MesesReferencia {
+  const atual = mesAtual();
+  const [ano, mes] = atual.split("-").map(Number);
+  const anterior = new Date(ano, mes - 2, 1);
+  return {
+    mesAtual: atual,
+    mesAnterior: `${anterior.getFullYear()}-${String(anterior.getMonth() + 1).padStart(2, "0")}`,
+  };
+}
+
 export function Dashboard() {
   const [meses, setMeses] = useState<MesesReferencia | null>(null);
-  const [mesReferencia, setMesReferencia] = useState<string | null>(null);
+  const [importados, setImportados] = useState<string[]>([]);
+  // O mês vive na URL (?mes=): F5, voltar do navegador e link compartilhado mantêm
+  const [searchParams, setSearchParams] = useSearchParams();
+  const parametroMes = searchParams.get("mes");
+  const mesReferencia = meses && mesPermitido(parametroMes, meses) ? parametroMes : null;
   const { dados, isLoading, erro } = useDashboard(mesReferencia, {
     buscarPorModelo: GRAFICO_MODELOS_DISPONIVEL,
   });
@@ -37,39 +72,65 @@ export function Dashboard() {
   const financeiro = podeVerDadosFinanceiros();
   // Aqui e não no card: o card dá lugar ao skeleton a cada troca de mês, e a
   // escolha do usuário não pode voltar ao padrão por isso
-  const [selecionados, setSelecionados] = useState<IndicadorId[]>(SELECAO_INICIAL);
-  const [mesesComparacao, setMesesComparacao] = useState<MesesComparacao>(COMPARACAO_INICIAL);
+  // Começa com o que o usuário deixou da última vez (ou o padrão do perfil)
+  const [selecionados, setSelecionados] = useState<IndicadorId[]>(() => selecaoSalva(financeiro));
+  const [mesesComparacao, setMesesComparacao] = useState<MesesComparacao>(comparacaoSalva);
+
+  function mudarSelecionados(novos: IndicadorId[]) {
+    setSelecionados(novos);
+    gravarPreferencia(PREFERENCIA_SELECIONADOS, novos);
+  }
+
+  function mudarMesesComparacao(meses: MesesComparacao) {
+    setMesesComparacao(meses);
+    gravarPreferencia(PREFERENCIA_COMPARACAO, meses);
+  }
   const itensSkeleton = indicadoresVisiveis(selecionados, financeiro).map((i) => ({
     comVariacao: !i.semDado,
     comGrafico: !i.semDado && temGrafico(mesesComparacao),
   }));
 
+  function mudarMes(mes: string) {
+    gravarPreferenciaSessao(PREFERENCIA_MES, mes);
+    setSearchParams((atual) => {
+      const parametros = new URLSearchParams(atual);
+      parametros.set("mes", mes);
+      return parametros;
+    });
+  }
+
+  // Os meses vêm uma vez só, ao montar
   useEffect(() => {
     let cancelado = false;
-    buscarMesesReferencia()
-      .then((resposta) => {
-        if (cancelado) return;
-        setMeses(resposta);
-        setMesReferencia(resposta.mesAtual);
-      })
-      .catch(() => {
-        if (cancelado) return;
-
-        // Mantém o dashboard disponível se a API ainda não oferecer essa rota.
-        const atual = mesAtual();
-        const [ano, mes] = atual.split("-").map(Number);
-        const anterior = new Date(ano, mes - 2, 1);
-        const mesesLocais = {
-          mesAtual: atual,
-          mesAnterior: `${anterior.getFullYear()}-${String(anterior.getMonth() + 1).padStart(2, "0")}`,
-        };
-        setMeses(mesesLocais);
-        setMesReferencia(mesesLocais.mesAtual);
-      });
+    Promise.all([
+      // Mantém o dashboard disponível se a API ainda não oferecer essas rotas
+      buscarMesesReferencia().catch(mesesLocais),
+      buscarMesesImportados().catch(() => []),
+    ]).then(([resposta, lista]) => {
+      if (cancelado) return;
+      setMeses(resposta);
+      setImportados(lista);
+    });
     return () => {
       cancelado = true;
     };
   }, []);
+
+  // Sem ?mes (ou inválido), completa a URL sem criar um passo a mais no histórico.
+  // Não é só na montagem: clicar em "Dashboard" no menu estando no próprio
+  // Dashboard leva a /dashboard sem ?mes, com o componente ainda montado.
+  useEffect(() => {
+    if (!meses || mesPermitido(parametroMes, meses)) return;
+    const inicial = mesInicial(meses, importados);
+    setSearchParams(
+      (atual) => {
+        const parametros = new URLSearchParams(atual);
+        parametros.set("mes", inicial);
+        return parametros;
+      },
+      { replace: true },
+    );
+  }, [meses, importados, parametroMes, setSearchParams]);
 
   const mensagemErro = erro;
 
@@ -80,7 +141,7 @@ export function Dashboard() {
           <SeletorMes
             meses={meses}
             valor={mesReferencia}
-            onChange={setMesReferencia}
+            onChange={mudarMes}
           />
         </div>
       )}
@@ -99,9 +160,9 @@ export function Dashboard() {
                   indicadores={dados.indicadores}
                   historico={dados.historico}
                   selecionados={selecionados}
-                  onSelecionadosChange={setSelecionados}
+                  onSelecionadosChange={mudarSelecionados}
                   mesesComparacao={mesesComparacao}
-                  onMesesComparacaoChange={setMesesComparacao}
+                  onMesesComparacaoChange={mudarMesesComparacao}
                 />
               )}
             </div>
@@ -119,7 +180,7 @@ export function Dashboard() {
                 <div className="dashboard-chart" data-tour="dashboard-grafico-tipos">
                   {/* Desligado, o card só mostra o aviso: não há o que esperar */}
                   {GRAFICO_MODELOS_DISPONIVEL && (isLoading || !dados) ? (
-                    <GraficoSkeleton altura={300} barras={6} />
+                    <GraficoSkeleton altura={320} barras={6} />
                   ) : (
                     <GraficoModelos
                       porModelo={dados?.porModelo ?? []}

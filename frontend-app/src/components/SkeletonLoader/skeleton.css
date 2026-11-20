@@ -74,12 +74,8 @@
 
 /*
  * Indicadores: mesma grade do .indicadores-grid (IndicadoresCard.css). Flex com
- * a última linha centralizada e colunas de no mínimo 300px pela largura do card.
+ * a última linha centralizada; --colunas vem do useColunasEquilibradas.
  */
-.skeleton-indicadores-area {
-  container-type: inline-size;
-}
-
 .skeleton-indicadores-grid {
   display: flex;
   flex-wrap: wrap;
@@ -88,32 +84,15 @@
 }
 
 .skeleton-indicadores-grid > .skeleton-indicador {
-  flex: 0 0 100%;
+  /* --colunas vem do useColunasEquilibradas */
+  flex: 0 0 calc((100% - (var(--colunas, 1) - 1) * 16px) / var(--colunas, 1));
   min-width: 0;
   box-sizing: border-box;
 }
 
-@container (min-width: 616px) {
-  .skeleton-indicadores-grid > .skeleton-indicador {
-    flex-basis: calc((100% - 16px) / 2);
-  }
-}
-
-@container (min-width: 932px) {
-  .skeleton-indicadores-grid > .skeleton-indicador {
-    flex-basis: calc((100% - 32px) / 3);
-  }
-}
-
-@container (min-width: 1248px) {
-  .skeleton-indicadores-grid > .skeleton-indicador {
-    flex-basis: calc((100% - 48px) / 4);
-  }
-}
-
 .skeleton-indicador {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   column-gap: 16px;
   align-items: start;
   padding: 16px 18px;
@@ -129,7 +108,8 @@
 }
 
 .skeleton-indicador .skeleton-sparkline {
-  align-self: end;
+  grid-column: 1 / -1;
+  margin-top: 12px;
 }
 
 /* Tabela: mesma caixa do .data-table-wrap */
@@ -184,10 +164,4 @@
 .skeleton-grafico .skeleton-barra {
   flex: 1;
   border-radius: 6px 6px 0 0;
-}
-
-@media (max-width: 640px) {
-  .skeleton-indicador .skeleton-sparkline {
-    display: none;
-  }
 }

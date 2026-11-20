@@ -42,6 +42,18 @@ api.interceptors.response.use(
             window.location.href = '/login';
         }
 
+        // Falha no servidor: deixa no console o que é preciso para achar o erro no
+        // log do backend (o "codigo" é o mesmo gravado lá, junto com o stack trace).
+        const status = error.response?.status;
+        if (status >= 500) {
+            const metodo = error.config?.method?.toUpperCase() ?? '';
+            const codigo = error.response?.data?.codigo;
+            console.error(
+                `[API] ${status} em ${metodo} ${error.config?.url ?? ''}` +
+                    (codigo ? ` | código ${codigo} (procure no log: docker compose logs | grep ${codigo})` : ''),
+            );
+        }
+
         // Logado, mas sem permissão: a sessão continua válida, só avisa.
         if (error.response?.status === 403 && !ehLogin) {
             window.dispatchEvent(new CustomEvent(EVENTO_ACESSO_NEGADO));

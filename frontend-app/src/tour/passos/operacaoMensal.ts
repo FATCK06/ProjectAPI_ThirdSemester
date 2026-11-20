@@ -40,7 +40,9 @@ export const passosOperacaoMensal: MontarPassos = () => [
         alvo: 'operacao-mes',
         lado: 'bottom',
         titulo: '"Mês"',
-        texto: 'Escolhe o mês exibido. Ao abrir a tela pelo menu, vem o mês atual.',
+        texto:
+            'Escolhe o mês exibido. Ao abrir a tela pelo menu, vem o último mês com viagens importadas, ' +
+            'destacado no selo ao lado do título.',
     },
     {
         id: 'operacao-exportar',
@@ -77,7 +79,7 @@ export const passosOperacaoMensal: MontarPassos = () => [
         alvo: 'operacao-pagina',
         titulo: 'Ficha do motorista',
         texto:
-            'A ficha cadastral de cada motorista fica na tela "Motoristas", a próxima do tutorial. O histórico do ' +
-            'mês abre por uma linha do "Ranking de Motoristas" no Dashboard.',
+            'Clique no nome do motorista para abrir a ficha dele no mesmo mês. O "Voltar" da ficha traz de volta ' +
+            'para esta tela, com a página, os filtros e a rolagem de antes.',
     },
 ];

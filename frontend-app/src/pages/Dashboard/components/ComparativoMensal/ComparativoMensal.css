@@ -23,13 +23,20 @@
 }
 
 .comparativo-meses button:hover:not(:disabled) {
+  border-color: #94a3b8;
   background: #f1f5f9;
 }
 
+/* Depois do hover: selecionado continua escuro, só um tom acima */
 .comparativo-meses button[aria-pressed="true"] {
   border-color: #334155;
   background: #334155;
   color: #ffffff;
+}
+
+.comparativo-meses button[aria-pressed="true"]:hover:not(:disabled) {
+  border-color: #1e293b;
+  background: #1e293b;
 }
 
 .comparativo-meses button:disabled {
@@ -81,6 +88,7 @@
 
 .comparativo-cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  /* auto-fit: poucos cards esticam até ocupar a linha, sem sobrar espaço à direita */
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
   gap: 12px;
 }

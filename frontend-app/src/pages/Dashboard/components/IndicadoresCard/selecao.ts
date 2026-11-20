@@ -3,17 +3,23 @@
 // o card dá lugar ao skeleton) e o skeleton desenha exatamente os mesmos itens.
 
 import type { HistoricoMes } from "../../../../services/Dashboard";
+import { lerPreferencia } from "../../../../utils/preferencias";
 
 export type IndicadorId =
   | "numeroViagens"
   | "diasOperacao"
-  | "diasDisponiveis"
   | "utilizacaoMedia"
   | "valorFrete"
   | "custoTotal"
   | "rentabilidade"
   | "rentabilidadeMediaViagem"
   | "margem";
+
+// Também usado pelo Comparativo mensal, que mostra o mesmo indicador
+export const AJUDA_UTILIZACAO =
+  "Dias em operação ÷ (dias do mês × motoristas com viagem) × 100. Aproximado: conta " +
+  "todos os dias do mês como disponíveis, pois o CSV não informa férias, afastamentos " +
+  "nem manutenção (aguardando definição da Newe).";
 
 export type Categoria = "operacional" | "financeiro";
 
@@ -28,8 +34,7 @@ interface MetaIndicador {
 export const INDICADORES: MetaIndicador[] = [
   { id: "numeroViagens", categoria: "operacional" },
   { id: "diasOperacao", categoria: "operacional" },
-  { id: "diasDisponiveis", categoria: "operacional", semDado: true },
-  { id: "utilizacaoMedia", categoria: "operacional", semDado: true },
+  { id: "utilizacaoMedia", categoria: "operacional" },
   { id: "valorFrete", categoria: "financeiro" },
   { id: "custoTotal", categoria: "financeiro" },
   { id: "rentabilidade", categoria: "financeiro" },
@@ -37,12 +42,14 @@ export const INDICADORES: MetaIndicador[] = [
   { id: "margem", categoria: "financeiro" },
 ];
 
-export const SELECAO_INICIAL: IndicadorId[] = [
-  "numeroViagens",
-  "diasOperacao",
-  "diasDisponiveis",
-  "utilizacaoMedia",
-];
+/**
+ * O que o card mostra ao abrir o Dashboard. Quem vê dados financeiros (gestor e
+ * administrador) começa com todos os indicadores; o operador, que não recebe a
+ * categoria financeira, fica com os operacionais.
+ */
+export function selecaoInicial(financeiro: boolean): IndicadorId[] {
+  return INDICADORES.filter((i) => financeiro || i.categoria !== "financeiro").map((i) => i.id);
+}
 
 /** Quantos meses antes do exibido entram na comparação. */
 export type MesesComparacao = 1 | 2 | 3;
@@ -89,4 +96,24 @@ export function indicadoresVisiveis(selecionados: IndicadorId[], financeiro: boo
   return INDICADORES.filter(
     (i) => (financeiro || i.categoria !== "financeiro") && selecionados.includes(i.id),
   );
+}
+
+/** Nomes das preferências do card (ver utils/preferencias). */
+export const PREFERENCIA_SELECIONADOS = "dashboard.indicadores";
+export const PREFERENCIA_COMPARACAO = "dashboard.comparacao";
+
+/**
+ * A seleção que o usuário deixou da última vez, ou o padrão do perfil. Ids
+ * desconhecidos (indicador removido numa versão nova) ficam de fora.
+ */
+export function selecaoSalva(financeiro: boolean): IndicadorId[] {
+  const salvo = lerPreferencia(PREFERENCIA_SELECIONADOS);
+  if (!Array.isArray(salvo)) return selecaoInicial(financeiro);
+  const conhecidos = new Set<string>(INDICADORES.map((i) => i.id));
+  return salvo.filter((id): id is IndicadorId => typeof id === "string" && conhecidos.has(id));
+}
+
+export function comparacaoSalva(): MesesComparacao {
+  const salvo = lerPreferencia(PREFERENCIA_COMPARACAO);
+  return OPCOES_COMPARACAO.some((o) => o.valor === salvo) ? (salvo as MesesComparacao) : COMPARACAO_INICIAL;
 }

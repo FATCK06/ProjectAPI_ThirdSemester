@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, type ReactElement } from 'react';
-import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight, AlertTriangle } from 'lucide-react';
+import { Lock, Hourglass, CheckCircle2, ArrowLeft, ArrowRight, AlertTriangle, ClipboardList, type LucideIcon } from 'lucide-react';
 import { Step1Upload } from './components/Step1Upload';
 import { Step2Mapeamento } from './components/Step2Mapeamento';
 import { Step3Validacao, type IdentificarLinha } from './components/Step3Validacao';
@@ -49,6 +49,9 @@ export interface ConfigImportacao {
     tipo: TipoImportacao;
     titulo: string;
     subtitulo: string;
+    /** Ícone ao lado do título: distingue manifestos de veículos sem ler o título. */
+    icone: LucideIcon;
+    tomIcone: 'azul' | 'ambar';
     /** Passo 4: a prévia mostra colunas diferentes por tipo. */
     Revisao: (props: { validacao: ResultadoValidacao | null }) => ReactElement;
     identificarLinha?: IdentificarLinha;
@@ -64,6 +67,8 @@ export function ManifestosImport() {
         <ImportacaoWizard
             tipo="MANIFESTO"
             titulo="Importação de Manifestos"
+            icone={ClipboardList}
+            tomIcone="azul"
             subtitulo="Envie o CSV de manifestos, confira o mapeamento e valide os dados antes de gravar"
             Revisao={Step4Revisao}
             confirmacao={(v) =>
@@ -77,6 +82,8 @@ export function ImportacaoWizard({
     tipo,
     titulo,
     subtitulo,
+    icone,
+    tomIcone,
     Revisao,
     identificarLinha,
     rotuloGravadas,
@@ -210,7 +217,7 @@ export function ImportacaoWizard({
 
     return (
         <div className="importacao-container" data-tour="importacao-pagina">
-            <PageHeader titulo={titulo} subtitulo={subtitulo} />
+            <PageHeader titulo={titulo} icone={icone} tomIcone={tomIcone} subtitulo={subtitulo} />
             <div className="stepper-wrapper" data-tour="importacao-passos">
                 {STEPS.map((step, index) => {
                     const stepNumber = index + 1;

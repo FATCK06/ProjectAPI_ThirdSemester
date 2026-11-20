@@ -49,7 +49,8 @@ export const passosMenu: MontarPassos = ({ gerenciarUsuarios, verStatus }) => {
             lado: 'right',
             titulo: '"Motoristas"',
             texto:
-                'Lista de fichas dos motoristas. Cada ficha abre os dados cadastrais e o histórico de viagens.',
+                'Lista de fichas dos motoristas. Cada ficha traz os dados cadastrais e a comparação dos últimos ' +
+                'três meses.',
         },
         {
             id: 'menu-ranking',

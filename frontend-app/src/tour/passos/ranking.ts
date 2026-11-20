@@ -18,7 +18,9 @@ export const passosRanking: MontarPassos = ({ financeiro }) => {
             alvo: 'ranking-mes',
             lado: 'bottom',
             titulo: '"Mês de referência"',
-            texto: 'Escolhe o mês do ranking. Ao abrir a tela pelo menu, vem o mês atual.',
+            texto:
+                'Escolhe o mês do ranking. Ao abrir a tela pelo menu, vem o último mês com viagens importadas, ' +
+                'destacado no selo ao lado do título.',
         },
         {
             id: 'ranking-exportar',

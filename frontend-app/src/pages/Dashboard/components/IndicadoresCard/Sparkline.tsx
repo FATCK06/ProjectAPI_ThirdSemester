@@ -8,6 +8,8 @@ interface PropsSparkline {
   altura?: number;
   animada?: boolean;
   posicaoPontoUnico?: number;
+  // Ocupa a largura do contêiner (a altura continua fixa); a linha não engrossa ao esticar
+  responsiva?: boolean;
 }
 
 export function Sparkline({
@@ -17,6 +19,7 @@ export function Sparkline({
   altura = 48,
   animada = false,
   posicaoPontoUnico = 0.5,
+  responsiva = false,
 }: PropsSparkline) {
   const idGradiente = useId().replace(/:/g, "");
 
@@ -64,10 +67,10 @@ export function Sparkline({
   return (
     <svg
       className={`sparkline${animada ? " sparkline--animada" : ""}`}
-      width={largura}
+      width={responsiva ? "100%" : largura}
       height={altura}
       viewBox={`0 0 ${largura} ${altura}`}
-      preserveAspectRatio="xMidYMid meet"
+      preserveAspectRatio={responsiva ? "none" : "xMidYMid meet"}
       {...(titulo ? { role: "img", "aria-label": titulo } : { "aria-hidden": true })}
     >
       {titulo && <title>{titulo}</title>}
@@ -86,6 +89,7 @@ export function Sparkline({
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"
+        vectorEffect={responsiva ? "non-scaling-stroke" : undefined}
         pathLength={animada ? 1 : undefined}
       />
       {animada && pontos.map(([x, y], indice) => (

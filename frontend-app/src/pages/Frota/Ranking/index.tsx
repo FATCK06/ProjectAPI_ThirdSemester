@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { baixarRankingMensalCsv, buscarRankingMensal, type RankingMensalMotorista } from '../../../services/Ranking';
 import { TableSkeleton } from '../../../components/SkeletonLoader/TableSkeleton';
 import { Aviso, AVISO_CUSTOS_NAO_INFORMADOS, AVISO_SEM_PERMISSAO_FINANCEIRO, AVISO_SEM_VIAGENS_MEDIA } from '../../../components/Aviso/Aviso';
 import { podeVerDadosFinanceiros } from '../../../services/auth';
+import { CampoMes } from '../../../components/CampoMes/CampoMes';
+import { Loading } from '../../../components/Loading';
+import { SeloMes } from '../../../components/SeloMes/SeloMes';
+import { useMesDaUrl } from '../../../hooks/useMesDaUrl';
 import { mesAtual } from '../../../utils/datas';
 import { formatarMoeda, formatarPercentual, SEM_VALOR } from '../../../utils/formatacao';
 import './ranking.css';
@@ -42,43 +46,40 @@ const COLUNAS_FINANCEIRAS: ColunaTabela<Linha>[] = [
   },
 ];
 
+// Sem ?mes na URL, espera o mês mais recente com dados antes de montar a tela
 export function Ranking() {
+  const mes = useMesDaUrl();
+  return mes ? <RankingDoMes mes={mes} /> : <Loading texto="Carregando mês" />;
+}
+
+function RankingDoMes({ mes }: { mes: string }) {
   const location = useLocation();
   const restauracao = (location.state as { restauracao?: RestauracaoTabela } | null)?.restauracao;
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [, setSearchParams] = useSearchParams();
   const financeiro = podeVerDadosFinanceiros();
-  const parametroMes = searchParams.get('mes');
-  const mes = parametroMes && /^\d{4}-(0[1-9]|1[0-2])$/.test(parametroMes) ? parametroMes : mesAtual();
   // Controlada aqui porque a exportação CSV precisa seguir a ordenação da tela
   const [ordenacao, setOrdenacao] = useState<OrdenacaoTabela>(
     restauracao?.ordenacao ?? { chave: financeiro ? 'rentabilidade' : 'numeroViagens', direcao: 'desc' },
   );
-  const [linhas, setLinhas] = useState<Linha[]>([]);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState(false);
   const [tentativa, setTentativa] = useState(0);
+  // Resultado com a chave do pedido: chave diferente da atual = ainda carregando
+  const [resultado, setResultado] = useState<{ chave: string; linhas: Linha[] } | { chave: string; erro: true } | null>(null);
+  const chave = `${mes}|${tentativa}`;
+  const carregando = resultado?.chave !== chave;
+  const erro = !carregando && resultado !== null && 'erro' in resultado;
+  const linhas = useMemo(
+    () => (resultado?.chave === chave && 'linhas' in resultado ? resultado.linhas : []),
+    [resultado, chave],
+  );
   const scrollRestaurado = useRef(false);
 
   useEffect(() => {
-    if (parametroMes !== mes) {
-      setSearchParams((atual) => {
-        const parametros = new URLSearchParams(atual);
-        parametros.set('mes', mes);
-        return parametros;
-      }, { replace: true });
-    }
-  }, [mes, parametroMes, setSearchParams]);
-
-  useEffect(() => {
     let cancelado = false;
-    setCarregando(true);
-    setErro(false);
     buscarRankingMensal(mes)
-      .then((dados) => { if (!cancelado) setLinhas(dados); })
-      .catch(() => { if (!cancelado) setErro(true); })
-      .finally(() => { if (!cancelado) setCarregando(false); });
+      .then((dados) => { if (!cancelado) setResultado({ chave, linhas: dados }); })
+      .catch(() => { if (!cancelado) setResultado({ chave, erro: true }); });
     return () => { cancelado = true; };
-  }, [mes, tentativa]);
+  }, [mes, chave]);
 
   useEffect(() => {
     if (carregando || restauracao?.scrollY === undefined || scrollRestaurado.current) return;
@@ -92,17 +93,17 @@ export function Ranking() {
 
   return (
     <div className="ranking-page" data-tour="ranking-pagina">
-      <PageHeader titulo="Ranking Mensal" subtitulo="Compare o desempenho dos motoristas no período selecionado">
-        <label htmlFor="ranking-page-mes" data-tour="ranking-mes">Mês de referência
-          <input id="ranking-page-mes" type="month" value={mes} onChange={(event) => {
-            if (!event.target.value) return;
+      <PageHeader titulo="Ranking Mensal" selo={<SeloMes mes={mes} />} subtitulo="Compare o desempenho dos motoristas no período selecionado">
+        <div className="ranking-page-mes" data-tour="ranking-mes">
+          <label htmlFor="ranking-page-mes">Mês de referência</label>
+          <CampoMes id="ranking-page-mes" valor={mes} max={mesAtual()} onChange={(novoMes) => {
             setSearchParams((atual) => {
               const parametros = new URLSearchParams(atual);
-              parametros.set('mes', event.target.value);
+              parametros.set('mes', novoMes);
               return parametros;
             });
           }} />
-        </label>
+        </div>
         <ExportarCsvButton
           nomeArquivo={`ranking_${mes.replace("-", "_")}.csv`}
           baixarCsv={(aoProgredir) => baixarRankingMensalCsv(
@@ -130,6 +131,15 @@ export function Ranking() {
           colunas={colunas}
           linhas={linhas}
           chaveLinha={(linha) => linha.motoristaId}
+          // O nome leva à ficha no mesmo mês; o "Voltar" de lá restaura página, ordem e rolagem
+          linkLinha={(linha) => `/motoristas/${linha.motoristaId}?mes=${encodeURIComponent(mes)}`}
+          estadoNavegacaoLinha={(_, estado) => ({
+            retorno: {
+              destino: `/ranking?mes=${encodeURIComponent(mes)}`,
+              rotulo: 'Voltar para o Ranking Mensal',
+              restauracao: { ...estado, scrollY: window.scrollY },
+            },
+          })}
           ordenacao={ordenacao}
           aoOrdenar={setOrdenacao}
           paginaInicial={restauracao?.pagina ?? 1}

@@ -4,8 +4,8 @@ const ROTA = '/motoristas';
 
 /**
  * Regras conferidas em pages/Frota/Motoristas, pages/Frota/OperacaoMensal/FichaMotorista
- * (rota /motoristas/:id), ComparativoMotorista e pages/Frota/HistoricoMotorista.
- * A ficha e o histórico dependem de um motorista real: o tour só os descreve.
+ * (rota /motoristas/:id) e ComparativoMotorista. A ficha depende de um motorista
+ * real: o tour só a descreve.
  */
 export const passosMotoristas: MontarPassos = ({ financeiro }) => [
     {
@@ -52,16 +52,5 @@ export const passosMotoristas: MontarPassos = ({ financeiro }) => [
             (financeiro
                 ? ', fretes, custos, rentabilidade, rentabilidade média por viagem e margem.'
                 : '; os valores financeiros aparecem só para Gestor e Administrador.'),
-    },
-    {
-        id: 'motoristas-historico',
-        rota: ROTA,
-        alvo: 'motoristas-pagina',
-        titulo: 'Histórico do motorista',
-        texto:
-            'Abre por uma linha do "Ranking de Motoristas" no Dashboard. Mostra placa, tipo de veículo, viagens, ' +
-            'dias em operação, utilização e disponibilidade no mês' +
-            (financeiro ? ', além de fretes, custos, rentabilidade e rentabilidade média' : '') +
-            '. "Ver ficha cadastral" leva à ficha.',
     },
 ];

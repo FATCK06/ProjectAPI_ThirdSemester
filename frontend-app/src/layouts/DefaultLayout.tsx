@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar/index';
 import { useToast } from '../components/Toast';
+import { Loading } from '../components/Loading';
 import { EVENTO_ACESSO_NEGADO } from '../services/api';
 import { TourProvider } from '../tour/TourProvider';
 import { useTour } from '../tour/useTour';
@@ -33,9 +34,12 @@ function LayoutConteudo() {
         <div className="layout-wrapper">
             <Sidebar isMinimized={isMinimized} toggleSidebar={alternarMenu} />
 
-                <main className={`layout-content ${isMinimized ? 'minimized' : ''}`}>
+            <main className={`layout-content ${isMinimized ? 'minimized' : ''}`}>
+                {/* As páginas são carregadas sob demanda (ver AppRoutes) */}
+                <Suspense fallback={<Loading texto="Carregando página" />}>
                     <Outlet />
-                </main>
+                </Suspense>
+            </main>
         </div>
     );
 }

@@ -6,7 +6,7 @@
   background: #ffffff;
 }
 
-.seletor-mes button {
+.seletor-mes-opcao {
   display: flex;
   align-items: baseline;
   gap: 6px;
@@ -22,40 +22,46 @@
   transition: background-color 0.15s ease;
 }
 
-.seletor-mes button span {
+.seletor-mes-opcao span {
   font-size: 12px;
   color: #94a3b8;
 }
 
-.seletor-mes button:hover {
+.seletor-mes-opcao:hover {
   background: #f1f5f9;
 }
 
-.seletor-mes button[aria-pressed="true"] {
+.seletor-mes-opcao[aria-pressed="true"] {
   background: #334155;
   color: #ffffff;
 }
 
-.seletor-mes button[aria-pressed="true"] span {
+.seletor-mes-opcao[aria-pressed="true"] span {
   color: #cbd5e1;
 }
 
-/* Âncora do calendário: o campo fica invisível embaixo do botão */
+/* Âncora do calendário, que abre embaixo do botão */
 .seletor-mes-selecionar {
   position: relative;
   display: flex;
 }
 
-.seletor-mes-campo {
+.seletor-mes-popover {
   position: absolute;
+  top: calc(100% + 8px);
   left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 1px;
-  padding: 0;
-  border: 0;
-  opacity: 0;
-  pointer-events: none;
+  z-index: 30;
+  animation: calendario-mes-entrar 0.12s ease-out;
+}
+
+.seletor-mes-popover[data-acima] {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+
+.seletor-mes-popover[data-direita] {
+  left: auto;
+  right: 0;
 }
 
 @media (max-width: 640px) {
@@ -68,7 +74,7 @@
     flex: 1;
   }
 
-  .seletor-mes button {
+  .seletor-mes-opcao {
     flex: 1;
     flex-direction: column;
     align-items: center;

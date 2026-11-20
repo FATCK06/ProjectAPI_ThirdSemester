@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   Activity,
   ArrowDown,
   ArrowUp,
   BadgePercent,
-  CalendarDays,
   CircleDollarSign,
   CalendarCheck,
   CreditCard,
@@ -16,6 +15,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Card } from "../../../../components/Card/Card";
+import { Select } from "../../../../components/Select/Select";
+import { useFecharAoClicarFora } from "../../../../hooks/useFecharAoClicarFora";
 import { AVISO_SEM_VIAGENS_MEDIA } from "../../../../components/Aviso/Aviso";
 import {
   type HistoricoMes,
@@ -24,9 +25,13 @@ import {
 } from "../../../../services/Dashboard";
 import { podeVerDadosFinanceiros } from "../../../../services/auth";
 import { formatarIntervaloMeses, formatarMesCurto, formatarMesExtenso } from "../../../../utils/datas";
-import { formatarMoeda, formatarPercentual, SEM_VALOR } from "../../../../utils/formatacao";
+import { SeloMes } from "../../../../components/SeloMes/SeloMes";
+import { useColunasEquilibradas } from "../../../../hooks/useColunasEquilibradas";
+import { formatarMoeda, formatarMoedaCompacta, formatarPercentual, SEM_VALOR } from "../../../../utils/formatacao";
 import { Sparkline } from "./Sparkline";
+import { ValorAjustavel } from "./ValorAjustavel";
 import {
+  AJUDA_UTILIZACAO,
   INDICADORES,
   OPCOES_COMPARACAO,
   indicadoresVisiveis,
@@ -73,6 +78,8 @@ interface DefinicaoIndicador {
   // Devolve undefined quando a API omite o valor (média sem viagem apurável, margem sem frete).
   obterNumero?: (totais: Totais) => number | undefined;
   formatar: (valor: number) => string;
+  // Versão curta para quando o valor não cabe no card (só os de moeda têm)
+  formatarCompacto?: (valor: number) => string;
   // Tooltip quando o valor do mês vem ausente
   semValor?: string;
   // Texto do tooltip ao lado do título; função quando depende do mês
@@ -144,26 +151,15 @@ const DEFINICOES: DefinicaoIndicador[] = [
       "Uma viagem de mais de um dia conta como 1 dia, pois a coluna Diária do CSV vem vazia.",
   },
   {
-    id: "diasDisponiveis",
-    titulo: "Dias disponíveis",
-    tom: "azul",
-    Icone: CalendarDays,
-    maiorEhMelhor: true,
-    formatar: formatarNumero,
-    ajuda:
-      "Ainda não calculado: o CSV de manifestos não informa férias, afastamentos " +
-      "ou manutenção. Aguardando definição da Newe.",
-  },
-  {
     id: "utilizacaoMedia",
     titulo: "% de utilização",
     tom: "roxo",
     Icone: Percent,
     maiorEhMelhor: true,
+    obterNumero: (t) => t.utilizacaoMedia,
     formatar: formatarPercentual,
-    ajuda:
-      "Dias em operação ÷ dias disponíveis × 100. Ainda não calculado, pois depende " +
-      "dos dias disponíveis.",
+    aproximado: true,
+    ajuda: AJUDA_UTILIZACAO,
   },
   {
     id: "valorFrete",
@@ -173,6 +169,7 @@ const DEFINICOES: DefinicaoIndicador[] = [
     maiorEhMelhor: true,
     obterNumero: (t) => t.valorFrete,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta(
       "Quanto os clientes pagaram à Newe pelas viagens (coluna Valor Fretes do CSV).",
@@ -186,6 +183,7 @@ const DEFINICOES: DefinicaoIndicador[] = [
     maiorEhMelhor: false, // custo maior é ruim
     obterNumero: (t) => t.custoTotal,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta(
       "Quanto a Newe pagou ao motorista pelas viagens (coluna Vale frete do CSV): " +
@@ -200,6 +198,7 @@ const DEFINICOES: DefinicaoIndicador[] = [
     maiorEhMelhor: true,
     obterNumero: (t) => t.rentabilidade,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     aproximado: faltamViagens,
     ajuda: comAvisoDeFalta("Valor total dos fretes − custo total."),
   },
@@ -211,6 +210,7 @@ const DEFINICOES: DefinicaoIndicador[] = [
     maiorEhMelhor: true,
     obterNumero: (t) => t.rentabilidadeMediaViagem,
     formatar: formatarMoeda,
+    formatarCompacto: formatarMoedaCompacta,
     semValor: AVISO_SEM_VIAGENS_MEDIA,
     // Só quando alguma viagem ficou de fora: com todas apuradas o valor é exato
     aproximado: faltamViagens,
@@ -240,12 +240,12 @@ function ehAproximado(d: DefinicaoIndicador, totais: Totais): boolean {
   return typeof d.aproximado === "function" ? d.aproximado(totais) : Boolean(d.aproximado);
 }
 
-/** "mai. de 2026" ou "média de abr. a mai. de 2026": contra o que o card compara. */
+/** "maio de 2026" ou "média de abril a maio de 2026": contra o que o card compara. */
 function descreverPeriodo(anteriores: HistoricoMes[]): string {
   const primeiro = anteriores[0].mesReferencia;
   const ultimo = anteriores[anteriores.length - 1].mesReferencia;
   return anteriores.length === 1
-    ? formatarMesCurto(ultimo)
+    ? formatarMesExtenso(ultimo)
     : `média de ${formatarIntervaloMeses(primeiro, ultimo)}`;
 }
 
@@ -323,14 +323,14 @@ function VariacaoIndicador({ comparativo, maiorEhMelhor }: PropsVariacao) {
         : "ruim";
 
   return (
-    <>
-      <div className="indicador-variacao" data-sentido={sentido}>
+    <div className="indicador-comparacao">
+      <span className="indicador-variacao" data-sentido={sentido}>
         {variacaoPercentual > 0 && <ArrowUp size={14} />}
         {variacaoPercentual < 0 && <ArrowDown size={14} />}
         {formatarVariacao(variacaoPercentual)}
-      </div>
-      <div className="indicador-anterior">{rotuloAnterior}</div>
-    </>
+      </span>
+      <span className="indicador-anterior">{rotuloAnterior}</span>
+    </div>
   );
 }
 
@@ -353,14 +353,17 @@ function ValorIndicador({ d, totais }: PropsValorIndicador) {
   }
 
   return (
-    <div className="indicador-valor">
-      {d.formatar(valor)}
-      {ehAproximado(d, totais) && (
-        <span className="indicador-asterisco" title={textoAjuda(d, totais)}>
-          *
-        </span>
-      )}
-    </div>
+    <ValorAjustavel
+      completo={d.formatar(valor)}
+      compacto={d.formatarCompacto?.(valor)}
+      extra={
+        ehAproximado(d, totais) && (
+          <span className="indicador-asterisco" title={textoAjuda(d, totais)}>
+            *
+          </span>
+        )
+      }
+    />
   );
 }
 
@@ -374,6 +377,7 @@ export function IndicadoresCard({
 }: PropsIndicadoresCard) {
   const [mostrarFiltro, setMostrarFiltro] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const gradeRef = useRef<HTMLDivElement>(null);
 
   // Sem VER_DADOS_FINANCEIROS o backend não manda esses valores: a categoria
   // some inteira, inclusive do filtro.
@@ -383,30 +387,8 @@ export function IndicadoresCard({
     : CATEGORIAS.filter((c) => c !== "financeiro");
   const disponiveis = INDICADORES.filter((i) => categorias.includes(i.categoria));
 
-  useEffect(() => {
-    if (!mostrarFiltro) return;
-
-    function aoClicarFora(evento: MouseEvent) {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(evento.target as Node)
-      ) {
-        setMostrarFiltro(false);
-      }
-    }
-
-    function aoPressionarTecla(evento: KeyboardEvent) {
-      if (evento.key === "Escape") setMostrarFiltro(false);
-    }
-
-    document.addEventListener("mousedown", aoClicarFora);
-    document.addEventListener("keydown", aoPressionarTecla);
-
-    return () => {
-      document.removeEventListener("mousedown", aoClicarFora);
-      document.removeEventListener("keydown", aoPressionarTecla);
-    };
-  }, [mostrarFiltro]);
+  const fecharFiltro = useCallback(() => setMostrarFiltro(false), []);
+  useFecharAoClicarFora(containerRef, mostrarFiltro, fecharFiltro);
 
   function alternarIndicador(id: IndicadorId) {
     onSelecionadosChange(
@@ -419,41 +401,54 @@ export function IndicadoresCard({
   const visiveis = indicadoresVisiveis(selecionados, financeiro).map(
     (i) => DEFINICAO_POR_ID.get(i.id)!,
   );
+  const colunas = useColunasEquilibradas(gradeRef, visiveis.length);
 
   // A escolha do usuário fica guardada; aqui só se usa o que o mês permite.
   // Voltar para um mês com mais histórico devolve o período escolhido.
   const mesesDisponiveis = mesesComDadosParaComparar(historico);
-  const mesesEmUso = Math.min(mesesComparacao, mesesDisponiveis);
+  const mesesEmUso = Math.min(mesesComparacao, mesesDisponiveis) as MesesComparacao;
   const semComparacao = mesesDisponiveis === 0;
   const avisoSemComparacao =
     historico[historico.length - 1]?.totais.motoristas === 0
       ? "Sem viagens importadas neste mês: não há o que comparar."
       : "Sem viagens importadas nos meses anteriores para comparar.";
-  const descricaoComparacao = semComparacao
-    ? avisoSemComparacao
-    : `Comparando com ${descreverPeriodo(historico.slice(-(mesesEmUso + 1), -1))}.`;
+  // Os meses de referência em selo, como o mês exibido no título
+  const anteriores = historico.slice(-(mesesEmUso + 1), -1);
+  const descricaoComparacao = semComparacao ? (
+    avisoSemComparacao
+  ) : anteriores.length === 1 ? (
+    <>
+      Comparando com <SeloMes mes={anteriores[0].mesReferencia} tamanho="texto" />
+    </>
+  ) : (
+    <>
+      Comparando com a média de <SeloMes mes={anteriores[0].mesReferencia} tamanho="texto" /> a{" "}
+      <SeloMes mes={anteriores[anteriores.length - 1].mesReferencia} tamanho="texto" />
+    </>
+  );
 
   const acoes = (
     <div className="indicadores-acoes">
-      <label
+      <div
         className="indicadores-comparacao"
         title={semComparacao ? avisoSemComparacao : undefined}
       >
-        <span>Comparar com</span>
-        <select
-          value={semComparacao ? "" : mesesEmUso}
+        <span aria-hidden="true">Comparar com</span>
+        <Select<MesesComparacao>
+          aria-label="Comparar com"
+          valor={semComparacao ? null : mesesEmUso}
+          placeholder="Sem dados"
           disabled={semComparacao}
-          onChange={(e) => onMesesComparacaoChange(Number(e.target.value) as MesesComparacao)}
-        >
-          {semComparacao && <option value="">Sem dados</option>}
-          {OPCOES_COMPARACAO.map((o) => (
-            // Só vale a opção cujos meses todos têm viagens importadas
-            <option key={o.valor} value={o.valor} disabled={o.valor > mesesDisponiveis}>
-              {o.valor > mesesDisponiveis ? `${o.rotulo} (sem dados)` : o.rotulo}
-            </option>
-          ))}
-        </select>
-      </label>
+          onChange={onMesesComparacaoChange}
+          // Só vale a opção cujos meses todos têm viagens importadas
+          opcoes={OPCOES_COMPARACAO.map((o) => ({
+            valor: o.valor,
+            rotulo: o.rotulo,
+            detalhe: o.valor > mesesDisponiveis ? "sem dados" : undefined,
+            desabilitada: o.valor > mesesDisponiveis,
+          }))}
+        />
+      </div>
 
       <div ref={containerRef} className="indicadores-filtro">
         <button
@@ -512,7 +507,12 @@ export function IndicadoresCard({
   return (
     <Card
       sobretitulo="Visão geral"
-      titulo={`Indicadores de ${formatarMesExtenso(indicadores.mesReferencia)}`}
+      titulo={
+        <>
+          Indicadores do mês
+          <SeloMes mes={indicadores.mesReferencia} />
+        </>
+      }
       subtitulo={descricaoComparacao}
       acoes={acoes}
     >
@@ -522,49 +522,47 @@ export function IndicadoresCard({
           exibir.
         </p>
       ) : (
-        // A grade mede a largura do card (container query) para centralizar a última linha
-        <div className="indicadores-area">
-          <div className="indicadores-grid">
-            {visiveis.map((d) => {
-              const comp = montarComparativo(d, historico, mesesEmUso);
-              const ajuda = textoAjuda(d, indicadores.totais);
+        // As colunas dependem da largura e do número de cards (useColunasEquilibradas)
+        <div ref={gradeRef} className="indicadores-grid" style={colunas}>
+          {visiveis.map((d) => {
+            const comp = montarComparativo(d, historico, mesesEmUso);
+            const ajuda = textoAjuda(d, indicadores.totais);
 
-              return (
-                <div key={d.id} className="indicador-item" data-tom={d.tom}>
-                  <span className="indicador-icone">
-                    <d.Icone size={22} />
-                  </span>
+            return (
+              <div key={d.id} className="indicador-item" data-tom={d.tom}>
+                <span className="indicador-icone">
+                  <d.Icone size={22} />
+                </span>
 
-                  <div className="indicador-corpo">
-                    <div className="indicador-titulo">
-                      {d.titulo}
-                      {ajuda && (
-                        <span
-                          className="indicador-ajuda"
-                          title={ajuda}
-                          aria-label={ajuda}
-                          tabIndex={0}
-                        >
-                          <Info size={13} />
-                        </span>
-                      )}
-                    </div>
-                    <ValorIndicador d={d} totais={indicadores.totais} />
-                    {comp && (
-                      <VariacaoIndicador
-                        comparativo={comp}
-                        maiorEhMelhor={d.maiorEhMelhor}
-                      />
+                <div className="indicador-corpo">
+                  <div className="indicador-titulo">
+                    {d.titulo}
+                    {ajuda && (
+                      <span
+                        className="indicador-ajuda"
+                        title={ajuda}
+                        aria-label={ajuda}
+                        tabIndex={0}
+                      >
+                        <Info size={13} />
+                      </span>
                     )}
                   </div>
-
-                  {comp?.serie && (
-                    <Sparkline valores={comp.serie} titulo={comp.descricaoSerie} />
+                  <ValorIndicador d={d} totais={indicadores.totais} />
+                  {comp && (
+                    <VariacaoIndicador
+                      comparativo={comp}
+                      maiorEhMelhor={d.maiorEhMelhor}
+                    />
                   )}
                 </div>
-              );
-            })}
-          </div>
+
+                {comp?.serie && (
+                  <Sparkline valores={comp.serie} titulo={comp.descricaoSerie} altura={36} responsiva />
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </Card>
