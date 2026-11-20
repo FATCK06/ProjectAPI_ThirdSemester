@@ -1,0 +1,164 @@
+.select {
+  position: relative;
+  display: inline-flex;
+  min-width: 150px;
+}
+
+.select-gatilho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 10px 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-family: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.select-gatilho:hover:not(:disabled) {
+  border-color: #94a3b8;
+}
+
+.select-gatilho:focus-visible,
+.select[data-aberto] .select-gatilho {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.select-gatilho:disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+/* Todas as opções na mesma célula: a largura é a da maior */
+.select-valor {
+  display: grid;
+  min-width: 0;
+}
+
+.select-valor > span {
+  grid-area: 1 / 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  visibility: hidden;
+}
+
+.select-valor > span[data-visivel] {
+  visibility: visible;
+}
+
+.select-placeholder {
+  color: #94a3b8;
+}
+
+.select-seta {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.15s ease;
+}
+
+.select[data-aberto] .select-seta {
+  transform: rotate(180deg);
+}
+
+.select-lista {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 30;
+  min-width: 100%;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: 260px;
+  margin: 0;
+  padding: 6px;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+  animation: select-entrar 0.12s ease-out;
+}
+
+.select-lista[data-acima] {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.select-lista[data-direita] {
+  left: auto;
+  right: 0;
+}
+
+.select-opcao {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.select-opcao-detalhe {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.select-opcao[data-ativo] {
+  background: #f1f5f9;
+}
+
+.select-opcao[aria-selected="true"] {
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.select-opcao[aria-selected="true"] svg {
+  flex-shrink: 0;
+  color: #2563eb;
+}
+
+.select-opcao[aria-disabled="true"] {
+  color: #94a3b8;
+  cursor: not-allowed;
+}
+
+@keyframes select-entrar {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .select-lista {
+    animation: none;
+  }
+
+  .select-seta {
+    transition: none;
+  }
+}

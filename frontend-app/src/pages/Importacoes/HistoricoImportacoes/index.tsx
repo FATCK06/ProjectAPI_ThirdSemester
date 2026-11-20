@@ -3,6 +3,8 @@ import DataTable, { type ColunaTabela } from "../../../components/DataTable/Data
 import api from "../../../services/api";
 import "./HistoricoImportacoes.css";
 import { PageHeader } from "../../../components/PageHeader";
+import { Loading } from "../../../components/Loading";
+import { History } from "lucide-react";
 
 interface ImportacaoArquivo {
   id: string;
@@ -43,9 +45,11 @@ export function HistoricoImport() {
     <div className="historico-importacoes" data-tour="historico-pagina">
       <PageHeader
         titulo="Histórico de Importações"
+        icone={History}
+        tomIcone="cinza"
         subtitulo="Arquivos importados, com data, responsável e status de cada envio"
       />
-      {carregando && <p>Carregando...</p>}
+      {carregando && <Loading tamanho="sm" texto="Carregando importações" />}
       {!carregando && erro && <p>{erro}</p>}
       {!carregando && !erro && (
         <DataTable

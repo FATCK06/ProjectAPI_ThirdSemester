@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, type MouseEvent, type ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import { Paginacao } from "../Paginacao";
@@ -35,7 +35,7 @@ interface PropsDataTable<T> {
   // Larguras fixas por coluna e textos longos cortados com reticências
   layoutFixo?: boolean;
   larguraMinima?: number | string;
-  // A linha inteira leva a este endereço; a primeira célula vira um link acessível
+  // A primeira célula (o nome) vira um link para este endereço; o resto da linha não navega
   linkLinha?: (linha: T) => string;
   estadoNavegacaoLinha?: (linha: T, estado: EstadoNavegacaoTabela) => unknown;
   // Abaixo de 900px troca a tabela por cards (título = primeira coluna)
@@ -126,6 +126,15 @@ export function DataTable<T>({
       : <ArrowDown size={14} aria-hidden="true" />;
   }
 
+  // O estado vai junto da navegação e é montado na hora do clique, não no render:
+  // assim leva a rolagem (window.scrollY) do momento em que a pessoa saiu.
+  // Ctrl/Cmd/Shift/botão do meio seguem o padrão do navegador (outra aba).
+  function aoClicarLink(evento: MouseEvent<HTMLAnchorElement>, linha: T, destino: string) {
+    if (evento.button !== 0 || evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.altKey) return;
+    evento.preventDefault();
+    navigate(destino, { state: estadoNavegacaoLinha?.(linha, { pagina, ordenacao }) });
+  }
+
   function classeAlinhamento(coluna: ColunaTabela<T>) {
     return coluna.alinhamento === "direita" ? "data-table-direita" : undefined;
   }
@@ -190,13 +199,8 @@ export function DataTable<T>({
           <tbody>
             {linhasVisiveis.map((linha) => {
               const destino = linkLinha?.(linha);
-              const estadoNavegacao = estadoNavegacaoLinha?.(linha, { pagina, ordenacao });
               return (
-                <tr
-                  key={chaveLinha(linha)}
-                  className={destino ? "data-table-linha-link" : undefined}
-                  onClick={destino ? () => navigate(destino, { state: estadoNavegacao }) : undefined}
-                >
+                <tr key={chaveLinha(linha)}>
                   {colunas.map((coluna, indice) => (
                     <td
                       key={coluna.chave}
@@ -205,9 +209,8 @@ export function DataTable<T>({
                       {destino && indice === 0 ? (
                         <Link
                           to={destino}
-                          state={estadoNavegacao}
                           className="data-table-link"
-                          onClick={(event) => event.stopPropagation()}
+                          onClick={(evento) => aoClicarLink(evento, linha, destino)}
                         >
                           {coluna.render(linha)}
                         </Link>
@@ -225,13 +228,21 @@ export function DataTable<T>({
         <div className="data-table-cards">
           {linhasVisiveis.map((linha) => {
             const destino = linkLinha?.(linha);
-            const estadoNavegacao = estadoNavegacaoLinha?.(linha, { pagina, ordenacao });
             const [primeira, ...demais] = colunas;
-            const conteudo = (
-              <>
+            // Só o nome é link, como na tabela; o card em si não navega
+            return (
+              <div key={chaveLinha(linha)} className="data-table-card">
                 <span className="data-table-card-titulo">
-                  {primeira.render(linha)}
-                  {destino && <span aria-hidden="true">›</span>}
+                  {destino ? (
+                    <Link
+                      to={destino}
+                      className="data-table-link"
+                      onClick={(evento) => aoClicarLink(evento, linha, destino)}
+                    >
+                      {primeira.render(linha)}
+                      <span aria-hidden="true"> ›</span>
+                    </Link>
+                  ) : primeira.render(linha)}
                 </span>
                 <span className="data-table-card-campos">
                   {demais.map((coluna) => (
@@ -241,14 +252,7 @@ export function DataTable<T>({
                     </span>
                   ))}
                 </span>
-              </>
-            );
-            return destino ? (
-              <Link key={chaveLinha(linha)} to={destino} state={estadoNavegacao} className="data-table-card data-table-card--link">
-                {conteudo}
-              </Link>
-            ) : (
-              <div key={chaveLinha(linha)} className="data-table-card">{conteudo}</div>
+              </div>
             );
           })}
         </div>
