@@ -9,7 +9,7 @@ type PageHeaderProps = {
 
 export function PageHeader({ titulo, subtitulo, children }: PageHeaderProps){
     return (
-        <header className="page-header">
+        <header className="page-header" data-tour="cabecalho-pagina">
             <div>
                 <h1>{titulo}</h1>
                 {subtitulo && <p>{subtitulo}</p>}

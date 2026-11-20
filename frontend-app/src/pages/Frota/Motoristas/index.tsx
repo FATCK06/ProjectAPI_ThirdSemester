@@ -81,18 +81,18 @@ export function Motoristas() {
   }
 
   return (
-    <section className="motoristas-card">
+    <section className="motoristas-card" data-tour="motoristas-pagina">
       <header className="motoristas-header">
         <div>
           <h1 className="motoristas-title">Motoristas</h1>
           <p className="motoristas-subtitle">Acesse a ficha cadastral do motorista</p>
         </div>
         <div className="motoristas-filtros">
-          <div className="motoristas-filtro">
+          <div className="motoristas-filtro" data-tour="motoristas-busca">
             <label htmlFor="motoristas-busca">Buscar motorista</label>
             <input id="motoristas-busca" type="search" placeholder="Nome do motorista" value={busca} onChange={(event) => setBusca(event.target.value)} />
           </div>
-          <div className="motoristas-filtro">
+          <div className="motoristas-filtro" data-tour="motoristas-mes">
             <label htmlFor="motoristas-mes">Mês de referência</label>
             <input id="motoristas-mes" type="month" value={mes} onChange={(event) => { if (event.target.value) atualizarConsulta(event.target.value, 1); }} />
           </div>

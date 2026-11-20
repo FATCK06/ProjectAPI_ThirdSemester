@@ -199,10 +199,10 @@ export function OperacaoMensal() {
   }
 
   return (
-    <section className="operacao-mensal-page">
+    <section className="operacao-mensal-page" data-tour="operacao-pagina">
       <PageHeader titulo="Operação Mensal" subtitulo="Viagens, dias em operação e indicadores de cada motorista e veículo no mês">
         <div className="operacao-mensal-filtros">
-          <div className="operacao-mensal-filtro">
+          <div className="operacao-mensal-filtro" data-tour="operacao-busca">
             <label htmlFor="operacao-mensal-busca">Buscar motorista ou placa</label>
             <input
               id="operacao-mensal-busca"
@@ -215,7 +215,7 @@ export function OperacaoMensal() {
               }}
             />
           </div>
-          <div className="operacao-mensal-filtro">
+          <div className="operacao-mensal-filtro" data-tour="operacao-tipo">
             <label htmlFor="operacao-mensal-tipo-veiculo">Tipo de veículo</label>
             <select
               id="operacao-mensal-tipo-veiculo"
@@ -240,7 +240,7 @@ export function OperacaoMensal() {
               ))}
             </select>
           </div>
-          <div className="operacao-mensal-filtro">
+          <div className="operacao-mensal-filtro" data-tour="operacao-mes">
             <label htmlFor="operacao-mensal-mes">Mês</label>
             <input
               id="operacao-mensal-mes"

@@ -209,9 +209,9 @@ export function ImportacaoWizard({
     const mostrarRodape = passoAtual !== PASSO_RESULTADO && !executando;
 
     return (
-        <div className="importacao-container">
+        <div className="importacao-container" data-tour="importacao-pagina">
             <PageHeader titulo={titulo} subtitulo={subtitulo} />
-            <div className="stepper-wrapper">
+            <div className="stepper-wrapper" data-tour="importacao-passos">
                 {STEPS.map((step, index) => {
                     const stepNumber = index + 1;
                     const isActive = stepNumber === passoAtual;
@@ -248,7 +248,7 @@ export function ImportacaoWizard({
                 </div>
             )}
 
-            <div className="step-content">
+            <div className="step-content" data-tour="importacao-conteudo">
                 {passoAtual === 1 && (
                     <Step1Upload
                         tipo={tipo}
@@ -292,7 +292,7 @@ export function ImportacaoWizard({
             </div>
 
             {mostrarRodape && (
-                <div className="step-footer">
+                <div className="step-footer" data-tour="importacao-rodape">
                     <button className="btn-voltar" onClick={voltar} disabled={passoAtual === PASSO_UPLOAD}>
                         <ArrowLeft size={20} />
                         Anterior

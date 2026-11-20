@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Gauge, TrendingUp, Truck } from 'lucide-react';
+import { LayoutDashboard, PanelLeftClose, PanelLeftOpen, UploadCloud, ChevronRight, LogOut, UserPlus, Activity, Gauge, TrendingUp, Truck, CircleHelp } from 'lucide-react';
 import neweLogo from '../../assets/image 3.png';
 import './sidebar.css';
-import { useState } from 'react';
 import { logout, rotuloPerfil, temPermissao, usuarioLogado } from '../../services/auth';
+import { useTour } from '../../tour/useTour';
 
 interface SidebarProps {
   isMinimized: boolean;
@@ -11,7 +11,8 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
-  const [isImportOpen, setIsImportOpen] = useState(false);
+  // No contexto do tour (TourProvider) para o tutorial poder abrir o acordeão
+  const { importacaoAberta: isImportOpen, setImportacaoAberta: setIsImportOpen, iniciarTour } = useTour();
   const navigate = useNavigate();
   const usuario = usuarioLogado();
   const podeGerenciarUsuarios = temPermissao('GERENCIAR_USUARIOS');
@@ -31,12 +32,12 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
   };
 
   return (
-    <aside className={`sidebar-container ${isMinimized ? 'minimized' : ''}`}>
+    <aside className={`sidebar-container ${isMinimized ? 'minimized' : ''}`} data-tour="menu-lateral">
       <div className="sidebar-header">
         
         {!isMinimized && <img src={neweLogo} alt="Logo Newe" className="sidebar-logo" />}
         
-        <button className="btn-toggle" onClick={toggleSidebar}>
+        <button className="btn-toggle" onClick={toggleSidebar} data-tour="menu-recolher">
           {isMinimized ? <PanelLeftOpen size={20} /> : <PanelLeftClose size={20} />}
         </button>
       </div>
@@ -45,7 +46,8 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
         <NavLink
           to="/dashboard"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
-          title="Dashboard" 
+          title="Dashboard"
+          data-tour="menu-dashboard"
         >
           <LayoutDashboard size={20} />
           {!isMinimized && <span>Dashboard</span>}
@@ -55,6 +57,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
           to="/operacao-mensal"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
           title="Operação Mensal"
+          data-tour="menu-operacao"
         >
           <Gauge size={20} />
           {!isMinimized && <span>Operação Mensal</span>}
@@ -64,17 +67,18 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
           to="/motoristas"
           className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
           title="Motoristas"
+          data-tour="menu-motoristas"
         >
           <Truck size={20} />
           {!isMinimized && <span>Motoristas</span>}
         </NavLink>
 
-        <NavLink to="/ranking" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} title="Ranking mensal">
+        <NavLink to="/ranking" className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')} title="Ranking mensal" data-tour="menu-ranking">
           <TrendingUp size={20} />
           {!isMinimized && <span>Ranking Mensal</span>}
         </NavLink>
 
-        <div className="nav-accordion">
+        <div className="nav-accordion" data-tour="menu-importacao">
           <button
             className="nav-item btn-accordion"
             onClick={handleImportClick}
@@ -96,6 +100,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
               <div className="accordion-itens">
                 <NavLink
                   to="/importacoes/manifestos"
+                  data-tour="menu-manifestos"
                   className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
                 >
                   <span>Manifestos</span>
@@ -109,6 +114,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
               <div className="accordion-itens">
                 <NavLink
                   to="/importacoes/veiculos"
+                  data-tour="menu-veiculos"
                   className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
                 >
                   <span>Veículos</span>
@@ -122,6 +128,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
               <div className="accordion-itens">
                 <NavLink
                   to="/importacoes/historico"
+                  data-tour="menu-historico"
                   className={({ isActive }) => (isActive ? 'nav-sub-item active' : 'nav-sub-item')}
                 >
                   <span>Histórico de Importações</span>
@@ -138,6 +145,7 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
             to="/usuarios/novo"
             className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
             title="Cadastrar usuário"
+            data-tour="menu-usuarios"
           >
             <UserPlus size={20} />
             {!isMinimized && <span>Cadastrar usuário</span>}
@@ -149,15 +157,28 @@ export function Sidebar({ isMinimized, toggleSidebar }: SidebarProps) {
             to="/status"
             className={({ isActive }) => (isActive ? 'nav-item active' : 'nav-item')}
             title="Status dos serviços"
+            data-tour="menu-status"
           >
             <Activity size={20} />
             {!isMinimized && <span>Status dos serviços</span>}
           </NavLink>
         )}
 
+        {/* Último da navegação, para todos os perfis: inicia o tour, não navega */}
+        <button
+          type="button"
+          className="nav-item btn-tutorial"
+          onClick={iniciarTour}
+          title="Tutorial"
+          data-tour="menu-tutorial"
+        >
+          <CircleHelp size={20} />
+          {!isMinimized && <span>Tutorial</span>}
+        </button>
+
       </nav>
 
-      <div className="sidebar-footer">
+      <div className="sidebar-footer" data-tour="menu-rodape">
         {!isMinimized && usuario && (
           <div className="usuario-info">
             <span className="usuario-nome">{usuario.nome || 'Usuário'}</span>

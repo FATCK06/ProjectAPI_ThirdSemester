@@ -76,7 +76,7 @@ export function Dashboard() {
   return (
     <div className="dashboard">
       {meses && mesReferencia && (
-        <div className="dashboard-filtro">
+        <div className="dashboard-filtro" data-tour="dashboard-mes">
           <SeletorMes
             meses={meses}
             valor={mesReferencia}
@@ -90,7 +90,7 @@ export function Dashboard() {
       ) : (
         <>
           <div className="dashboard-charts">
-            <div className="dashboard-indicators">
+            <div className="dashboard-indicators" data-tour="dashboard-indicadores">
               {isLoading || !dados ? (
                 // Os mesmos cards, na mesma ordem e com ou sem gráfico, que o card vai mostrar
                 <IndicadoresSkeleton itens={itensSkeleton} />
@@ -108,7 +108,7 @@ export function Dashboard() {
 
             {financeiro && (
               <>
-                <div className="dashboard-chart dashboard-driver-chart">
+                <div className="dashboard-chart dashboard-driver-chart" data-tour="dashboard-grafico-motoristas">
                   {isLoading || !dados ? (
                     <GraficoSkeleton altura={320} barras={10} />
                   ) : (
@@ -116,7 +116,7 @@ export function Dashboard() {
                   )}
                 </div>
 
-                <div className="dashboard-chart">
+                <div className="dashboard-chart" data-tour="dashboard-grafico-tipos">
                   {/* Desligado, o card só mostra o aviso: não há o que esperar */}
                   {GRAFICO_MODELOS_DISPONIVEL && (isLoading || !dados) ? (
                     <GraficoSkeleton altura={300} barras={6} />
@@ -132,18 +132,27 @@ export function Dashboard() {
           </div>
 
           {/* Os dois gráficos são de rentabilidade: o operador vê o aviso no lugar */}
-          {!financeiro && <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />}
+          {!financeiro && (
+            <div data-tour="dashboard-aviso-financeiro">
+              <Aviso mensagem={AVISO_SEM_PERMISSAO_FINANCEIRO} />
+            </div>
+          )}
         </>
       )}
 
       {/* Fora do bloco acima: não depende do mês da página e mantém a seleção se ele falhar */}
-      <ComparativoMensal />
+      {/* Os data-tour abaixo só marcam o alvo do tutorial; os blocos não mudam */}
+      <div data-tour="dashboard-comparativo">
+        <ComparativoMensal />
+      </div>
 
       {!mensagemErro && mesReferencia && (
-        <RankingMotoristas
-          mesReferencia={mesReferencia}
-          indicadores={isLoading ? undefined : dados?.indicadores.motoristas}
-        />
+        <div data-tour="dashboard-ranking">
+          <RankingMotoristas
+            mesReferencia={mesReferencia}
+            indicadores={isLoading ? undefined : dados?.indicadores.motoristas}
+          />
+        </div>
       )}
     </div>
   );
