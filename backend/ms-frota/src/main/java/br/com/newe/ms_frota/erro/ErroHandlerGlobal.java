@@ -2,6 +2,9 @@ package br.com.newe.ms_frota.erro;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,11 +61,35 @@ public class ErroHandlerGlobal extends ResponseEntityExceptionHandler {
                 .body(new RespostaErro(RespostaErro.FALHA_GENERICA));
     }
 
+    /**
+     * O codigo vai na resposta e na primeira linha do log, junto com a rota e a
+     * causa raiz: com o codigo que o front mostrar, um grep no log acha o erro.
+     */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<RespostaErro> erroInesperado(Exception e) {
-        log.error("Erro nao tratado", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new RespostaErro(RespostaErro.FALHA_GENERICA));
+    public ResponseEntity<RespostaErro> erroInesperado(Exception e, HttpServletRequest requisicao) {
+        String codigo = novoCodigo();
+        log.error("Erro nao tratado [codigo={}] {} {} -> {}",
+                codigo, requisicao.getMethod(), rota(requisicao), causaRaiz(e), e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(RespostaErro.falha(codigo));
+    }
+
+    /** 8 caracteres bastam para achar a linha no log de um dia. */
+    static String novoCodigo() {
+        return UUID.randomUUID().toString().substring(0, 8);
+    }
+
+    static String rota(HttpServletRequest requisicao) {
+        String query = requisicao.getQueryString();
+        return query == null ? requisicao.getRequestURI() : requisicao.getRequestURI() + "?" + query;
+    }
+
+    /** A excecao mais interna, que e a que explica (ex.: "relation ... does not exist"). */
+    static String causaRaiz(Throwable e) {
+        Throwable raiz = e;
+        while (raiz.getCause() != null && raiz.getCause() != raiz) {
+            raiz = raiz.getCause();
+        }
+        return raiz.getClass().getSimpleName() + ": " + raiz.getMessage();
     }
 
     @Override
