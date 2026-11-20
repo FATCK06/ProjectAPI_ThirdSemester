@@ -77,6 +77,12 @@ export function perfilAtual(): Perfil | null {
     return PERFIS.find((p) => p === perfil) ?? null;
 }
 
+/** Identificador do usuário logado (o sub do token). null sem login válido. */
+export function idUsuarioAtual(): string | null {
+    if (!estaLogado()) return null;
+    return lerPayload(localStorage.getItem(CHAVE_TOKEN)!)?.sub?.trim() || null;
+}
+
 /** O usuário logado tem a permissão? Só decide o que desenhar: quem barra é o gateway. */
 export function temPermissao(permissao: Permissao): boolean {
     const perfil = perfilAtual();

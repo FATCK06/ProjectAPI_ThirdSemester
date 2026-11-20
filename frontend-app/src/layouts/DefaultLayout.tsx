@@ -1,12 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar/index';
 import { useToast } from '../components/Toast';
 import { EVENTO_ACESSO_NEGADO } from '../services/api';
+import { TourProvider } from '../tour/TourProvider';
+import { useTour } from '../tour/useTour';
 import './layout.css';
 
 export function DefaultLayout() {
-    const [isMinimized, setIsMinimized] = useState(false);
+    // O estado do menu mora no TourProvider para o tutorial poder expandi-lo
+    return (
+        <TourProvider>
+            <LayoutConteudo />
+        </TourProvider>
+    );
+}
+
+function LayoutConteudo() {
+    const { menuMinimizado: isMinimized, alternarMenu } = useTour();
     const toast = useToast();
 
     // Qualquer 403 vindo da API (ver api.ts) vira um aviso, para o usuário
@@ -20,7 +31,7 @@ export function DefaultLayout() {
 
     return (
         <div className="layout-wrapper">
-            <Sidebar isMinimized={isMinimized} toggleSidebar={() => setIsMinimized(!isMinimized)} />
+            <Sidebar isMinimized={isMinimized} toggleSidebar={alternarMenu} />
 
                 <main className={`layout-content ${isMinimized ? 'minimized' : ''}`}>
                     <Outlet />

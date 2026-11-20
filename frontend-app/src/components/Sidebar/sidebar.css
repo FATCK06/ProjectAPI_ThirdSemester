@@ -89,7 +89,8 @@
 }
 
 /* Reseta o estilo nativo do botão para ficar igual aos NavLinks */
-.btn-accordion {
+.btn-accordion,
+.btn-tutorial {
   background: none;
   border: none;
   width: calc(100% - 32px); /* Compensa a margem lateral */
