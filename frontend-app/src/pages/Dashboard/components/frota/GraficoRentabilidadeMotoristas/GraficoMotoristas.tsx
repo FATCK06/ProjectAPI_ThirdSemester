@@ -1,6 +1,7 @@
 import { Bar } from "react-chartjs-2";
 import type { ChartData, ChartOptions } from "chart.js";
 import "../../../../../components/chartSetup";
+import { ALTURA_EIXO_X, ALTURA_GRAFICO_BARRAS } from "../alturaGraficos";
 import { Card } from "../../../../../components/Card/Card";
 import type { IndicadoresMotorista } from "../../../../../services/Dashboard";
 
@@ -83,8 +84,13 @@ function montarOpcoes(motoristas: IndicadoresMotorista[]): ChartOptions<"bar"> {
         border: { display: false },
       },
       x: {
+        // Mesma altura do eixo no gráfico por tipo de veículo: a linha do R$ 0
+        // fica alinhada mesmo com os nomes inclinados
+        afterFit: (escala) => {
+          escala.height = ALTURA_EIXO_X;
+        },
         grid: {
-          display: false, 
+          display: false,
         },
         ticks: {
           font: { size: 10, family: "Inter, sans-serif" },
@@ -104,7 +110,7 @@ export function GraficoMotoristas({ motoristas }: PropsGraficoMotoristas) {
 
   return (
     <Card titulo="Rentabilidade por Motorista" subtitulo="Top 10 do mês">
-      <div className="ui-card-chart" style={{ width: "100%", height: "320px" }}>
+      <div className="ui-card-chart" style={{ width: "100%", height: ALTURA_GRAFICO_BARRAS }}>
         <Bar data={montarDados(top)} options={montarOpcoes(top)} />
       </div>
     </Card>

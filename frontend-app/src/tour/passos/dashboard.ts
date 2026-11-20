@@ -17,7 +17,8 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             texto:
                 '"Mês atual" e "Mês anterior" trocam o mês com um clique; "Selecionar mês" abre o calendário para ' +
                 'qualquer mês até o atual. O mês escolhido vale para os indicadores, os gráficos e o ranking. ' +
-                'O "Comparativo mensal" tem seleção própria.',
+                'O Dashboard abre no último mês com viagens importadas e lembra o mês escolhido enquanto a aba ' +
+                'estiver aberta. O "Comparativo mensal" tem seleção própria.',
         },
         {
             id: 'dashboard-indicadores',
@@ -25,8 +26,9 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             alvo: 'dashboard-indicadores',
             titulo: 'Indicadores do mês',
             texto:
-                'O card "Indicadores de" + mês soma todos os motoristas. "Nº de viagens" conta as viagens importadas ' +
-                'no mês. "Dias em operação" soma, para cada motorista, as datas diferentes em que ele teve manifesto.',
+                'O card "Indicadores do mês" soma todos os motoristas; o selo azul ao lado do título mostra o mês. ' +
+                '"Nº de viagens" conta as viagens importadas no mês. "Dias em operação" soma, para cada motorista, ' +
+                'as datas diferentes em que ele teve manifesto.',
         },
     ];
 
@@ -45,14 +47,14 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
 
     passos.push(
         {
-            id: 'dashboard-indicadores-pendentes',
+            id: 'dashboard-utilizacao',
             rota: ROTA,
             alvo: 'dashboard-indicadores',
-            titulo: '"Dias disponíveis" e "% de utilização"',
+            titulo: '"% de utilização"',
             texto:
-                '"Dias disponíveis" são os dias em que a frota pode rodar, descontando férias, afastamentos e ' +
-                'manutenção. "% de utilização" = dias em operação ÷ dias disponíveis × 100: mostra quanto da ' +
-                'capacidade foi usada.',
+                'Dias em operação ÷ (dias do mês × motoristas com viagem) × 100: quanto da capacidade foi usada. ' +
+                'É aproximado (*): todos os dias do mês contam como disponíveis, pois o CSV não informa férias, ' +
+                'afastamentos nem manutenção.',
         },
         {
             id: 'dashboard-filtros',
@@ -73,7 +75,8 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             texto:
                 'Compara o mês exibido com o "Mês anterior" ou com a média dos "Últimos 2 meses" ou "Últimos 3 meses". ' +
                 'Só ficam liberados os períodos em que todos os meses têm viagens importadas. Com 2 ou 3 meses, cada ' +
-                'indicador ganha uma linha de tendência.',
+                'indicador ganha uma linha de tendência na base do card. Os meses comparados aparecem em selos ' +
+                'cinza no subtítulo.',
         },
         {
             id: 'dashboard-variacao',
@@ -170,7 +173,7 @@ export const passosDashboard: MontarPassos = ({ financeiro }) => {
             alvo: 'dashboard-ranking',
             titulo: '"Ranking de Motoristas"',
             texto:
-                'Os 5 motoristas com mais viagens no mês de referência. Clique em uma linha para abrir o histórico do ' +
+                'Os 5 motoristas com mais viagens no mês de referência. Clique no nome para abrir a ficha do ' +
                 'motorista naquele mês. "Disponibilidade" e "Utilização" mostram quanto cada motorista esteve ' +
                 'disponível e quanto rodou.' +
                 (financeiro ? ' As colunas de fretes, custos e rentabilidade completam cada linha.' : ''),

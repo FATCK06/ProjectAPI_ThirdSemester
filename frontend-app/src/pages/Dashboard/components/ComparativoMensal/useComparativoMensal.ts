@@ -10,9 +10,10 @@ export function useComparativoMensal() {
   const [meses, setMeses] = useState<string[] | null>(null);
   const [erroMeses, setErroMeses] = useState<string | null>(null);
   const [selecionados, setSelecionados] = useState<string[]>([]);
-  const [serie, setSerie] = useState<SerieMes[] | null>(null);
-  const [carregandoSerie, setCarregandoSerie] = useState(false);
-  const [erroSerie, setErroSerie] = useState<string | null>(null);
+  // Resultado com a chave da seleção que o pediu: chave diferente = ainda carregando
+  const [resultadoSerie, setResultadoSerie] = useState<
+    { chave: string; serie: SerieMes[] } | { chave: string; erro: string } | null
+  >(null);
 
   useEffect(() => {
     let cancelado = false;
@@ -33,30 +34,28 @@ export function useComparativoMensal() {
   // Só com 2+ meses: o back recusa menos. A resposta de uma seleção antiga é
   // descartada para não sobrescrever a atual.
   const chaveSelecao = selecionados.join(",");
+  const suficiente = selecionados.length >= MINIMO_MESES;
+  const atual = suficiente && resultadoSerie?.chave === chaveSelecao ? resultadoSerie : null;
+  const carregandoSerie = suficiente && atual === null;
+  const serie = atual && "serie" in atual ? atual.serie : null;
+  const erroSerie = atual && "erro" in atual ? atual.erro : null;
+
   useEffect(() => {
     const pedidos = chaveSelecao ? chaveSelecao.split(",") : [];
-    if (pedidos.length < MINIMO_MESES) {
-      setSerie(null);
-      setCarregandoSerie(false);
-      setErroSerie(null);
-      return;
-    }
+    if (pedidos.length < MINIMO_MESES) return;
 
     let cancelado = false;
-    setCarregandoSerie(true);
-    setErroSerie(null);
     buscarSerie(pedidos)
       .then((resposta) => {
-        if (!cancelado) setSerie(resposta);
+        if (!cancelado) setResultadoSerie({ chave: chaveSelecao, serie: resposta });
       })
       .catch(() => {
         if (!cancelado) {
-          setSerie(null);
-          setErroSerie("Não foi possível carregar o comparativo dos meses selecionados.");
+          setResultadoSerie({
+            chave: chaveSelecao,
+            erro: "Não foi possível carregar o comparativo dos meses selecionados.",
+          });
         }
-      })
-      .finally(() => {
-        if (!cancelado) setCarregandoSerie(false);
       });
     return () => {
       cancelado = true;
