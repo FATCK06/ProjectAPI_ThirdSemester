@@ -36,14 +36,14 @@ export function CadastroUsuario() {
     }
 
     return (
-        <div className="cadastro-container">
+        <div className="cadastro-container" data-tour="cadastro-pagina">
             <div className="cadastro-header">
                 <h2>Cadastrar usuário</h2>
                 <p>A senha é criptografada pelo servidor antes de ser gravada.</p>
             </div>
 
-            <form onSubmit={enviar} className="cadastro-form">
-                <div className="campo">
+            <form onSubmit={enviar} className="cadastro-form" data-tour="cadastro-form">
+                <div className="campo" data-tour="cadastro-nome">
                     <label htmlFor="nome">Nome</label>
                     <input
                         id="nome"
@@ -54,7 +54,7 @@ export function CadastroUsuario() {
                     />
                 </div>
 
-                <div className="campo">
+                <div className="campo" data-tour="cadastro-email">
                     <label htmlFor="email">E-mail</label>
                     <input
                         id="email"
@@ -66,7 +66,7 @@ export function CadastroUsuario() {
                     />
                 </div>
 
-                <div className="campo">
+                <div className="campo" data-tour="cadastro-senha">
                     <label htmlFor="senha">Senha</label>
                     <div className="campo-senha">
                         <input
@@ -89,7 +89,7 @@ export function CadastroUsuario() {
                     </div>
                 </div>
 
-                <div className="campo">
+                <div className="campo" data-tour="cadastro-perfil">
                     <label htmlFor="perfil">Perfil de acesso</label>
                     <select id="perfil" value={perfil} onChange={(e) => setPerfil(e.target.value as Perfil)}>
                         {PERFIS.map((p) => (

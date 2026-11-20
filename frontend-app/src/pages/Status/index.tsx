@@ -32,8 +32,8 @@ export function StatusServicos() {
     }, [consultar]);
 
     return (
-        <div className="status-container">
-            <div className="status-header">
+        <div className="status-container" data-tour="status-pagina">
+            <div className="status-header" data-tour="status-cabecalho">
                 <div>
                     <h2>Status dos serviços</h2>
                     {atualizadoEm && (
@@ -42,7 +42,7 @@ export function StatusServicos() {
                         </p>
                     )}
                 </div>
-                <button className="btn-atualizar" onClick={consultar} disabled={carregando}>
+                <button className="btn-atualizar" data-tour="status-atualizar" onClick={consultar} disabled={carregando}>
                     <RefreshCw size={16} className={carregando ? 'girando' : ''} />
                     Atualizar
                 </button>

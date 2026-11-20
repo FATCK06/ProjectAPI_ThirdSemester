@@ -1,3 +1,4 @@
+import { passosAdministracao } from './administracao';
 import { passosBoasVindas } from './boasVindas';
 import { passosDashboard } from './dashboard';
 import { passosEncerramento } from './encerramento';
@@ -17,6 +18,7 @@ const TELAS: MontarPassos[] = [
     passosMotoristas,
     passosRanking,
     passosImportacao,
+    passosAdministracao,
     passosEncerramento,
 ];
 
